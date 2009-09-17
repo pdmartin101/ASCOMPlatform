@@ -56,8 +56,8 @@ namespace ASCOM.TelescopeSimulator
             this.buttonHome = new System.Windows.Forms.Button();
             this.buttonUnpark = new System.Windows.Forms.Button();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
-            this.lblHOME = new System.Windows.Forms.Label();
             this.lblPARK = new System.Windows.Forms.Label();
+            this.lblHOME = new System.Windows.Forms.Label();
             this.picASCOM = new System.Windows.Forms.PictureBox();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.labelSlew = new System.Windows.Forms.Label();
@@ -241,8 +241,6 @@ namespace ASCOM.TelescopeSimulator
             this.buttonSlew1.TabIndex = 0;
             this.buttonSlew1.Text = "N";
             this.buttonSlew1.UseVisualStyleBackColor = true;
-            this.buttonSlew1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.buttonSlew1_MouseDown);
-            this.buttonSlew1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.buttonSlew1_MouseUp);
             // 
             // buttonSlew3
             // 
@@ -253,8 +251,6 @@ namespace ASCOM.TelescopeSimulator
             this.buttonSlew3.TabIndex = 1;
             this.buttonSlew3.Text = "E";
             this.buttonSlew3.UseVisualStyleBackColor = true;
-            this.buttonSlew3.MouseDown += new System.Windows.Forms.MouseEventHandler(this.buttonSlew3_MouseDown);
-            this.buttonSlew3.MouseUp += new System.Windows.Forms.MouseEventHandler(this.buttonSlew3_MouseUp);
             // 
             // buttonSlew4
             // 
@@ -265,8 +261,6 @@ namespace ASCOM.TelescopeSimulator
             this.buttonSlew4.TabIndex = 2;
             this.buttonSlew4.Text = "W";
             this.buttonSlew4.UseVisualStyleBackColor = true;
-            this.buttonSlew4.MouseDown += new System.Windows.Forms.MouseEventHandler(this.buttonSlew4_MouseDown);
-            this.buttonSlew4.MouseUp += new System.Windows.Forms.MouseEventHandler(this.buttonSlew4_MouseUp);
             // 
             // buttonSlew2
             // 
@@ -277,8 +271,6 @@ namespace ASCOM.TelescopeSimulator
             this.buttonSlew2.TabIndex = 3;
             this.buttonSlew2.Text = "S";
             this.buttonSlew2.UseVisualStyleBackColor = true;
-            this.buttonSlew2.MouseDown += new System.Windows.Forms.MouseEventHandler(this.buttonSlew2_MouseDown);
-            this.buttonSlew2.MouseUp += new System.Windows.Forms.MouseEventHandler(this.buttonSlew2_MouseUp);
             // 
             // buttonSlew0
             // 
@@ -290,7 +282,6 @@ namespace ASCOM.TelescopeSimulator
             this.buttonSlew0.TabIndex = 4;
             this.buttonSlew0.Text = "Ä";
             this.buttonSlew0.UseVisualStyleBackColor = true;
-            this.buttonSlew0.Click += new System.EventHandler(this.buttonSlew0_Click);
             // 
             // pictureBoxPierSideEast
             // 
@@ -310,7 +301,6 @@ namespace ASCOM.TelescopeSimulator
             this.checkBoxTrack.TabIndex = 10;
             this.checkBoxTrack.Text = "Track";
             this.checkBoxTrack.UseVisualStyleBackColor = true;
-            this.checkBoxTrack.CheckedChanged += new System.EventHandler(this.checkBoxTrack_CheckedChanged);
             // 
             // tableLayoutPanel3
             // 
@@ -386,19 +376,6 @@ namespace ASCOM.TelescopeSimulator
             this.tableLayoutPanel4.Size = new System.Drawing.Size(115, 20);
             this.tableLayoutPanel4.TabIndex = 12;
             // 
-            // lblHOME
-            // 
-            this.lblHOME.AutoSize = true;
-            this.lblHOME.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.lblHOME.Dock = System.Windows.Forms.DockStyle.Left;
-            this.lblHOME.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.lblHOME.Location = new System.Drawing.Point(3, 0);
-            this.lblHOME.Name = "lblHOME";
-            this.lblHOME.Padding = new System.Windows.Forms.Padding(1, 2, 1, 1);
-            this.lblHOME.Size = new System.Drawing.Size(41, 20);
-            this.lblHOME.TabIndex = 1;
-            this.lblHOME.Text = "HOME";
-            // 
             // lblPARK
             // 
             this.lblPARK.AutoSize = true;
@@ -411,6 +388,19 @@ namespace ASCOM.TelescopeSimulator
             this.lblPARK.Size = new System.Drawing.Size(38, 20);
             this.lblPARK.TabIndex = 2;
             this.lblPARK.Text = "PARK";
+            // 
+            // lblHOME
+            // 
+            this.lblHOME.AutoSize = true;
+            this.lblHOME.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.lblHOME.Dock = System.Windows.Forms.DockStyle.Left;
+            this.lblHOME.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.lblHOME.Location = new System.Drawing.Point(3, 0);
+            this.lblHOME.Name = "lblHOME";
+            this.lblHOME.Padding = new System.Windows.Forms.Padding(1, 2, 1, 1);
+            this.lblHOME.Size = new System.Drawing.Size(41, 20);
+            this.lblHOME.TabIndex = 1;
+            this.lblHOME.Text = "HOME";
             // 
             // picASCOM
             // 

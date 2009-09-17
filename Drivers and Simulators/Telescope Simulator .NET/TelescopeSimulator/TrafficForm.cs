@@ -57,9 +57,5 @@ namespace ASCOM.TelescopeSimulator
         }
         public bool Other
         { get { return checkBoxAllOther.Checked; } }
-        public bool Slew
-        { get { return checkBoxSlew.Checked; } }
-        public bool Gets
-        { get { return checkBoxGets.Checked; } }
     }
 }
