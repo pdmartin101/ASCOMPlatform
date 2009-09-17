@@ -2,7 +2,7 @@
 // --------------------------------------------------------------------------------
 // TODO fill in this information for your driver, then remove this line!
 //
-// ASCOM $deviceclass$ driver for $devicename$
+// ASCOM $safeprojectname$ driver for DeviceName
 //
 // Description:	Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam 
 //				nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam 
@@ -10,27 +10,27 @@
 //				dolores et ea rebum. Stet clita kasd gubergren, no sea takimata 
 //				sanctus est Lorem ipsum dolor sit amet.
 //
-// Implements:	ASCOM $deviceclass$ interface version: 1.0
+// Implements:	ASCOM $safeprojectname$ interface version: 1.0
 // Author:		(XXX) Your N. Here <your@email.here>
 //
 // Edit Log:
 //
 // Date			Who	Vers	Description
 // -----------	---	-----	-------------------------------------------------------
-// dd-mmm-yyyy	XXX	1.0.0	Initial edit, from Platform 5.1 template
+// dd-mmm-yyyy	XXX	1.0.0	Initial edit, from $safeprojectname$ template
 // --------------------------------------------------------------------------------
 //
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Text;
-using ASCOM;
-using ASCOM.Astrometry;
-using ASCOM.Controls;
-using ASCOM.Interface;
-using ASCOM.Utilities;
+using System.Runtime.InteropServices;
 
-namespace $namespace$
+using ASCOM;
+using ASCOM.Helper;
+using ASCOM.Helper2;
+using ASCOM.Interface;
+
+namespace ASCOM.DeviceName
 {
 	//
 	// Your driver's ID is ASCOM.DeviceName.$safeprojectname$
@@ -41,19 +41,19 @@ namespace $namespace$
 	//
 	[Guid("GUIDSUBST")]
 	[ClassInterface(ClassInterfaceType.None)]
-	public class $deviceclass$ : I$deviceclass$
+	public class $safeprojectname$ : I$safeprojectname$
 	{
 		//
 		// Driver ID and descriptive string that shows in the Chooser
 		//
-		private static string s_csDriverID = "$deviceid$";
+		private static string s_csDriverID = "ASCOM.DeviceName.$safeprojectname$";
 		// TODO Change the descriptive string for your driver then remove this line
-		private static string s_csDriverDescription = "$devicename$";
+		private static string s_csDriverDescription = "DeviceName $safeprojectname$";
 
 		//
 		// Constructor - Must be public for COM registration!
 		//
-		public $deviceclass$()
+		public $safeprojectname$()
 		{
 			// TODO Implement your additional construction here
 		}
@@ -65,7 +65,8 @@ namespace $namespace$
 		//
 		private static void RegUnregASCOM(bool bRegister)
 		{
-			var P = new Profile { DeviceType = "$deviceclass$" };
+			Helper.Profile P = new Helper.Profile();
+			P.DeviceTypeV = "$safeprojectname$";					//  Requires Helper 5.0.3 or later
 			if (bRegister)
 				P.Register(s_csDriverID, s_csDriverDescription);
 			else
@@ -92,10 +93,10 @@ namespace $namespace$
 		#endregion
 
 		//
-		// PUBLIC COM INTERFACE I$deviceclass$ IMPLEMENTATION
+		// PUBLIC COM INTERFACE I$safeprojectname$ IMPLEMENTATION
 		//
 
-		#region I$deviceclass$ Members
+		#region I$safeprojectname$ Members
 
 		public void SetupDialog()
 		{

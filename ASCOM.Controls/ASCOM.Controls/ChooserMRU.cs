@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 using System.Reflection;
 using Microsoft.Win32;
 using System.Diagnostics;
-using Helper = ASCOM.Utilities;
+using Helper = ASCOM.HelperNET;
 
 namespace ASCOM.Controls
 	{

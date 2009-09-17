@@ -237,7 +237,7 @@ namespace ASCOM.GeminiTelescope
                     Assembly so = Assembly.LoadFrom(aPath);
 
                     //Added check to see if the dll has the ServedClassNameAttribute
-                    object[] attributes = so.GetCustomAttributes(typeof(ASCOM.ServedClassNameAttribute), false);
+                    object[] attributes = so.GetCustomAttributes(typeof(ServedClassNameAttribute), false);
                     if (attributes.Length > 0)
                     {
                         m_ComObjectTypes.Add(so.GetType(fqClassName, true));
@@ -302,7 +302,6 @@ namespace ASCOM.GeminiTelescope
                 key.SetValue("AppID", m_sAppId);
                 key.Close();
                 key = null;
-
             }
             catch (Exception ex)
             {
@@ -315,17 +314,6 @@ namespace ASCOM.GeminiTelescope
                 if (key != null) key.Close();
             }
 
-
-            //Registration happens below not here.
-            //Utilities.Profile prof = new ASCOM.Utilities.Profile();
-            //prof.DeviceType = "Telescope";
-            //prof.Register(SharedResources.TELESCOPE_PROGRAM_ID, SharedResources.TELESCOPE_DRIVER_NAME);
-            //prof.DeviceType = "Focuser";
-            //prof.Register(SharedResources.FOCUSER_PROGRAM_ID, SharedResources.FOCUSER_DRIVER_NAME);
-
-            //Initialise registered classes counter
-            int ClassCount = 0;
-            
             //
             // For each of the driver assemblies
             //
@@ -377,14 +365,11 @@ namespace ASCOM.GeminiTelescope
                     //
                     assy = type.Assembly;
                     attr = Attribute.GetCustomAttribute(assy, typeof(AssemblyProductAttribute));
-                    attr = Attribute.GetCustomAttribute(assy, typeof(ASCOM.ServedClassNameAttribute));
-                    string chooserName = ((ASCOM.ServedClassNameAttribute)attr).DisplayName;
-                    ASCOM.Utilities.Profile P = new ASCOM.Utilities.Profile();
+                    attr = Attribute.GetCustomAttribute(assy, typeof(ServedClassNameAttribute));
+                    string chooserName = ((ServedClassNameAttribute)attr).ServedClassName;
+                    ASCOM.HelperNET.Profile P = new ASCOM.HelperNET.Profile();
                     P.DeviceType = progid.Substring(progid.LastIndexOf('.') + 1);	//  Requires Helper 5.0.3 or later
                     P.Register(progid, chooserName);
-
-                    ClassCount += 1; //Increment class counter
-
                     try										// In case Helper becomes native .NET
                     {
                         Marshal.ReleaseComObject(P);
@@ -406,9 +391,6 @@ namespace ASCOM.GeminiTelescope
                 }
                 if (bFail) break;
             }
-
-            if (ClassCount == 0) MessageBox.Show("No registerable drivers were found");
-
         }
 
         //
@@ -455,7 +437,7 @@ namespace ASCOM.GeminiTelescope
                     //
                     // ASCOM
                     //
-                    ASCOM.Utilities.Profile P = new ASCOM.Utilities.Profile();
+                    ASCOM.HelperNET.Profile P = new ASCOM.HelperNET.Profile();
                     P.DeviceType = progid.Substring(progid.LastIndexOf('.') + 1);	//  Requires Helper 5.0.3 or later
                     P.Unregister(progid);
                     try										// In case Helper becomes native .NET
@@ -562,16 +544,6 @@ namespace ASCOM.GeminiTelescope
         [STAThread]
         static void Main(string[] args)
         {
-            // Add the event handler for handling UI thread exceptions to the event.
-            Application.ThreadException += new ThreadExceptionEventHandler(Application_ThreadException);
-            // Set the unhandled exception mode to force all Windows Forms errors to go through
-            // our handler.
-            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-
-            // Add the event handler for handling non-UI thread exceptions to the event. 
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
-
-            
             if (!LoadComObjectAssemblies()) return;						// Load served COM class assemblies, get types
 
             if (!ProcessArguments(args)) return;						// Register/Unregister
@@ -610,55 +582,6 @@ namespace ASCOM.GeminiTelescope
             // Now stop the Garbage Collector thread.
             GarbageCollector.StopThread();
             GarbageCollector.WaitForThreadToStop();
-        }
-
-        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            try
-            {
-                if (m_MainForm != null)
-                {
-                    if (GeminiHardware.Trace != null)
-                    {
-                        Exception ex = e.ExceptionObject as Exception;
-                        if (ex != null)
-                        {
-                            GeminiHardware.Trace.Except(ex);
-                            GeminiHardware.Trace.Error("CurrentDomain_Exception", ex.Message, ex.Source, ex.StackTrace, ex.InnerException);
-                        }
-                        MessageBox.Show(SharedResources.TELESCOPE_DRIVER_NAME + " has encountered an error and must now close\r\n\r\n"+ex.ToString(), SharedResources.TELESCOPE_DRIVER_NAME + "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            }
-            finally
-            {
-                System.Diagnostics.Process.GetCurrentProcess().Kill();
-            }
-        }
-
-        static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
-        {
-            try
-            {
-                if (m_MainForm != null)
-                {
-                    if (GeminiHardware.Trace != null)
-                    {
-                        Exception ex = e.Exception as Exception;
-                        if (ex != null)
-                        {
-                            GeminiHardware.Trace.Except(ex);
-                            GeminiHardware.Trace.Error("ThreadException", ex.Message, ex.Source, ex.StackTrace, ex.InnerException);
-                            MessageBox.Show(SharedResources.TELESCOPE_DRIVER_NAME + " has encountered an error and must now close\r\n\r\n" + ex.ToString(), SharedResources.TELESCOPE_DRIVER_NAME + "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-
-                }
-            }
-            finally
-            {
-                System.Diagnostics.Process.GetCurrentProcess().Kill();
-            }
         }
         #endregion
     }

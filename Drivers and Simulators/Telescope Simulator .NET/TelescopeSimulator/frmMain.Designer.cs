@@ -241,8 +241,6 @@ namespace ASCOM.TelescopeSimulator
             this.buttonSlew1.TabIndex = 0;
             this.buttonSlew1.Text = "N";
             this.buttonSlew1.UseVisualStyleBackColor = true;
-            this.buttonSlew1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.buttonSlew1_MouseDown);
-            this.buttonSlew1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.buttonSlew1_MouseUp);
             // 
             // buttonSlew3
             // 
@@ -253,8 +251,6 @@ namespace ASCOM.TelescopeSimulator
             this.buttonSlew3.TabIndex = 1;
             this.buttonSlew3.Text = "E";
             this.buttonSlew3.UseVisualStyleBackColor = true;
-            this.buttonSlew3.MouseDown += new System.Windows.Forms.MouseEventHandler(this.buttonSlew3_MouseDown);
-            this.buttonSlew3.MouseUp += new System.Windows.Forms.MouseEventHandler(this.buttonSlew3_MouseUp);
             // 
             // buttonSlew4
             // 
@@ -265,8 +261,6 @@ namespace ASCOM.TelescopeSimulator
             this.buttonSlew4.TabIndex = 2;
             this.buttonSlew4.Text = "W";
             this.buttonSlew4.UseVisualStyleBackColor = true;
-            this.buttonSlew4.MouseDown += new System.Windows.Forms.MouseEventHandler(this.buttonSlew4_MouseDown);
-            this.buttonSlew4.MouseUp += new System.Windows.Forms.MouseEventHandler(this.buttonSlew4_MouseUp);
             // 
             // buttonSlew2
             // 
@@ -277,8 +271,6 @@ namespace ASCOM.TelescopeSimulator
             this.buttonSlew2.TabIndex = 3;
             this.buttonSlew2.Text = "S";
             this.buttonSlew2.UseVisualStyleBackColor = true;
-            this.buttonSlew2.MouseDown += new System.Windows.Forms.MouseEventHandler(this.buttonSlew2_MouseDown);
-            this.buttonSlew2.MouseUp += new System.Windows.Forms.MouseEventHandler(this.buttonSlew2_MouseUp);
             // 
             // buttonSlew0
             // 
@@ -290,7 +282,6 @@ namespace ASCOM.TelescopeSimulator
             this.buttonSlew0.TabIndex = 4;
             this.buttonSlew0.Text = "Ä";
             this.buttonSlew0.UseVisualStyleBackColor = true;
-            this.buttonSlew0.Click += new System.EventHandler(this.buttonSlew0_Click);
             // 
             // pictureBoxPierSideEast
             // 

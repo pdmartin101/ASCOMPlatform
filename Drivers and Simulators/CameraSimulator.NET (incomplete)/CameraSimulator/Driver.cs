@@ -24,7 +24,7 @@ using System.Runtime.InteropServices;
 
 using ASCOM;
 using ASCOM.Interface;
-using Helper = ASCOM.Utilities;
+using Helper = ASCOM.HelperNET;
 
 namespace ASCOM.Simulator
 {

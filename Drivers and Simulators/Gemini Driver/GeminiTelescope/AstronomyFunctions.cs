@@ -22,8 +22,7 @@ using System.Text;
 
 namespace ASCOM.GeminiTelescope
 {
-    
-    public class AstronomyFunctions
+    class AstronomyFunctions
     {
         static AstronomyFunctions()
         { }
@@ -48,28 +47,9 @@ namespace ASCOM.GeminiTelescope
             return dt;
         }
 
-
-        //----------------------------------------------------------------------------------------
-        // Calculate Precession
-        //----------------------------------------------------------------------------------------
-        public static double Precess(DateTime datetime)
-        {
-            int y = datetime.Year + 1900;
-            if (y >= 3900) { y = y - 1900; }
-            int p = y - 1;
-            int r = p / 1000;
-            int s = 2 - r + r / 4;
-            int t = (int)Math.Truncate(365.25 * p);
-            double r1 = (s + t - 693597.5) / 36525;
-            double s1 = 6.646 + 2400.051 * r1;
-
-            return 24 - s1 + (24 * (y - 1900));
-
-        }
         //----------------------------------------------------------------------------------------
         // Current Local Apparent Sidereal Time for Longitude
         //----------------------------------------------------------------------------------------
-
         public static double LocalSiderealTime(double longitude)
         {
             double days_since_j_2000 = DateUtcToJulian(DateTime.Now.ToUniversalTime()) - 2451545.0;
@@ -181,19 +161,19 @@ namespace ASCOM.GeminiTelescope
         //----------------------------------------------------------------------------------------
         public static string ConvertDoubleToDMS(double d)
         {
-
+            
             int degrees = (int)Math.Truncate(d);
 
-            int minutes = (int)Math.Truncate((d - (double)degrees) * 60);
-            int seconds = (int)Math.Round((d - (double)degrees - (double)minutes / 60) * 3600, 0);
-
+            int minutes = (int)Math.Truncate((d-(double)degrees) * 60);
+            int seconds = (int)Math.Round((d - (double)degrees - (double)minutes/60) * 3600,0);
+            
             if (seconds == 60)
             {
                 minutes += 1;
                 seconds = 0;
             }
 
-
+            
 
             string output = degrees.ToString() + ":" + minutes.ToString().PadLeft(2, '0') + ":" + seconds.ToString().PadLeft(2, '0');
             if (d >= 0)
@@ -202,91 +182,5 @@ namespace ASCOM.GeminiTelescope
             }
             return output;
         }
-        //----------------------------------------------------------------------------------------
-        // Calculate RA and Dec From Altitude and Azimuth and Site
-        //----------------------------------------------------------------------------------------
-        public static double CalculateRa(double Altitude, double Azimuth, double Latitude, double Longitude)
-        {
-
-            //double hourAngle = Math.Acos((Math.Cos(Altitude) - Math.Sin(Declination) * Math.Sin(Latitude)) / Math.Cos(Declination) * Math.Cos(Latitude))*SharedResources.RAD_DEG;
-            //double hourAngle = Math.Acos((Math.Cos(Altitude) * Math.Cos(Latitude) - Math.Sin(Latitude) * Math.Sin(Altitude) * Math.Cos(Azimuth)) / Math.Cos(Declination)) * SharedResources.RAD_DEG;
-            //double hourAngle = Math.Atan(-Math.Sin(Azimuth) * Math.Cos(Altitude) - Math.Cos(Azimuth) * Math.Sin(Latitude) * Math.Cos(Altitude) + Math.Sin(Altitude) * Math.Cos(Latitude)) * SharedResources.RAD_DEG;
-            double hourAngle = Math.Atan2(-Math.Sin(Azimuth) * Math.Cos(Altitude), -Math.Cos(Azimuth) * Math.Sin(Latitude) * Math.Cos(Altitude) + Math.Sin(Altitude) * Math.Cos(Latitude)) * SharedResources.RAD_DEG;
-            if (hourAngle < 0)
-            { hourAngle += 360; }
-            else if (hourAngle >= 360)
-            { hourAngle -= 360; }
-            double lst = LocalSiderealTime(Longitude * SharedResources.RAD_DEG);
-            double ra = lst - hourAngle;
-
-            return ra;
-        }
-        public static double CalculateDec(double Altitude, double Azimuth, double Latitude)
-        {
-
-            //return Math.Asin(Math.Cos(Azimuth)*Math.Cos(Latitude)*Math.Cos(Altitude) + Math.Sin(Latitude)*Math.Sin(Altitude));
-            return Math.Asin(Math.Cos(Azimuth) * Math.Cos(Latitude) * Math.Cos(Altitude) + Math.Sin(Latitude) * Math.Sin(Altitude)) * SharedResources.RAD_DEG;
-        }
-        //----------------------------------------------------------------------------------------
-        // Calculate Altitude and Azimuth From Ra/Dec and Site
-        //----------------------------------------------------------------------------------------
-        public static double CalculateAltitude(double RightAscension, double Declination, double Latitude, double Longitude)
-        {
-            double lst = LocalSiderealTime(Longitude * SharedResources.RAD_DEG);
-            double ha = lst * SharedResources.DEG_RAD - RightAscension;
-            return Math.Asin(Math.Sin(Declination) * Math.Sin(Latitude) + Math.Cos(Declination) * Math.Cos(ha) * Math.Cos(Latitude)) * SharedResources.RAD_DEG;
-
-        }
-        public static double CalculateAzimuth(double RightAscension, double Declination, double Latitude, double Longitude)
-        {
-            double lst = LocalSiderealTime(Longitude * SharedResources.RAD_DEG);
-            double ha = lst * SharedResources.DEG_RAD - RightAscension;
-
-            double A1 = -Math.Cos(Declination) * Math.Sin(ha) / Math.Cos(Math.Asin(Math.Sin(Declination) * Math.Sin(Latitude) + Math.Cos(Declination) * Math.Cos(ha) * Math.Cos(Latitude)));
-            double A2 = (Math.Sin(Declination) * Math.Cos(Latitude) - Math.Cos(Declination) * Math.Cos(ha) * Math.Sin(Latitude)) / Math.Cos(Math.Asin(Math.Sin(Declination) * Math.Sin(Latitude) + Math.Cos(Declination) * Math.Cos(ha) * Math.Cos(Latitude)));
-
-            double azimuth = Math.Atan2(A1, A2);
-            if (azimuth < 0)
-            {
-                azimuth = 2 * Math.PI + azimuth;
-            }
-
-            return azimuth * SharedResources.RAD_DEG;
-        }
-
-        //----------------------------------------------------------------------------------------
-        // Range RA and DEC
-        //----------------------------------------------------------------------------------------
-        public static double RangeHa(double RightAscension)
-        {
-            if (RightAscension < 0)
-            {
-                return 24 + RightAscension;
-            }
-            else if (RightAscension >= 24)
-            {
-                return RightAscension - 24;
-            }
-            else
-            {
-                return RightAscension;
-            }
-        }
-        public static double RangeDec(double Declination)
-        {
-            if (Declination > 90)
-            {
-                return 90;
-            }
-            else if (Declination < -90)
-            {
-                return -90;
-            }
-            else
-            {
-                return Declination;
-            }
-        }
     }
 }
-

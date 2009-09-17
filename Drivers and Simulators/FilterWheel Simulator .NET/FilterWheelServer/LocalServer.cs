@@ -21,7 +21,7 @@ using System.Reflection;
 using Microsoft.Win32;
 using System.Text;
 using System.Threading;
-using Helper = ASCOM.Utilities;
+using Helper = ASCOM.HelperNET;
 
 namespace ASCOM.FilterWheelSim
 {
@@ -556,8 +556,7 @@ namespace ASCOM.FilterWheelSim
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             m_MainForm = new frmHandbox();
-            // if (m_bComStart) m_MainForm.WindowState = FormWindowState.Minimized;
-            // if (m_bComStart) m_MainForm.Visible = false;
+            if (m_bComStart) m_MainForm.WindowState = FormWindowState.Minimized;
             
             // Initialize hardware layer
             SimulatedHardware.Initialize();
