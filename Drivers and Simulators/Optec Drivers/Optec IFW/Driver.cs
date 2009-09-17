@@ -30,7 +30,7 @@ using ASCOM.Helper;
 using ASCOM.Helper2;
 using ASCOM.Interface;
 using System.IO.Ports;
-using System.Windows.Forms;
+
 
 namespace ASCOM.Optec_IFW
 {
@@ -45,18 +45,19 @@ namespace ASCOM.Optec_IFW
     [ClassInterface(ClassInterfaceType.None)]
     public class FilterWheel : IFilterWheel
     {
-
+        //
         // Driver ID and descriptive string that shows in the Chooser
-        internal static string s_csDriverID = "ASCOM.Optec_IFW.FilterWheel";
+        //
+        private static string s_csDriverID = "ASCOM.Optec_IFW.FilterWheel";
         private static string s_csDriverDescription = "Driver for Optec IFW";
-        private static object CommLock = new object();
-        //private static bool processing;
-
+        //
         // Constructor - Must be public for COM registration!
+        //
+        private static object CommLock = new object();
+
         public FilterWheel()
         {
-            //processing = false;
-            //  Implement your additional construction here
+            // TODO Implement your additional construction here
         }
 
         #region ASCOM Registration
@@ -92,17 +93,19 @@ namespace ASCOM.Optec_IFW
             RegUnregASCOM(false);
         }
         #endregion
-     
+
+        //
         // PUBLIC COM INTERFACE IFilterWheel IMPLEMENTATION
+        //
 
         #region IFilterWheel Members
         public bool Connected
         {
-            get 
+            // TODO Replace this with your implementation
+            get
             {
                 lock(CommLock)
                 {
-                    
                     return DeviceComm.CheckForConnection();
                 }
             }
@@ -113,18 +116,19 @@ namespace ASCOM.Optec_IFW
                     if (value)
                     {
                         DeviceComm.ConnectToDevice();
+                        if (DeviceComm.CheckForConnection())
+                        {
+                            Connected = true;
+                        }
+                        else
+                        {
+                            Connected = false;
+                            throw new Exception("Connection to the device has failed");
+                        }
                     }
                     else
                     {
-                        if (DeviceComm.CheckForConnection())
-                        {
-                            DeviceComm.DisconnectDevice();
-                        }
-                        else
-                        {  
-                            //do nothing, already disconnected
-                        }
-                        
+                        DeviceComm.DisconnectDevice();
 
                     }
                 }
@@ -133,38 +137,24 @@ namespace ASCOM.Optec_IFW
 
         public short Position
         {
-            get { lock (CommLock) { return DeviceComm.GetCurrentPos(); } }
-            set 
-            {
-                lock (CommLock)
-                {
-                    if (value < 0 || value > DeviceComm.NumOfFilters - 1) throw new DriverException("Position: " + MSG_VAL_OUTOFRANGE,
-                        unchecked((int)0x80040404));
-                    DeviceComm.GoToPosition(value);
-                    
-                }
-            }
+            // TODO Replace this with your implementation
+            get { throw new PropertyNotImplementedException("Position", false); }
+            set { throw new PropertyNotImplementedException("Position", true); }
         }
 
         public int[] FocusOffsets
         {
-            get 
-            {
-                lock (CommLock)
-                {
-                    return DeviceComm.GetOffsets();
-                }
-            }
+            // TODO Replace this with your implementation
+            get { throw new PropertyNotImplementedException("FocusOfsets", false); }
         }
 
         public string[] Names
         {
+            // TODO Replace this with your implementation
             get
             {
-                lock (CommLock)
-                {
-                    return DeviceComm.ReadAllNames();
-                }
+                return DeviceComm.ReadAllNames();
+
             }
         }
 
@@ -175,8 +165,5 @@ namespace ASCOM.Optec_IFW
         }
 
         #endregion
-
-        // Exception codes/messages
-        public const string MSG_VAL_OUTOFRANGE = "The value is out of range";
     }
 }

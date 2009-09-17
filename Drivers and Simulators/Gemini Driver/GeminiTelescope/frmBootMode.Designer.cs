@@ -52,7 +52,6 @@
             // 
             // btnCancel
             // 
-            this.btnCancel.BackColor = System.Drawing.SystemColors.Control;
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.ForeColor = System.Drawing.Color.Black;
             this.btnCancel.Location = new System.Drawing.Point(119, 119);
@@ -60,19 +59,18 @@
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 4;
             this.btnCancel.Text = "Cancel";
-            this.btnCancel.UseVisualStyleBackColor = false;
+            this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // btnBoot
             // 
-            this.btnBoot.BackColor = System.Drawing.SystemColors.Control;
             this.btnBoot.ForeColor = System.Drawing.Color.Black;
             this.btnBoot.Location = new System.Drawing.Point(20, 119);
             this.btnBoot.Name = "btnBoot";
             this.btnBoot.Size = new System.Drawing.Size(75, 23);
             this.btnBoot.TabIndex = 3;
             this.btnBoot.Text = "Start Now!";
-            this.btnBoot.UseVisualStyleBackColor = false;
+            this.btnBoot.UseVisualStyleBackColor = true;
             this.btnBoot.Click += new System.EventHandler(this.btnBoot_Click);
             // 
             // radioButton3
