@@ -23,9 +23,6 @@ Namespace Transform
     ''' http://www.usno.navy.mil/USNO/astronomical-applications/software-products/novas/novas-fortran/novas-fortran 
     ''' </para>
     ''' </remarks>
-    <Guid("779CD957-5502-4939-A661-EBEE9E1F485E"), _
-    ClassInterface(ClassInterfaceType.None), _
-    ComVisible(True)> _
     Public Class Transform
         Implements ITransform, IDisposable
         Private disposedValue As Boolean = False        ' To detect redundant calls
@@ -39,7 +36,7 @@ Namespace Transform
         Private CatEntry As CatEntry
         Private Site As SiteInfo
 
-        Private TL As TraceLogger
+        Private TL As ITraceLogger
         Private Sw As Stopwatch
 
         Private Const J2000 As Double = 2451545.0

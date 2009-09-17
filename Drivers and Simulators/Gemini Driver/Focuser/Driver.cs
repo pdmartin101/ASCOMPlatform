@@ -68,7 +68,7 @@ namespace ASCOM.GeminiTelescope
         public Focuser()
         {
             m_Util = new ASCOM.Utilities.Util();
-            tmrFocus.Tick += new ASCOM.Utilities.Timer.TickEventHandler(tmrFocus_Tick);// Changed to work with new timer interface
+            tmrFocus.Tick += new ASCOM.Utilities.Interfaces.ITimer.TickEventHandler(tmrFocus_Tick);
         }
 
         /// <summary>
@@ -269,7 +269,7 @@ namespace ASCOM.GeminiTelescope
                 throw new DriverException("The hardware is connected, cannot do SetupDialog()",
                                     unchecked(ErrorCodes.DriverBase + 4));
             }
-            GeminiTelescope.m_MainForm.DoFocuserSetupDialog(); ;
+            frmMain.DoFocuserSetupDialog();
         }
 
         /// <summary>

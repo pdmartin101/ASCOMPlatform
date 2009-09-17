@@ -18,12 +18,10 @@
     <HtmlHelpName>PlatformHelp</HtmlHelpName>
     <DocumentationSources>
       <DocumentationSource sourceFile="..\..\Interfaces\ASCOMExceptions\ASCOM.Exceptions.csproj" />
-      <DocumentationSource sourceFile="..\..\ASCOM.IConform\ASCOM.IConform\ASCOM.IConform.vbproj" />
-      <DocumentationSource sourceFile="..\..\ASCOM.Astrometry\Astrometry\Astrometry.vbproj" />
-      <DocumentationSource sourceFile="..\..\ASCOM.Astrometry\Astrometry\AstrometryNamespaceDocs.xml" />
-      <DocumentationSource sourceFile="..\Utilities\NamespaceDocumentation.xml" />
-      <DocumentationSource sourceFile="..\Utilities\Utilities.vbproj" />
-    </DocumentationSources>
+<DocumentationSource sourceFile="..\..\ASCOM.Astrometry\Astrometry\Astrometry.vbproj" />
+<DocumentationSource sourceFile="..\..\ASCOM.Astrometry\Astrometry\AstrometryNamespaceDocs.xml" />
+<DocumentationSource sourceFile="..\Utilities\UtilitiesSupport\NamespaceDocumentation.xml" />
+<DocumentationSource sourceFile="..\Utilities\Utilities.vbproj" /></DocumentationSources>
     <HelpTitle>ASCOM Platform Help</HelpTitle>
     <CopyrightText>Copyright &amp;#169%3b ASCOM Initiative 2009</CopyrightText>
     <ApiFilter>
@@ -55,7 +53,7 @@
           <!-- Logo image file (optional).  Filename is required. The height,
                  width, altText, placement, and alignment attributes are
                  optional. -->
-          <logoFile filename="C:\Documents and Settings\Peter\My Documents\ASCOM Source\ASCOM.Utilities\Help\ASCOMLogo64.png" height="0" width="0" altText="" placement="left" alignment="left" />
+          <logoFile filename="C:\Documents and Settings\Peter\My Documents\Visual Studio 2008\Projects\ASCOM.Utilities\Help\ASCOMLogo64.png" height="0" width="0" altText="" placement="left" alignment="left" />
         </component>
       </ComponentConfig>
       <ComponentConfig id="Cached MSDN URL References" enabled="True">
@@ -89,7 +87,7 @@
     <PlugInConfigurations>
       <PlugInConfig id="Hierarchical Table of Contents" enabled="True">
         <configuration>
-          <toc minParts="2" insertBelow="False" />
+          <toc minParts="2" insertBelow="True" />
         </configuration>
       </PlugInConfig>
     </PlugInConfigurations>
@@ -116,12 +114,6 @@
     <Folder Include="Introduction\" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Introduction\ManufLogos.png">
-      <CopyToMedia>False</CopyToMedia>
-      <ImageId>ManufLogos</ImageId>
-    </Image>
-    <Content Include="Introduction\Acknowledgements.aml" />
-    <None Include="Introduction\Key Changes in 5.5.aml" />
     <None Include="Examples\NOVAS2.aml" />
     <None Include="Examples\NOVASCOM.aml" />
     <None Include="Introduction\Which NOVAS.aml" />
@@ -143,7 +135,7 @@
     <None Include="Version History\Version Summary.aml" />
     <None Include="Introduction\ASCOM Platform for COM.aml" />
     <None Include="Introduction\ASCOM Platform for .NET.aml" />
-    <None Include="Version History\Version 5.3.0.0.aml" />
+    <None Include="Version History\Version 5.0.0.0.aml" />
     <None Include="Introduction\Introduction.aml" />
   </ItemGroup>
   <ItemGroup>

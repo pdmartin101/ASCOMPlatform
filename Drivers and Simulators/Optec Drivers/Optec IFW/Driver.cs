@@ -50,12 +50,10 @@ namespace ASCOM.Optec_IFW
         internal static string s_csDriverID = "ASCOM.Optec_IFW.FilterWheel";
         private static string s_csDriverDescription = "Driver for Optec IFW";
         private static object CommLock = new object();
-        //private static bool processing;
 
         // Constructor - Must be public for COM registration!
         public FilterWheel()
         {
-            //processing = false;
             //  Implement your additional construction here
         }
 
@@ -102,7 +100,6 @@ namespace ASCOM.Optec_IFW
             {
                 lock(CommLock)
                 {
-                    
                     return DeviceComm.CheckForConnection();
                 }
             }
@@ -113,16 +110,25 @@ namespace ASCOM.Optec_IFW
                     if (value)
                     {
                         DeviceComm.ConnectToDevice();
+                        if (DeviceComm.CheckForConnection())
+                        {
+                            //do nothing, already connected
+                        }
+                        else
+                        {
+                            throw new Exception("Connection to the device has failed");
+                            
+                        }
                     }
                     else
                     {
                         if (DeviceComm.CheckForConnection())
                         {
-                            DeviceComm.DisconnectDevice();
+                            throw new Exception("Connection to the device has failed");
                         }
                         else
                         {  
-                            //do nothing, already disconnected
+                            //do nothing, already connected
                         }
                         
 

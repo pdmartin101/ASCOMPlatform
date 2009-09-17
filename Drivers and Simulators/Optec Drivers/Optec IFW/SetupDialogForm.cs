@@ -6,8 +6,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using System.Timers;
-using System.Diagnostics;
-using System.IO;
 
 namespace ASCOM.Optec_IFW
 {
@@ -17,25 +15,22 @@ namespace ASCOM.Optec_IFW
         #region //Declarations
         private static object CommLock = new object();
 
-
-        //FilterWheel DriverInstance = new FilterWheel();
+        FilterWheel DriverInstance = new FilterWheel();
         #endregion
 
         public SetupDialogForm()
         {
-            InitializeComponent();
-
+            InitializeComponent();    
         }
 
         private void cmdOK_Click(object sender, EventArgs e)
         {
-            DeviceComm.DisconnectDevice();
+            DriverInstance.Connected = false;   //dissconnect the device to free it up for manual control
             Dispose();   
         }
 
         private void cmdCancel_Click(object sender, EventArgs e)
         {
-            DeviceComm.DisconnectDevice();
             Dispose();
         }
 
@@ -68,8 +63,7 @@ namespace ASCOM.Optec_IFW
         {
             cmdOK.Enabled = false;
             this.Home_Btn.Enabled = false;
-            this.homeDeviceToolStripMenuItem.Enabled = false;
-            this.saveDataToolStripMenuItem.Enabled = false;
+
 
             //load the com port if one has been saved
             if( Int32.Parse(DeviceComm.TryGetCOMPort())> 0)
@@ -102,8 +96,7 @@ namespace ASCOM.Optec_IFW
             }
             else
             {
-                //DriverInstance.Connected = true;
-                if (!DeviceComm.ConnectToDevice()) return;
+                DriverInstance.Connected = true;
 
                 #region Enable/Disable textbox's
                 switch (DeviceComm.NumOfFilters)
@@ -181,24 +174,18 @@ namespace ASCOM.Optec_IFW
                 } 
                 #endregion
 
-                this.WheelID_Value.Text = DeviceComm.WheelID.ToString();
                 this.Connect_BTN.Enabled = false;
                 this.SaveData_Btn.Enabled = true;
-                this.saveDataToolStripMenuItem.Enabled = true;
                 this.Home_Btn.Enabled = true;
-                this.homeDeviceToolStripMenuItem.Enabled = true;
-                this.WheelID_Label.Enabled = true; 
-                this.WheelID_Value.Enabled = true;
 
             }
         }
-        
 
         private void ComPort_Picker_ValueChanged(object sender, EventArgs e)
         {
             int PortNumber = (int)this.ComPort_Picker.Value;
             DeviceComm.SavePortNumber(PortNumber.ToString());
-            //DeviceComm.FilterWheelType = DeviceComm.TypesOfFWs.IFW;
+            DeviceComm.FilterWheelType = DeviceComm.TypesOfFWs.IFW;
         }
 
         private void IFW_RB_CheckedChanged(object sender, EventArgs e)
@@ -277,7 +264,7 @@ namespace ASCOM.Optec_IFW
 
         private void AdvancedButton_Click(object sender, EventArgs e)
         {
-            DeviceComm.DisconnectDevice();
+            if (DriverInstance.Connected) DriverInstance.Connected = false;
 
             AdvancedForm AForm = new AdvancedForm();
             AForm.COMPortString = "Note: Using COM Port: " + this.ComPort_Picker.Value.ToString()+ ". Selected on previous page.";
@@ -288,13 +275,9 @@ namespace ASCOM.Optec_IFW
                 C.Enabled = false;
             }
             this.SaveData_Btn.Enabled = false;
-            this.saveDataToolStripMenuItem.Enabled = false;
             this.Home_Btn.Enabled = false;
-            this.homeDeviceToolStripMenuItem.Enabled = false;
             this.Connect_BTN.Enabled = true;
             this.cmdOK.Enabled = true;
-            this.WheelID_Label.Enabled = false;
-            this.WheelID_Value.Enabled = false;
 
            
         }
@@ -303,20 +286,5 @@ namespace ASCOM.Optec_IFW
         {
             DeviceComm.HomeDevice();
         }
-
-        private void driverHelpToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            //string HtmlPath = System.IO.Path.Combine(Application.ExecutablePath, "IFWReadMe.html");
-            string HTMlpath = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
-            HTMlpath = Path.GetDirectoryName(HTMlpath);
-            HTMlpath = HTMlpath + "\\IFWReadMe.html";
-            MessageBox.Show("Looking for the helpfile at the following path: " + HTMlpath);
-            // MessageBox.Show("Current Working Directory: " + System.IO.Directory.GetCurrentDirectory());
-            //Trace.WriteLine("Looking for the helpfile at the following path: " + HtmlPath);
-            //Trace.Flush();
-            Process.Start(HTMlpath);
-           
-        }
-
     }
 }

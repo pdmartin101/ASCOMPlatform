@@ -3,7 +3,6 @@
 Option Strict On
 Option Explicit On
 Imports ASCOM.Utilities.Interfaces
-Imports System.Runtime.InteropServices
 
 ''' <summary>
 ''' Provides a repeating timer with associated tick event.
@@ -14,10 +13,6 @@ Imports System.Runtime.InteropServices
 ''' <para>You can create multiple instances of this object. When enabled, the Timer delivers Tick events periodically 
 ''' (determined by setting the Interval property).</para>
 ''' </remarks>
-<Guid("64FEE414-176D-44d0-99DF-47621D9C377F"), _
-ComVisible(True), _
-ComSourceInterfaces(GetType(ITimerEvent)), _
-ClassInterface(ClassInterfaceType.None)> _
 Public Class [Timer]
     Implements ITimer, IDisposable
     '---------------------------------------------------------------------
@@ -51,25 +46,16 @@ Public Class [Timer]
     'Set up a timer to create the tick events. Use a FORMS timer so that it will fire on the current owner's thread
     'If you use a system timer it will  fire on its own thread and this will be invisble to the application!
     Private WithEvents m_Timer As System.Windows.Forms.Timer
-
-    ''' <summary>
-    ''' Timer tick event handler
-    ''' </summary>
-    ''' <remarks></remarks>
-    <ComVisible(False)> _
-    Public Delegate Sub TickEventHandler()
-
     ''' <summary>
     ''' Fired once per Interval when timer is Enabled.
     ''' </summary>
     ''' <remarks>To sink this event in Visual Basic, declare the object variable using the WithEvents keyword.</remarks>
-    Public Event Tick As TickEventHandler 'Implements ITimer.Tick ' Declare the tick event
+    Public Event Tick() Implements ITimer.Tick ' Declare the tick event
 
 #Region "New and IDisposable Support"
-    ''' <summary>
-    ''' Create a new timer component
-    ''' </summary>
-    ''' <remarks></remarks>
+    ' ------------------------
+    ' Constructor / Destructor
+    ' ------------------------
     Public Sub New()
         m_Timer = New System.Windows.Forms.Timer ' Create a form timer
         m_Timer.Enabled = False ' Default settings
@@ -161,7 +147,5 @@ Public Class [Timer]
         RaiseEvent Tick()
     End Sub
 #End Region
-
-
 
 End Class

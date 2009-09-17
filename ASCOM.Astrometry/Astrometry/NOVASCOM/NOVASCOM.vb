@@ -1,4 +1,4 @@
-﻿'NOVASCOM component implementation
+﻿'NOVASCOM omponent implementation
 
 Option Strict On
 Imports ASCOM.Astrometry.NOVAS.NOVAS2
@@ -28,9 +28,6 @@ Namespace NOVASCOM
     ''' (KM/sec.). In addition, it must support three read/write properties BodyType, Name, and Number, 
     ''' which correspond to the Type, Name, and Number properties of Novas.Planet. 
     ''' </para></remarks>
-    <Guid("6BD93BA2-79C5-4077-9630-B7C6E30B2FDF"), _
-    ClassInterface(ClassInterfaceType.None), _
-    ComVisible(True)> _
     Public Class Earth
         Implements IEarth
 
@@ -278,9 +275,6 @@ Namespace NOVASCOM
     ''' which correspond to the Type, Name, and Number properties of Novas.Planet. 
     ''' </para>
     '''</remarks>
-    <Guid("78F157E4-D03D-4efb-8248-745F9C63A850"), _
-    ClassInterface(ClassInterfaceType.None), _
-    ComVisible(True)> _
     Public Class Planet
         Implements IPlanet
 
@@ -886,11 +880,8 @@ Namespace NOVASCOM
     ''' proper motion. Thus, a PositionVector object gives access to some of the lower-level NOVAS functions. 
     ''' <para><b>Note:</b> The equatorial coordinate properties of this object are dependent variables, and thus are read-only. Changing any cartesian coordinate will cause the equatorial coordinates to be recalculated. 
     ''' </para></remarks>
-    <Guid("8D8B7043-49AA-40be-881F-0EC5D8E2213D"), _
-    ClassInterface(ClassInterfaceType.None), _
-    ComVisible(True)> _
     Public Class PositionVector
-        Implements IPositionVector, IPositionVectorExtra
+        Implements IPositionVector
         Private xOk, yOk, zOk, RADecOk, AzElOk As Boolean
         Private PosVec(2), m_RA, m_DEC, m_Dist, m_Light, m_Alt, m_Az As Double
 
@@ -1196,7 +1187,7 @@ Namespace NOVASCOM
         ''' with delta_t set to 0.0 to achieve this effect.
         ''' </remarks>
         <ComVisible(False)> _
-        Public Overloads Function SetFromSiteJD(ByVal site As Site, ByVal ujd As Double) As Boolean Implements IPositionVectorExtra.SetFromSiteJD
+        Public Overloads Function SetFromSiteJD(ByVal site As Site, ByVal ujd As Double) As Boolean Implements IPositionVector.SetFromSiteJD
             SetFromSiteJD(site, ujd, 0.0)
         End Function
 
@@ -1373,9 +1364,6 @@ Namespace NOVASCOM
     ''' ellipsoid. Properties are latitude, longitude, height above mean sea level, the ambient temperature 
     ''' and the sea-level barmetric pressure. The latter two are used only for optional refraction corrections. 
     ''' Latitude and longitude are (common) geodetic, not geocentric. </remarks>
-    <Guid("46ACFBCE-4EEE-496d-A4B6-7A5FDDD8F969"), _
-    ClassInterface(ClassInterfaceType.None), _
-    ComVisible(True)> _
     Public Class Site
         Implements ISite
         Private vHeight, vLatitude, vLongitude, vPressure, vTemperature As Double
@@ -1508,9 +1496,6 @@ Namespace NOVASCOM
     ''' time, the (optionally refracted) alt-az coordinates are calculated, and are also contained within 
     ''' the returned PositionVector. <b>Note that Alt/Az is available in PositionVectors returned from calling 
     ''' GetTopocentricPosition().</b></para></remarks>
-    <Guid("8FD58EDE-DF7A-4fdc-9DEC-FD0B36424F5F"), _
-    ClassInterface(ClassInterfaceType.None), _
-    ComVisible(True)> _
     Public Class Star
         Implements IStar
         Private m_rv, m_plx, m_pmdec, m_pmra, m_ra, m_dec, m_deltat As Double
@@ -2221,11 +2206,8 @@ Namespace NOVASCOM
     ''' a Star object (essentially an FK5 or HIP catalog entry) or a Site (lat/long/height). For the star 
     ''' object the proper motions, distance and radial velocity are used, for a site, the velocity is that 
     ''' of the observer with respect to the Earth's center of mass. </remarks>
-    <Guid("25F2ED0A-D0C1-403d-86B9-5F7CEBE97D87"), _
-    ClassInterface(ClassInterfaceType.None), _
-    ComVisible(True)> _
     Public Class VelocityVector
-        Implements IVelocityVector, IVelocityVectorExtra
+        Implements IVelocityVector
 
         Private m_xv, m_yv, m_zv, m_cv As Boolean
         Private m_v(2), m_VRA, m_RadVel, m_VDec As Double
@@ -2365,7 +2347,7 @@ Namespace NOVASCOM
         ''' with delta_t set to 0.0 to achieve this effect.
         ''' </remarks>
         <ComVisible(False)> _
-        Public Function SetFromSiteJD(ByVal site As Site, ByVal ujd As Double) As Boolean Implements IVelocityVectorExtra.SetFromSiteJD
+        Public Function SetFromSiteJD(ByVal site As Site, ByVal ujd As Double) As Boolean Implements IVelocityVector.SetFromSiteJD
             SetFromSiteJD(site, ujd, 0.0)
         End Function
 

@@ -35,15 +35,8 @@ Friend Class XMLAccess
 
 #Region "New and IDisposable Support"
     Public Sub New()
-        Me.New(False) 'Create but respect any exceptions thrown
-    End Sub
-
-    Sub New(ByVal p_CallingComponent As String)
-        Me.New(False)
-    End Sub
-
-    Sub New(ByVal p_IgnoreTest As Boolean)
         Dim PlatformVersion As String
+        Dim FromKey As RegistryKey
         KeyCache = New Generic.Dictionary(Of String, Generic.SortedList(Of String, String))
 
         TL = New TraceLogger("", "XMLAccess") 'Create a new trace logger
@@ -55,18 +48,31 @@ Friend Class XMLAccess
 
         FileStore = New AllUsersFileSystemProvider
         'FileStore = New IsolatedStorageFileStoreProvider
+        Try
+            If Not FileStore.Exists("\" & VALUES_FILENAME) Then Throw New Exceptions.ProfileNotFoundException("Utilities Error Base key does not exist")
+            PlatformVersion = GetProfile("\", "PlatformVersion")
+            'OK, no exception so assume that we are initialised
+        Catch ex As ProfileNotFoundException
+            MsgBox("Migrating ASCOM Profiles from registry to file system" & vbCrLf & vbCrLf & "You should only see this message once, if not, please post on Yahoo group ASCOM-Talk", , "ASCOM Utilities")
+            'It doesn't exist so migrate
+            TL.LogMessage("New", "ProfileNotFoundException - migrating keys")
+            'Create the root directory if it doesn't already exist
+            If Not FileStore.Exists("\" & VALUES_FILENAME) Then
+                FileStore.CreateDirectory("\")
+                CreateKey("\") 'Create the root key
+            End If
 
-        ' Bypass test for initial setup by MigrateProfile because the profile isn't yet set up
-        If Not p_IgnoreTest Then
-            Try
-                If Not FileStore.Exists("\" & VALUES_FILENAME) Then Throw New Exceptions.ProfileNotFoundException("Utilities Error Base key does not exist")
-                PlatformVersion = GetProfile("\", "PlatformVersion")
-                'OK, no exception so assume that we are initialised
-            Catch ex As Exception
-                TL.LogMessage("XMLAccess.New Unexpected exception:", ex.ToString)
-                Throw
-            End Try
-        End If
+            FromKey = Registry.LocalMachine.OpenSubKey(ROOT_KEY_NAME) 'Source to copy from 
+            MigrateKey(FromKey, "") 'Use recursion to copy contents to new tree
+            FromKey.Close()
+        Catch ex As Exception
+            TL.LogMessage("XMLAccess.New Unexpected exception:", ex.ToString)
+            MsgBox("XMLAccess.New Unexpected exception: " & ex.ToString)
+        End Try
+    End Sub
+
+    Sub New(ByVal p_CallingComponent As String)
+        Me.New()
     End Sub
 
     ' IDisposable
@@ -304,40 +310,6 @@ Friend Class XMLAccess
         Values = Nothing
         sw.Stop() : TL.LogMessage("  ElapsedTime", "  " & sw.ElapsedMilliseconds & " milliseconds")
     End Sub
-
-    Sub MigrateProfile() Implements IAccess.MigrateProfile
-        Dim FromKey As RegistryKey
-
-        Try
-            'Force logging to be enabled for this...
-            TL.Enabled = True
-            RunningVersions(TL) 'Capture date in case logging wasn't initially enabled
-
-            TL.LogMessage("MigrateProfile", "Migrating keys")
-            'Create the root directory if it doesn't already exist
-            If Not FileStore.Exists("\" & VALUES_FILENAME) Then
-                FileStore.CreateDirectory("\")
-                CreateKey("\") 'Create the root key
-            End If
-            TL.LogMessage("MigrateProfile", "Successfully created root directory and root key")
-
-            'Get correct registry root key depending on whether we are running as 32 or 64bit
-            FromKey = Registry.LocalMachine.OpenSubKey(ROOT_KEY_NAME) 'Source to copy from 
-            If Not FromKey Is Nothing Then 'Got a key
-                TL.LogMessage("MigrateProfile", "FromKey Opened OK: " & FromKey.Name & ", SubKeyCount: " & FromKey.SubKeyCount.ToString & ", ValueCount: " & FromKey.ValueCount.ToString)
-                MigrateKey(FromKey, "") 'Use recursion to copy contents to new tree
-                TL.LogMessage("MigrateProfile", "Successfully migrated keys")
-                FromKey.Close()
-                'Restore original logging state
-                TL.Enabled = GetBool(TRACE_XMLACCESS, TRACE_XMLACCESS_DEFAULT) 'Get enabled / disabled state from the user registry
-            Else 'Didn't get a key from either location so throw an error
-                Throw New ProfileNotFoundException("Cannot find ASCOM Profile in HKLM\" & ROOT_KEY_NAME & " Is Platform 5 installed?")
-            End If
-        Catch ex As Exception
-            TL.LogMessage("MigrateProfile", "Exception: " & ex.ToString)
-            Throw
-        End Try
-    End Sub
 #End Region
 
 #Region "Support Functions"
@@ -508,13 +480,7 @@ Friend Class XMLAccess
         RecurseDepth += 1 'Increment the recursion depth indicator
 
         swLocal = Stopwatch.StartNew
-        TL.LogMessage("MigrateKeys " & RecurseDepth.ToString, "To Directory: " & p_ToDir)
-        Try
-            TL.LogMessage("MigrateKeys" & RecurseDepth.ToString, "From Key: " & p_FromKey.Name & ", SubKeyCount: " & p_FromKey.SubKeyCount.ToString & ", ValueCount: " & p_FromKey.ValueCount.ToString)
-        Catch ex As Exception
-            TL.LogMessage("MigrateKeys", "Exception processing """ & p_ToDir & """: " & ex.ToString)
-            TL.LogMessage("MigrateKeys", "Exception above: no action taken, continuing...")
-        End Try
+        TL.LogMessage("MigrateKeys " & RecurseDepth.ToString, "Start")
 
         'First copy values from the from key to the to key
         ValueNames = p_FromKey.GetValueNames
@@ -538,7 +504,7 @@ Friend Class XMLAccess
             MigrateKey(FromKey, p_ToDir & "\" & SubKeyName) 'Recursively process each key
             FromKey.Close()
         Next
-        swLocal.Stop() : TL.LogMessage("  ElapsedTime " & RecurseDepth.ToString, "  " & swLocal.ElapsedMilliseconds & " milliseconds, Completed Directory: " & p_ToDir)
+        swLocal.Stop() : TL.LogMessage("  ElapsedTime " & RecurseDepth.ToString, "  " & swLocal.ElapsedMilliseconds & " milliseconds")
         RecurseDepth -= 1 'Decrement the recursion depth counter
         swLocal = Nothing
     End Sub
