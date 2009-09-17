@@ -13,10 +13,7 @@ namespace ASCOM.GeminiTelescope
     [ComVisible(false)]					// Form not registered for COM!
     public partial class TelescopeSetupDialogForm : Form
     {
-        private string m_GpsComPort;
-        private string m_GpsBaudRate;
-        private bool m_GpsUpdateClock;
-
+        
         public TelescopeSetupDialogForm()
         {
             InitializeComponent();
@@ -67,53 +64,6 @@ namespace ASCOM.GeminiTelescope
         }
 
         #region Properties for Settings
-        public GeminiHardware.GeminiBootMode BootMode
-        {
-            get
-            {
-                if (radioButtonPrompt.Checked)
-                {
-                    return GeminiHardware.GeminiBootMode.Prompt;
-                }
-                else if (radioButtonColdStart.Checked)
-                {
-                    return GeminiHardware.GeminiBootMode.ColdStart;
-                }
-                else if (radioButtonWarmStart.Checked)
-                {
-                    return GeminiHardware.GeminiBootMode.WarmStart;
-                }
-                else if (radioButtonWarmRestart.Checked)
-                {
-                    return GeminiHardware.GeminiBootMode.WarmRestart;
-                }
-                else
-                {
-                    return GeminiHardware.GeminiBootMode.Prompt;
-                }
-            }
-            set
-            {
-                switch (value)
-                {
-                    case GeminiHardware.GeminiBootMode.Prompt:
-                        radioButtonPrompt.Checked = true;
-                        break;
-                    case GeminiHardware.GeminiBootMode.ColdStart:
-                        radioButtonColdStart.Checked = true;
-                        break;
-                    case GeminiHardware.GeminiBootMode.WarmStart:
-                        radioButtonWarmStart.Checked = true;
-                        break;
-                    case GeminiHardware.GeminiBootMode.WarmRestart:
-                        radioButtonWarmRestart.Checked = true;
-                        break;
-                    default:
-                        radioButtonPrompt.Checked = true;
-                        break;
-                }
-            }
-        }
         public string ComPort
         {
             get { return comboBoxComPort.SelectedItem.ToString(); }
@@ -124,23 +74,6 @@ namespace ASCOM.GeminiTelescope
         {
             get { return comboBoxBaudRate.SelectedItem.ToString(); }
             set { comboBoxBaudRate.SelectedItem = value; }
-        }
-
-        public string GpsComPort
-        {
-            get { return m_GpsComPort; }
-            set { m_GpsComPort = value; }
-        }
-        public bool GpsUpdateClock
-        {
-            get { return m_GpsUpdateClock; }
-            set { m_GpsUpdateClock = value; }
-        }
-
-        public string GpsBaudRate
-        {
-            get { return m_GpsBaudRate; }
-            set { m_GpsBaudRate = value; }
         }
         public double Elevation
         {
@@ -270,49 +203,6 @@ namespace ASCOM.GeminiTelescope
         private void timerUpdate_Tick(object sender, EventArgs e)
         {
             labelUtc.Text = DateTime.UtcNow.ToLongTimeString();
-        }
-
-        private void checkBoxUseGeminiSite_CheckedChanged(object sender, EventArgs e)
-        {
-            UseGeminiSite = checkBoxUseGeminiSite.Checked;
-        }
-
-        private void buttonGps_Click(object sender, EventArgs e)
-        {
-            frmGps gpsForm = new frmGps();
-
-            gpsForm.ComPort = m_GpsComPort;
-            gpsForm.BaudRate = m_GpsBaudRate;
-            gpsForm.UpdateClock = m_GpsUpdateClock;
-
-            DialogResult ans = gpsForm.ShowDialog(this);
-            if (ans == DialogResult.OK)
-            {
-                try
-                {
-                    m_GpsBaudRate = gpsForm.BaudRate;
-                    m_GpsComPort = gpsForm.ComPort;
-                    if (gpsForm.Latitude != 0 && gpsForm.Longitude != 0)
-                    {
-                        Latitude = gpsForm.Latitude;
-                        Longitude = gpsForm.Longitude;
-                        m_GpsUpdateClock = gpsForm.UpdateClock;
-                        checkBoxUseGeminiSite.Checked = false;
-                        if (m_GpsUpdateClock) checkBoxUseGeminiTime.Checked = false;
-                    }
-                }
-                catch
-                {
-                }
-            }
-        }
-
-        private void pbGeminiSettings_Click(object sender, EventArgs e)
-        {
-            frmAdvancedSettings settings = new frmAdvancedSettings();
-            DialogResult re = settings.ShowDialog();
-        }
-
-        
+        }   
     }
 }

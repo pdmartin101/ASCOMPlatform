@@ -112,14 +112,6 @@ namespace ASCOM.TelescopeSimulator
 
         private static int m_DateDelta;
 
-        private static long m_PulseGuideTixRa = 0;
-        private static long m_PulseGuideTixDec = 0;
-
-        public static double m_DeltaAz = 0;
-        public static double m_DeltaAlt = 0;
-        public static double m_DeltaRa = 0;
-        public static double m_DeltaDec = 0;
-
 
         private static bool m_Connected = false; //Keep track of the connection status of the hardware
 
@@ -950,36 +942,13 @@ namespace ASCOM.TelescopeSimulator
            get { return m_SlewSettleTime; }
            set { m_SlewSettleTime = value; }
        }
-
-       public static bool IsPulseGuiding
-       {
-           get
-           {
-               return ((m_PulseGuideTixDec > 0) || (m_PulseGuideTixRa > 0));
-           }
-
-       }
-       public static bool IsParked
-       {
-           get { return m_AtPark; }
-       }
         #endregion
 
         #region Helper Functions
-       public static int SideOfPierRaDec(double RightAscension, double Declination)
-       {
-           return 0;
-       }
        public static void StartSlewRaDec(double RightAscension, double Declination, bool DoSideOfPier)
        {
        }
        public static void StartSlewAltAz(double Altitude, double Azimuth, bool DoSideOfPier)
-       {
-       }
-       public static void Park()
-       {
-       }
-       public static void FindHome()
        {
        }
        public static void ChangeHome(bool NewValue)

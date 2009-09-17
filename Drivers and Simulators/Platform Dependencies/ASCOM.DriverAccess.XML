@@ -487,6 +487,85 @@
             immediately as the read value, and -1 is never produced.
             </summary>
         </member>
+        <member name="T:ASCOM.DriverAccess.SafetyMonitor">
+            <summary>
+            Provides universal access to SafetyMonitor drivers
+            </summary>
+        </member>
+        <member name="M:ASCOM.DriverAccess.SafetyMonitor.#ctor(System.String)">
+            <summary>
+            Creates a SafetyMonitor object with the given Prog ID
+            </summary>
+            <param name="SafetyMonitorID"></param>
+        </member>
+        <member name="M:ASCOM.DriverAccess.SafetyMonitor.Choose(System.String)">
+            <summary>
+            Brings up the ASCOM Chooser Dialog to choose a SafetyMonitor
+            </summary>
+            <param name="SafetyMonitorID">SafetyMonitor Prog ID for default or null for None</param>
+            <returns>Prog ID for chosen SafetyMonitor or null for none</returns>
+        </member>
+        <member name="M:ASCOM.DriverAccess.SafetyMonitor.SetupDialog">
+            <summary>
+            Launches a configuration dialog box for the driver.  The call will not return
+            until the user clicks OK or cancel manually.
+            </summary>
+            <exception cref="T:System.Exception">Must throw an exception if Setup dialog is unavailable.</exception>
+        </member>
+        <member name="M:ASCOM.DriverAccess.SafetyMonitor.Dispose">
+            <summary>
+            Dispose the late-bound interface, if needed. Will release it via COM
+            if it is a COM object, else if native .NET will just dereference it
+            for GC.
+            </summary>
+        </member>
+        <member name="P:ASCOM.DriverAccess.SafetyMonitor.CanEmergencyShutdown">
+            <summary>
+            Confirms the ability to flag an  emergency shutdown
+            </summary>
+        </member>
+        <member name="P:ASCOM.DriverAccess.SafetyMonitor.CanIsGood">
+            <summary>
+            Flags the ability to return usability condition
+            </summary>
+        </member>
+        <member name="P:ASCOM.DriverAccess.SafetyMonitor.Connected">
+            <summary>
+            Set True to Connect to the SafetyMonitores; set False to terminate the Connection.
+            The current Connected status can also be read back as this property.
+            An exception will be raised if the Connected fails to change state for any reason.
+            </summary>
+        </member>
+        <member name="P:ASCOM.DriverAccess.SafetyMonitor.Description">
+            <summary>
+            Returns a description of the SafetyMonitor controller
+            </summary>
+        </member>
+        <member name="P:ASCOM.DriverAccess.SafetyMonitor.DriverInfo">
+            <summary>
+            Returns the driver info
+            </summary>
+        </member>
+        <member name="P:ASCOM.DriverAccess.SafetyMonitor.DriverVersion">
+            <summary>
+            Returns the driver version
+            </summary>
+        </member>
+        <member name="P:ASCOM.DriverAccess.SafetyMonitor.EmergencyShutdown">
+            <summary>
+            Returns the emergency shutdown state
+            </summary>
+        </member>
+        <member name="P:ASCOM.DriverAccess.SafetyMonitor.IsGood">
+            <summary>
+            Returns the usability conditions
+            </summary>
+        </member>
+        <member name="P:ASCOM.DriverAccess.SafetyMonitor.IsSafe">
+            <summary>
+            Returns the safety conditions
+            </summary>
+        </member>
         <member name="T:ASCOM.DriverAccess.Camera">
             <summary>
             Implements a camera class to access any registered ASCOM Camera

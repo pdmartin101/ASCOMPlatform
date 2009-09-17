@@ -9,13 +9,13 @@ Imports System.Runtime.InteropServices
 ' Review the values of the assembly attributes
 
 <Assembly: AssemblyTitle("ASCOM Astrometry")> 
-<Assembly: AssemblyDescription("ASCOM Astrometry")> 
+<Assembly: AssemblyDescription("ASCOM Astrometric Support")> 
 <Assembly: AssemblyCompany("ASCOM Initiative")> 
-<Assembly: AssemblyProduct("ASCOM.Astrometry")> 
+<Assembly: AssemblyProduct("ASCOM.Astrometrics")> 
 <Assembly: AssemblyCopyright("Copyright © ASCOM Initiative 2009")> 
 <Assembly: AssemblyTrademark("")> 
 
-<Assembly: ComVisible(False)> 
+<Assembly: ComVisible(True)> 
 
 'The following GUID is for the ID of the typelib if this project is exposed to COM
 <Assembly: Guid("7f3582e3-9aa8-42ca-845c-2e6b13f362c1")> 

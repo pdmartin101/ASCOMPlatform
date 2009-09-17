@@ -29,8 +29,6 @@ namespace ASCOM.GeminiTelescope
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.Button buttonGps;
-            System.Windows.Forms.Button pbGeminiSettings;
             this.cmdOK = new System.Windows.Forms.Button();
             this.cmdCancel = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -61,6 +59,7 @@ namespace ASCOM.GeminiTelescope
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.comboBox2 = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             this.checkBoxAdvancedMode = new System.Windows.Forms.CheckBox();
             this.checkBoxPrecession = new System.Windows.Forms.CheckBox();
             this.checkBoxRefraction = new System.Windows.Forms.CheckBox();
@@ -77,11 +76,9 @@ namespace ASCOM.GeminiTelescope
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             this.radioButtonPrompt = new System.Windows.Forms.RadioButton();
+            this.radioButtonWarmRestart = new System.Windows.Forms.RadioButton();
             this.radioButtonColdStart = new System.Windows.Forms.RadioButton();
             this.radioButtonWarmStart = new System.Windows.Forms.RadioButton();
-            this.radioButtonWarmRestart = new System.Windows.Forms.RadioButton();
-            buttonGps = new System.Windows.Forms.Button();
-            pbGeminiSettings = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -94,18 +91,6 @@ namespace ASCOM.GeminiTelescope
             this.groupBox5.SuspendLayout();
             this.tableLayoutPanel6.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // buttonGps
-            // 
-            buttonGps.BackColor = System.Drawing.Color.Black;
-            buttonGps.ForeColor = System.Drawing.Color.White;
-            buttonGps.Location = new System.Drawing.Point(238, 303);
-            buttonGps.Name = "buttonGps";
-            buttonGps.Size = new System.Drawing.Size(105, 23);
-            buttonGps.TabIndex = 23;
-            buttonGps.Text = "GPS Settings...";
-            buttonGps.UseVisualStyleBackColor = false;
-            buttonGps.Click += new System.EventHandler(this.buttonGps_Click);
             // 
             // cmdOK
             // 
@@ -184,7 +169,6 @@ namespace ASCOM.GeminiTelescope
             this.checkBoxUseGeminiSite.TabIndex = 22;
             this.checkBoxUseGeminiSite.Text = "Use Gemini Site Info";
             this.checkBoxUseGeminiSite.UseVisualStyleBackColor = false;
-            this.checkBoxUseGeminiSite.CheckedChanged += new System.EventHandler(this.checkBoxUseGeminiSite_CheckedChanged);
             // 
             // textBoxLongitudeMinutes
             // 
@@ -284,10 +268,12 @@ namespace ASCOM.GeminiTelescope
             // 
             // labelTime
             // 
+            this.labelTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.labelTime.AutoSize = true;
             this.labelTime.ForeColor = System.Drawing.Color.White;
-            this.labelTime.Location = new System.Drawing.Point(363, 338);
+            this.labelTime.Location = new System.Drawing.Point(363, 337);
             this.labelTime.Name = "labelTime";
+            this.labelTime.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.labelTime.Size = new System.Drawing.Size(185, 13);
             this.labelTime.TabIndex = 19;
             this.labelTime.Text = "<run time - time zone and UTC offset>";
@@ -431,6 +417,17 @@ namespace ASCOM.GeminiTelescope
             this.label6.TabIndex = 6;
             this.label6.Text = "Com Port:";
             // 
+            // button1
+            // 
+            this.button1.BackColor = System.Drawing.Color.Black;
+            this.button1.ForeColor = System.Drawing.Color.White;
+            this.button1.Location = new System.Drawing.Point(238, 303);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 23;
+            this.button1.Text = "Query GPS";
+            this.button1.UseVisualStyleBackColor = false;
+            // 
             // checkBoxAdvancedMode
             // 
             this.checkBoxAdvancedMode.AutoSize = true;
@@ -572,7 +569,6 @@ namespace ASCOM.GeminiTelescope
             // 
             // timerUpdate
             // 
-            this.timerUpdate.Enabled = true;
             this.timerUpdate.Interval = 1000;
             this.timerUpdate.Tick += new System.EventHandler(this.timerUpdate_Tick);
             // 
@@ -592,9 +588,9 @@ namespace ASCOM.GeminiTelescope
             this.tableLayoutPanel6.ColumnCount = 1;
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel6.Controls.Add(this.radioButtonPrompt, 0, 3);
+            this.tableLayoutPanel6.Controls.Add(this.radioButtonWarmRestart, 0, 0);
             this.tableLayoutPanel6.Controls.Add(this.radioButtonColdStart, 0, 2);
             this.tableLayoutPanel6.Controls.Add(this.radioButtonWarmStart, 0, 1);
-            this.tableLayoutPanel6.Controls.Add(this.radioButtonWarmRestart, 0, 0);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 16);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
@@ -609,39 +605,18 @@ namespace ASCOM.GeminiTelescope
             // radioButtonPrompt
             // 
             this.radioButtonPrompt.AutoSize = true;
+            this.radioButtonPrompt.ForeColor = System.Drawing.Color.White;
             this.radioButtonPrompt.Location = new System.Drawing.Point(3, 84);
             this.radioButtonPrompt.Name = "radioButtonPrompt";
-            this.radioButtonPrompt.Size = new System.Drawing.Size(121, 17);
+            this.radioButtonPrompt.Size = new System.Drawing.Size(119, 17);
             this.radioButtonPrompt.TabIndex = 3;
-            this.radioButtonPrompt.TabStop = true;
-            this.radioButtonPrompt.Text = "Prompt if not Started";
+            this.radioButtonPrompt.Text = "Prompt if not started";
             this.radioButtonPrompt.UseVisualStyleBackColor = true;
-            // 
-            // radioButtonColdStart
-            // 
-            this.radioButtonColdStart.AutoSize = true;
-            this.radioButtonColdStart.Location = new System.Drawing.Point(3, 57);
-            this.radioButtonColdStart.Name = "radioButtonColdStart";
-            this.radioButtonColdStart.Size = new System.Drawing.Size(71, 17);
-            this.radioButtonColdStart.TabIndex = 2;
-            this.radioButtonColdStart.TabStop = true;
-            this.radioButtonColdStart.Text = "Cold Start";
-            this.radioButtonColdStart.UseVisualStyleBackColor = true;
-            // 
-            // radioButtonWarmStart
-            // 
-            this.radioButtonWarmStart.AutoSize = true;
-            this.radioButtonWarmStart.Location = new System.Drawing.Point(3, 30);
-            this.radioButtonWarmStart.Name = "radioButtonWarmStart";
-            this.radioButtonWarmStart.Size = new System.Drawing.Size(78, 17);
-            this.radioButtonWarmStart.TabIndex = 1;
-            this.radioButtonWarmStart.TabStop = true;
-            this.radioButtonWarmStart.Text = "Warm Start";
-            this.radioButtonWarmStart.UseVisualStyleBackColor = true;
             // 
             // radioButtonWarmRestart
             // 
             this.radioButtonWarmRestart.AutoSize = true;
+            this.radioButtonWarmRestart.ForeColor = System.Drawing.Color.White;
             this.radioButtonWarmRestart.Location = new System.Drawing.Point(3, 3);
             this.radioButtonWarmRestart.Name = "radioButtonWarmRestart";
             this.radioButtonWarmRestart.Size = new System.Drawing.Size(90, 17);
@@ -650,17 +625,27 @@ namespace ASCOM.GeminiTelescope
             this.radioButtonWarmRestart.Text = "Warm Restart";
             this.radioButtonWarmRestart.UseVisualStyleBackColor = true;
             // 
-            // pbGeminiSettings
+            // radioButtonColdStart
             // 
-            pbGeminiSettings.BackColor = System.Drawing.Color.Black;
-            pbGeminiSettings.ForeColor = System.Drawing.Color.White;
-            pbGeminiSettings.Location = new System.Drawing.Point(238, 267);
-            pbGeminiSettings.Name = "pbGeminiSettings";
-            pbGeminiSettings.Size = new System.Drawing.Size(105, 23);
-            pbGeminiSettings.TabIndex = 30;
-            pbGeminiSettings.Text = "Gemini Settings...";
-            pbGeminiSettings.UseVisualStyleBackColor = false;
-            pbGeminiSettings.Click += new System.EventHandler(this.pbGeminiSettings_Click);
+            this.radioButtonColdStart.AutoSize = true;
+            this.radioButtonColdStart.ForeColor = System.Drawing.Color.White;
+            this.radioButtonColdStart.Location = new System.Drawing.Point(3, 57);
+            this.radioButtonColdStart.Name = "radioButtonColdStart";
+            this.radioButtonColdStart.Size = new System.Drawing.Size(168, 17);
+            this.radioButtonColdStart.TabIndex = 2;
+            this.radioButtonColdStart.Text = "Cold Start (from CWD position)";
+            this.radioButtonColdStart.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonWarmStart
+            // 
+            this.radioButtonWarmStart.AutoSize = true;
+            this.radioButtonWarmStart.ForeColor = System.Drawing.Color.White;
+            this.radioButtonWarmStart.Location = new System.Drawing.Point(3, 30);
+            this.radioButtonWarmStart.Name = "radioButtonWarmStart";
+            this.radioButtonWarmStart.Size = new System.Drawing.Size(175, 17);
+            this.radioButtonWarmStart.TabIndex = 1;
+            this.radioButtonWarmStart.Text = "Warm Start (from CWD position)";
+            this.radioButtonWarmStart.UseVisualStyleBackColor = true;
             // 
             // TelescopeSetupDialogForm
             // 
@@ -668,14 +653,13 @@ namespace ASCOM.GeminiTelescope
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(560, 360);
-            this.Controls.Add(pbGeminiSettings);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.checkBoxAdditionalAlign);
             this.Controls.Add(this.checkBoxRefraction);
             this.Controls.Add(this.checkBoxPrecession);
             this.Controls.Add(this.checkBoxAdvancedMode);
-            this.Controls.Add(buttonGps);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.labelTime);
             this.Controls.Add(this.labelVersion);
@@ -745,6 +729,7 @@ namespace ASCOM.GeminiTelescope
         private System.Windows.Forms.ComboBox comboBox2;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.CheckBox checkBoxUseGeminiTime;
+        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.CheckBox checkBoxAdvancedMode;
         private System.Windows.Forms.CheckBox checkBoxPrecession;
         private System.Windows.Forms.CheckBox checkBoxRefraction;
@@ -759,9 +744,9 @@ namespace ASCOM.GeminiTelescope
         private System.Windows.Forms.Timer timerUpdate;
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
-        private System.Windows.Forms.RadioButton radioButtonWarmRestart;
-        private System.Windows.Forms.RadioButton radioButtonWarmStart;
         private System.Windows.Forms.RadioButton radioButtonPrompt;
+        private System.Windows.Forms.RadioButton radioButtonWarmRestart;
         private System.Windows.Forms.RadioButton radioButtonColdStart;
+        private System.Windows.Forms.RadioButton radioButtonWarmStart;
     }
 }
