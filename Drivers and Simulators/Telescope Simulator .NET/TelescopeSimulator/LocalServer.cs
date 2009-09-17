@@ -375,7 +375,8 @@ namespace ASCOM.TelescopeSimulator
                     attr = Attribute.GetCustomAttribute(assy, typeof(ServedClassNameAttribute));
                     string chooserName = ((ServedClassNameAttribute)attr).ServedClassName;
 
-					var P = new ASCOM.Utilities.Profile { DeviceType = progid.Substring(progid.LastIndexOf('.') + 1) };
+                    ASCOM.HelperNET.Profile P = new ASCOM.HelperNET.Profile();
+                    P.DeviceType = progid.Substring(progid.LastIndexOf('.') + 1);	//  Requires Helper 5.1 or later
                     P.Register(progid, chooserName);
                     try										// In case Helper becomes native .NET
                     {
@@ -444,7 +445,8 @@ namespace ASCOM.TelescopeSimulator
                     //
                     // ASCOM
                     //
-					var P = new ASCOM.Utilities.Profile { DeviceType = progid.Substring(progid.LastIndexOf('.') + 1) };
+                    ASCOM.HelperNET.Profile P = new ASCOM.HelperNET.Profile();
+                    P.DeviceType = progid.Substring(progid.LastIndexOf('.') + 1);	//  Requires Helper 5.1 or later
                     P.Unregister(progid);
                     try										// In case Helper becomes native .NET
                     {

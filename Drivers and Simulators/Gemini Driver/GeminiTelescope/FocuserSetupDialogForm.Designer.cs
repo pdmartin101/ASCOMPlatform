@@ -94,25 +94,23 @@
             // 
             // cmdCancel
             // 
-            this.cmdCancel.BackColor = System.Drawing.SystemColors.Control;
             this.cmdCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.cmdCancel.Location = new System.Drawing.Point(325, 345);
             this.cmdCancel.Name = "cmdCancel";
             this.cmdCancel.Size = new System.Drawing.Size(59, 25);
             this.cmdCancel.TabIndex = 5;
             this.cmdCancel.Text = "Cancel";
-            this.cmdCancel.UseVisualStyleBackColor = false;
+            this.cmdCancel.UseVisualStyleBackColor = true;
             // 
             // cmdOK
             // 
-            this.cmdOK.BackColor = System.Drawing.SystemColors.Control;
             this.cmdOK.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.cmdOK.Location = new System.Drawing.Point(325, 315);
             this.cmdOK.Name = "cmdOK";
             this.cmdOK.Size = new System.Drawing.Size(59, 24);
             this.cmdOK.TabIndex = 4;
             this.cmdOK.Text = "OK";
-            this.cmdOK.UseVisualStyleBackColor = false;
+            this.cmdOK.UseVisualStyleBackColor = true;
             // 
             // groupBox2
             // 
@@ -531,7 +529,6 @@
             this.MinimizeBox = false;
             this.Name = "FocuserSetupDialogForm";
             this.Text = "Gemini Focuser Setup";
-            this.Load += new System.EventHandler(this.FocuserSetupDialogForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);

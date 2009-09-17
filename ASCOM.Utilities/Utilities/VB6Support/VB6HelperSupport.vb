@@ -11,57 +11,22 @@ Imports ASCOM.Utilities.Interfaces
 
 Namespace VB6HelperSupport 'Tuck this out of the way of the main ASCOM.Utilities namespace
 
-#Region "VB6HelperInterfaces"
-    <Guid("87D14110-BEB7-43ff-991E-AAA11C44E5AF"), _
-    System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never), _
-    ComVisible(True)> _
-    Public Interface IProfileAccess
-        <DispId(1)> Function GetProfile(ByVal p_SubKeyName As String, ByVal p_ValueName As String, ByVal CName As String) As String
-        <DispId(2)> Sub WriteProfile(ByVal p_SubKeyName As String, ByVal p_ValueName As String, ByVal p_ValueData As String, ByRef CName As String)
-        <DispId(3)> Function EnumProfile(ByVal p_SubKeyName As String, ByVal CName As String) As ArrayList 'Scripting.Dictionary 'Hashtable
-        <DispId(4)> Sub DeleteProfile(ByVal p_SubKeyName As String, ByVal p_ValueName As String, ByVal CName As String)
-        <DispId(5)> Sub CreateKey(ByVal p_SubKeyName As String, ByVal CName As String)
-        <DispId(6)> Function EnumKeys(ByVal p_SubKeyName As String, ByVal CName As String) As ArrayList 'Scripting.Dictionary 'Hashtable
-        <DispId(7)> Sub DeleteKey(ByVal p_SubKeyName As String, ByVal CName As String)
-    End Interface
-
-    <Guid("ABE720E6-9C2C-47e9-8476-6CE5A3F994E2"), _
-    System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never), _
-    ComVisible(True)> _
-    Public Interface ISerialSupport
-        <DispId(1)> Sub ClearBuffers()
-        <DispId(2)> Property Connected() As Boolean
-        <DispId(3)> Property Port() As Short
-        <DispId(4)> Property PortSpeed() As Integer
-        <DispId(5)> Function Receive() As String
-        <DispId(6)> Function ReceiveByte() As Byte
-        <DispId(7)> Function ReceiveCounted(ByVal p_Count As Short) As String
-        <DispId(8)> Function ReceiveCountedBinary(ByVal p_Count As Short) As Byte()
-        <DispId(9)> Function ReceiveTerminated(ByVal p_Terminator As String) As String
-        <DispId(10)> Function ReceiveTerminatedBinary(ByRef p_Terminator() As Byte) As Byte()
-        <DispId(11)> Property ReceiveTimeout() As Short
-        <DispId(12)> Property ReceiveTimeoutMs() As Integer
-        <DispId(13)> Sub Transmit(ByVal p_Data As String)
-        <DispId(14)> Sub TransmitBinary(ByVal p_Data() As Byte)
-    End Interface
-
-    <Guid("5E3A9439-A1A4-4d8d-8658-53E2470C69F6"), _
-    System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never), _
-    ComVisible(True)> _
-    Public Interface IChooserSupport
-        <DispId(1)> Property DeviceType() As String
-        <DispId(2)> Function [Choose](Optional ByVal CurrentDriverID As String = "") As String
-    End Interface
-#End Region
-
 #Region "ProfileAccess"
     <ProgId("DriverHelper.ProfileAccess"), _
     ComVisible(True), _
-    Guid("f0acf8ea-ddeb-4869-ae33-b25d4d6195b6"), _
-    ClassInterface(ClassInterfaceType.None), _
+    ComClass(ProfileAccess.ClassId, ProfileAccess.InterfaceId, ProfileAccess.EventsId), _
     System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)> _
     Public Class ProfileAccess
-        Implements IProfileAccess, IDisposable
+        Implements IDisposable
+
+#Region "COM GUIDs"
+        ' These  GUIDs provide the COM identity for this class 
+        ' and its COM interfaces. If you change them, existing 
+        ' clients will no longer be able to access the class.
+        Public Const ClassId As String = "f0acf8ea-ddeb-4869-ae33-b25d4d6195b6"
+        Public Const InterfaceId As String = "e8b28e9a-cecf-436d-982e-0bf8c5216e4e"
+        Public Const EventsId As String = "eab943e2-0b66-45ac-9120-c6387eef1a94"
+#End Region
 
         'Class to support the VB6 Helper components
 
@@ -72,7 +37,7 @@ Namespace VB6HelperSupport 'Tuck this out of the way of the main ASCOM.Utilities
         'The function and sub signatures below exactly match those provided by the registry toolkit 
         'originally used by the helpers.
 
-        Private Profile As XMLAccess
+        Private Profile As IAccess
         Private TL As TraceLogger
 
 #Region "New and IDisposable Support"
@@ -140,7 +105,7 @@ Namespace VB6HelperSupport 'Tuck this out of the way of the main ASCOM.Utilities
 
 #Region "ProfileAccess Implementation"
 
-        Public Function GetProfile(ByVal p_SubKeyName As String, ByVal p_ValueName As String, ByVal CName As String) As String Implements IProfileAccess.GetProfile
+        Public Function GetProfile(ByVal p_SubKeyName As String, ByVal p_ValueName As String, ByVal CName As String) As String
             'Get a single profile value
             Dim Ret As String
             Ret = Profile.GetProfile(p_SubKeyName, p_ValueName)
@@ -148,61 +113,59 @@ Namespace VB6HelperSupport 'Tuck this out of the way of the main ASCOM.Utilities
             Return Ret
         End Function
 
-        Public Sub WriteProfile(ByVal p_SubKeyName As String, ByVal p_ValueName As String, ByVal p_ValueData As String, ByRef CName As String) Implements IProfileAccess.WriteProfile
+        Public Sub WriteProfile(ByVal p_SubKeyName As String, ByVal p_ValueName As String, ByVal p_ValueData As String, ByRef CName As String)
             'Write a single profile value
             TL.LogMessage("WriteProfile", "SubKey: """ & p_SubKeyName & """ Value: """ & p_ValueName & """ Data: """ & p_ValueData & """")
             If p_ValueData Is Nothing Then TL.LogMessage("WriteProfile", "WARNING - Supplied data value is Nothing, not empty string")
             Profile.WriteProfile(p_SubKeyName, p_ValueName, p_ValueData)
         End Sub
 
-        Public Function EnumProfile(ByVal p_SubKeyName As String, ByVal CName As String) As ArrayList Implements IProfileAccess.EnumProfile
+        Public Function EnumProfile(ByVal p_SubKeyName As String, ByVal CName As String) As Scripting.Dictionary 'Hashtable
             'Enumerate values within a given profile key
             'Return these as a Scripting.Dictionary object
 
-            Dim RetVal As ArrayList = New ArrayList
+            Dim RetVal As Scripting.Dictionary = New Scripting.Dictionary
             Dim ReturnedProfile As Generic.SortedList(Of String, String)
             ReturnedProfile = Profile.EnumProfile(p_SubKeyName) 'Get the requested values as a hashtable
             TL.LogMessage("EnumProfile", "SubKey: """ & p_SubKeyName & """ found " & ReturnedProfile.Count & " values")
             For Each de As Generic.KeyValuePair(Of String, String) In ReturnedProfile 'Copy the hashtable entries to the scripting.dictionary
-                Dim kvp As New KeyValuePair(de.Key, de.Value)
-                RetVal.Add(kvp)
+                RetVal.Add(de.Key, de.Value)
                 TL.LogMessage("  EnumProfile", "  Key: """ & de.Key & """ Value: """ & de.Value & """")
             Next
             Return RetVal
         End Function
 
-        Public Sub DeleteProfile(ByVal p_SubKeyName As String, ByVal p_ValueName As String, ByVal CName As String) Implements IProfileAccess.DeleteProfile
+        Public Sub DeleteProfile(ByVal p_SubKeyName As String, ByVal p_ValueName As String, ByVal CName As String)
             'Delete a profile key
             TL.LogMessage("DeleteProfile", "SubKey: """ & p_SubKeyName & """ Value: """ & p_ValueName & """")
 
             Profile.DeleteProfile(p_SubKeyName, p_ValueName)
         End Sub
 
-        Public Sub CreateKey(ByVal p_SubKeyName As String, ByVal CName As String) Implements IProfileAccess.CreateKey
+        Public Sub CreateKey(ByVal p_SubKeyName As String, ByVal CName As String)
             'Create a new profile key
             TL.LogMessage("CreateKey", "SubKey: """ & p_SubKeyName & """")
 
             Profile.CreateKey(p_SubKeyName)
         End Sub
 
-        Public Function EnumKeys(ByVal p_SubKeyName As String, ByVal CName As String) As ArrayList Implements IProfileAccess.EnumKeys
+        Public Function EnumKeys(ByVal p_SubKeyName As String, ByVal CName As String) As Scripting.Dictionary 'Hashtable
             'Enuerate the subkeys in a specified key
             'Return these as a Scripting.Dictionary object
 
-            Dim RetVal As ArrayList = New ArrayList
+            Dim RetVal As Scripting.Dictionary = New Scripting.Dictionary
             Dim Keys As Generic.SortedList(Of String, String)
             Keys = Profile.EnumKeys(p_SubKeyName) 'Get the list of subkeys
             TL.LogMessage("EnumKeys", "SubKey: """ & p_SubKeyName & """ found " & Keys.Count & " values")
 
             For Each de As Generic.KeyValuePair(Of String, String) In Keys 'Copy into the scripting.dictionary
-                Dim kvp As New KeyValuePair(de.Key, de.Value)
-                RetVal.Add(kvp)
+                RetVal.Add(de.Key, de.Value)
                 TL.LogMessage("  EnumKeys", "  Key: """ & de.Key & """ Value: """ & de.Value & """")
             Next
             Return RetVal
         End Function
 
-        Public Sub DeleteKey(ByVal p_SubKeyName As String, ByVal CName As String) Implements IProfileAccess.DeleteKey
+        Public Sub DeleteKey(ByVal p_SubKeyName As String, ByVal CName As String)
             'Delete a key and all its contents
             TL.LogMessage("DeleteKey", "SubKey: """ & p_SubKeyName & """")
 
@@ -211,23 +174,29 @@ Namespace VB6HelperSupport 'Tuck this out of the way of the main ASCOM.Utilities
 #End Region
 
     End Class
-
-
 #End Region
 
 #Region "SerialSupport"
     <ProgId("DriverHelper.SerialSupport"), _
     ComVisible(True), _
-    Guid("114EBEC4-7887-4ab9-B750-98BB5F1C8A8F"), _
-    ClassInterface(ClassInterfaceType.None), _
+    ComClass(SerialSupport.ClassId, SerialSupport.InterfaceId, SerialSupport.EventsId), _
     System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)> _
     Public Class SerialSupport
-        Implements ISerialSupport, IDisposable
+        Implements IDisposable
+
+#Region "COM GUIDs"
+        ' These  GUIDs provide the COM identity for this class 
+        ' and its COM interfaces. If you change them, existing 
+        ' clients will no longer be able to access the class.
+        Public Const ClassId As String = "114EBEC4-7887-4ab9-B750-98BB5F1C8A8F"
+        Public Const InterfaceId As String = "FC9D9FFD-512A-4eaf-883B-38D564DF1948"
+        Public Const EventsId As String = "B960ED6D-9FFD-4842-9813-E86673AAE9BB"
+#End Region
 
         'Class to support the VB6 Helper serial component
 
         'This exposes a new .Utilities serial port so that it can be accessed through the VB6 helper component
-        Private SerPort As Serial
+        Private SerPort As ISerial
 
 #Region "New and IDisposable Support"
         Public Sub New()
@@ -268,13 +237,13 @@ Namespace VB6HelperSupport 'Tuck this out of the way of the main ASCOM.Utilities
 
 #End Region
 
-#Region "SerialSupport Implementation"
+#Region "SerialAccess Implementation"
 
-        Public Sub ClearBuffers() Implements ISerialSupport.ClearBuffers
+        Public Sub ClearBuffers()
             SerPort.ClearBuffers()
         End Sub
 
-        Public Property Connected() As Boolean Implements ISerialSupport.Connected
+        Public Property Connected() As Boolean
             Get
                 Return SerPort.Connected
             End Get
@@ -283,7 +252,7 @@ Namespace VB6HelperSupport 'Tuck this out of the way of the main ASCOM.Utilities
             End Set
         End Property
 
-        Public Property Port() As Short Implements ISerialSupport.Port
+        Public Property Port() As Short
             Get
                 Return CShort(SerPort.Port)
             End Get
@@ -292,7 +261,7 @@ Namespace VB6HelperSupport 'Tuck this out of the way of the main ASCOM.Utilities
             End Set
         End Property
 
-        Public Property PortSpeed() As Integer Implements ISerialSupport.PortSpeed
+        Public Property PortSpeed() As Integer
             Get
                 Select Case SerPort.Speed
                     Case Utilities.SerialSpeed.ps300 : Return 300
@@ -325,31 +294,31 @@ Namespace VB6HelperSupport 'Tuck this out of the way of the main ASCOM.Utilities
             End Set
         End Property
 
-        Public Function Receive() As String Implements ISerialSupport.Receive
+        Public Function Receive() As String
             Return SerPort.Receive
         End Function
 
-        Public Function ReceiveByte() As Byte Implements ISerialSupport.ReceiveByte
+        Public Function ReceiveByte() As Byte
             Return SerPort.ReceiveByte
         End Function
 
-        Public Function ReceiveCounted(ByVal p_Count As Short) As String Implements ISerialSupport.ReceiveCounted
+        Public Function ReceiveCounted(ByVal p_Count As Short) As String
             Return SerPort.ReceiveCounted(CInt(p_Count))
         End Function
 
-        Public Function ReceiveCountedBinary(ByVal p_Count As Short) As Byte() Implements ISerialSupport.ReceiveCountedBinary
+        Public Function ReceiveCountedBinary(ByVal p_Count As Short) As Byte()
             Return SerPort.ReceiveCountedBinary(CInt(p_Count))
         End Function
 
-        Public Function ReceiveTerminated(ByVal p_Terminator As String) As String Implements ISerialSupport.ReceiveTerminated
+        Public Function ReceiveTerminated(ByVal p_Terminator As String) As String
             Return SerPort.ReceiveTerminated(p_Terminator)
         End Function
 
-        Public Function ReceiveTerminatedBinary(ByRef p_Terminator() As Byte) As Byte() Implements ISerialSupport.ReceiveTerminatedBinary
+        Public Function ReceiveTerminatedBinary(ByRef p_Terminator() As Byte) As Byte()
             Return SerPort.ReceiveTerminatedBinary(p_Terminator)
         End Function
 
-        Public Property ReceiveTimeout() As Short Implements ISerialSupport.ReceiveTimeout
+        Public Property ReceiveTimeout() As Short
             Get
                 Return CShort(SerPort.ReceiveTimeout)
             End Get
@@ -358,7 +327,7 @@ Namespace VB6HelperSupport 'Tuck this out of the way of the main ASCOM.Utilities
             End Set
         End Property
 
-        Public Property ReceiveTimeoutMs() As Integer Implements ISerialSupport.ReceiveTimeoutMs
+        Public Property ReceiveTimeoutMs() As Integer
             Get
                 Return SerPort.ReceiveTimeoutMs
             End Get
@@ -367,11 +336,11 @@ Namespace VB6HelperSupport 'Tuck this out of the way of the main ASCOM.Utilities
             End Set
         End Property
 
-        Public Sub Transmit(ByVal p_Data As String) Implements ISerialSupport.Transmit
+        Public Sub Transmit(ByVal p_Data As String)
             SerPort.Transmit(p_Data)
         End Sub
 
-        Public Sub TransmitBinary(ByVal p_Data() As Byte) Implements ISerialSupport.TransmitBinary
+        Public Sub TransmitBinary(ByVal p_Data() As Byte)
             SerPort.TransmitBinary(p_Data)
         End Sub
 #End Region
@@ -382,11 +351,20 @@ Namespace VB6HelperSupport 'Tuck this out of the way of the main ASCOM.Utilities
 #Region "ChooserSupport"
     <ProgId("DriverHelper.ChooserSupport"), _
     ComVisible(True), _
-    Guid("9289B6A5-CAF1-4da1-8A36-999BEBCDD5E9"), _
-    ClassInterface(ClassInterfaceType.None), _
+    ComClass(ChooserSupport.ClassId, ChooserSupport.InterfaceId, ChooserSupport.EventsId), _
     System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)> _
     Public Class ChooserSupport
-        Implements IChooserSupport, IDisposable
+        Implements IDisposable
+
+
+#Region "COM GUIDs"
+        ' These  GUIDs provide the COM identity for this class 
+        ' and its COM interfaces. If you change them, existing 
+        ' clients will no longer be able to access the class.
+        Public Const ClassId As String = "9289B6A5-CAF1-4da1-8A36-999BEBCDD5E9"
+        Public Const InterfaceId As String = "F8405951-6E1D-459d-842D-0CCC4634EC8C"
+        Public Const EventsId As String = "40565D32-33C1-4ff9-9B88-973398120335"
+#End Region
 
         'Class to support the VB6 Helper chooser component
 
@@ -436,7 +414,7 @@ Namespace VB6HelperSupport 'Tuck this out of the way of the main ASCOM.Utilities
 #End Region
 
 #Region "ChooserSupport Implementation"
-        Public Property DeviceType() As String Implements IChooserSupport.DeviceType
+        Public Property DeviceType() As String
             Get
                 Return myChooser.DeviceType
             End Get
@@ -446,7 +424,7 @@ Namespace VB6HelperSupport 'Tuck this out of the way of the main ASCOM.Utilities
             End Set
         End Property
 
-        Public Function [Choose](Optional ByVal CurrentDriverID As String = "") As String Implements IChooserSupport.Choose
+        Public Function [Choose](Optional ByVal CurrentDriverID As String = "") As String
             Try
                 Return myChooser.Choose(CurrentDriverID)
             Catch ex As Exception

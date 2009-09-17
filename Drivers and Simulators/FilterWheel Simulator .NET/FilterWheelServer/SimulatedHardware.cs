@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 using System.Drawing;
-using ASCOM.Utilities;
 
 namespace ASCOM.FilterWheelSim
 {
@@ -46,7 +45,7 @@ namespace ASCOM.FilterWheelSim
 
         public const string g_csDriverID = "ASCOM.FilterWheelSim.FilterWheel";
         private const string g_csDriverDescription = "FilterWheelSimulator FilterWheel";
-        public static Profile g_Profile;
+        public static HelperNET.Profile g_Profile;
 
 
         // Exception codes/messages
@@ -82,7 +81,7 @@ namespace ASCOM.FilterWheelSim
             m_asFilterNames = new string[8];
             m_aiFocusOffsets = new int[8];
             m_acFilterColours = new Color[8];
-            g_Profile = new Utilities.Profile();
+            g_Profile = new HelperNET.Profile();
             g_Profile.DeviceType = "FilterWheel";     // We're a filter wheel driver
 
         }

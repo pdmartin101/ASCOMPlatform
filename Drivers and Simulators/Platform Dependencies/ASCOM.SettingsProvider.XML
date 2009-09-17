@@ -4,6 +4,25 @@
         <name>ASCOM.SettingsProvider</name>
     </assembly>
     <members>
+        <member name="T:ASCOM.DeviceIdAttribute">
+            <summary>
+            An attribute for specifying an associated ASCOM DeviceID.
+            This is intended primarily for use with the <see cref="T:ASCOM.SettingsProvider"/> class.
+            This attribute is placed on the driver's <c>Properties.Settings</c> class and
+            informs the <see cref="T:ASCOM.SettingsProvider"/> which DeviceID to store settings under.
+            </summary>
+        </member>
+        <member name="M:ASCOM.DeviceIdAttribute.#ctor(System.String)">
+            <summary>
+            Construct a DeviceIdAttribute from teh supplied string.
+            </summary>
+            <param name="deviceId">A string containing the ASCOM DeviceID to be referenced.</param>
+        </member>
+        <member name="P:ASCOM.DeviceIdAttribute.DeviceId">
+            <summary>
+            Gets the ASCOM DeviceID that the attribute is associated with.
+            </summary>
+        </member>
         <member name="T:TiGra.ExtensionMethods.StringExtensions">
             <summary>
             Extension methods for manipulating strings.

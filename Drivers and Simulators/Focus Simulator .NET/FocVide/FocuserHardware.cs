@@ -110,8 +110,7 @@ namespace ASCOM.FocVide
         public static void Halt()
         {
             MyLog(eLogKind.LogMove, "HALT requested");
-            //if (!Properties.Settings.Default.sEnableHalt) { throw new MethodNotImplementedException("Halt"); }
-            if (!Properties.Settings.Default.sEnableHalt) { throw new Exception("Device not capable"); }
+            if (!Properties.Settings.Default.sEnableHalt) { throw new MethodNotImplementedException("Halt"); }
             else { HaltRequested = true; }
         }
         #endregion

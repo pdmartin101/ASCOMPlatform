@@ -1,7 +1,7 @@
 ﻿Imports System.IO
+Public Class EraseProfile
 
-Module EraseProfile
-    Sub Main()
+    Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         Const ASCOM_DIRECTORY As String = "\ASCOM\Profile" 'Root directory within the supplied file system space
         Dim BaseFolder As String
 
@@ -12,5 +12,6 @@ Module EraseProfile
         If Response = MsgBoxResult.Ok Then
             Try : Directory.Delete(BaseFolder, True) : Catch : End Try
         End If
+        End
     End Sub
-End Module
+End Class
