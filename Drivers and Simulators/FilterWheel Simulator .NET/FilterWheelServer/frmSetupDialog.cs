@@ -22,9 +22,6 @@ namespace ASCOM.FilterWheelSim
         {
             InitializeComponent();
 
-            // Uncomment the line below to change the locale to German, for testing dot/comma decimal issues
-            // System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("de-DE");
-
             // Create a tooltip object, and assign a few values
             ToolTip aTooltip  = new ToolTip();
             aTooltip.SetToolTip(picASCOM, "Visit the ASCOM website");
@@ -35,10 +32,6 @@ namespace ASCOM.FilterWheelSim
             m_arrNameTextBox = new TextBoxArray(this);
             m_arrOffsetTextBox = new TextBoxArray(this);
             m_arrColourPicBox = new PictureBoxArray(this);
-
-            // Populate the time combo with localised values
-            for (double j=0.5; j <= 4; j+=0.5)
-                cmbTime.Items.Add(j.ToString("F1"));
 
             // Create the textbox and picture controls on the form
             for (int i=0; i <= 7; i++)
@@ -80,7 +73,7 @@ namespace ASCOM.FilterWheelSim
             set
             {
                 // We store the time in millisecs, convert to seconds for display
-                cmbTime.Text = String.Format("{0:F1}", value / 1000.0);
+                cmbTime.Text = String.Format("{0:0.0}", value / 1000.0);
             }
         }
 
@@ -130,8 +123,7 @@ namespace ASCOM.FilterWheelSim
             m_iSlots = Convert.ToInt32(cmbSlots.Text);
             SimulatedHardware.g_Profile.WriteValue(SimulatedHardware.g_csDriverID, "Slots", m_iSlots.ToString());
             // Convert secs to millisecs
-            try { i = Convert.ToInt32(float.Parse(cmbTime.Text, System.Globalization.NumberStyles.AllowDecimalPoint) * 1000); }
-            catch { i = 1000; }
+            i = Convert.ToInt32(Convert.ToDouble(cmbTime.Text) * 1000);
             SimulatedHardware.g_Profile.WriteValue(SimulatedHardware.g_csDriverID, "Time", i.ToString());
             for (i=0; i <= 7; i++)
             {
@@ -199,28 +191,19 @@ namespace ASCOM.FilterWheelSim
         private void cmbTime_KeyPress(object sender, KeyPressEventArgs e)
         {
             // Only allow one occurrence of the period
-            // Oh-oh, decimal could be a comma!
-            //if (e.KeyChar == '.' && cmbTime.Text.Contains("."))
-            //    e.Handled = true;
+            if (e.KeyChar == '.' && cmbTime.Text.Contains("."))
+                e.Handled = true;
             // Now carry out numerals and period check
-            // Oh-oh, decimal could be a comma!
-            //else if (e.KeyChar < '.' || e.KeyChar > '9' || e.KeyChar == '/')
-            if (e.KeyChar < ',' || e.KeyChar > '9' || e.KeyChar == '-' || e.KeyChar == '/')
+            else if (e.KeyChar < '.' || e.KeyChar > '9' || e.KeyChar == '/')
                 if (e.KeyChar != '\b') e.Handled = true;
         }
 
         private void cmbTime_Validating(object sender, CancelEventArgs e)
         {
-            double i = 99;      // force error if conversion fails
-
-            try
-            {
-                i = Convert.ToDouble("0" + cmbTime.Text);        // Make blanks = 0
-            }
-            catch { }
+            double i = Convert.ToDouble("0" + cmbTime.Text);        // Make blanks = 0
             if (i < 0.1 || i >= 9)
             {
-                MessageBox.Show("Range of time values is 0.1-8.0");
+                MessageBox.Show("Range time values is 0.1-8.0");
                 e.Cancel = true;
             }
         }

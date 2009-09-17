@@ -11,7 +11,7 @@ namespace ASCOM.TelescopeSimulator
     {
         delegate void SetTextCallback(string text);
 
-        private Utilities.Util m_Util = new ASCOM.Utilities.Util();
+
         public frmMain()
         {
             InitializeComponent();
@@ -156,7 +156,7 @@ namespace ASCOM.TelescopeSimulator
             set
             {
                 SetTextCallback setText = new SetTextCallback(SetLstText);
-                string text = m_Util.DegreesToHMS(value);
+                string text = AstronomyFunctions.ConvertDoubleToHMS(value);
                 try{this.Invoke(setText, text);}
                 catch { }
                 
@@ -168,7 +168,7 @@ namespace ASCOM.TelescopeSimulator
             set
             {
                 SetTextCallback setText = new SetTextCallback(SetRaText);
-                string text = m_Util.DegreesToHMS(value);
+                string text = AstronomyFunctions.ConvertDoubleToHMS(value);
                 try { this.Invoke(setText, text); }
                 catch { }
             }
@@ -178,7 +178,7 @@ namespace ASCOM.TelescopeSimulator
             set
             {
                 SetTextCallback setText = new SetTextCallback(SetDecText);
-                string text = m_Util.DegreesToDMS(value);
+                string text = AstronomyFunctions.ConvertDoubleToDMS(value);
                 try { this.Invoke(setText, text); }
                 catch { }
             }
@@ -188,7 +188,7 @@ namespace ASCOM.TelescopeSimulator
             set
             {
                 SetTextCallback setText = new SetTextCallback(SetAltitudeText);
-                string text = m_Util.DegreesToDMS(value);
+                string text = AstronomyFunctions.ConvertDoubleToDMS(value);
                 try { this.Invoke(setText, text); }
                 catch { }
             }
@@ -198,7 +198,7 @@ namespace ASCOM.TelescopeSimulator
             set
             {
                 SetTextCallback setText = new SetTextCallback(SetAzimuthText);
-                string text = m_Util.DegreesToDMS(value);
+                string text = AstronomyFunctions.ConvertDoubleToDMS(value);
                 try { this.Invoke(setText, text); }
                 catch { }
             }

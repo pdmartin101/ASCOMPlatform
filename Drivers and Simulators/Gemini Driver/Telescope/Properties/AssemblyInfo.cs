@@ -7,8 +7,8 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 //
 // TODO - Add your authorship information here
-[assembly: AssemblyTitle("Gemini Telescope Driver")]
-[assembly: AssemblyDescription("ASCOM Telescope Driver forGemini")]
+[assembly: AssemblyTitle("Telescope Telescope Driver")]
+[assembly: AssemblyDescription("ASCOM Telescope Driver for Telescope")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("ASCOM Initiative")]
 [assembly: AssemblyProduct("")]
@@ -38,4 +38,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
-[assembly: ASCOM.ServedClassNameAttribute("Gemini Telescope .NET")]
+[assembly: ASCOM.ServedClassName("Gemini Telescope .NET")]

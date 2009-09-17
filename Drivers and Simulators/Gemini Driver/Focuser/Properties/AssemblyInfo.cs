@@ -7,8 +7,8 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 //
 // TODO - Add your authorship information here
-[assembly: AssemblyTitle("Gemini Focuser Driver")]
-[assembly: AssemblyDescription("ASCOM Focuser Driver for Gemini")]
+[assembly: AssemblyTitle("Focuser Focuser Driver")]
+[assembly: AssemblyDescription("ASCOM Focuser Driver for Focuser")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("ASCOM Initiative")]
 [assembly: AssemblyProduct("")]
@@ -38,4 +38,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
-[assembly: ASCOM.ServedClassNameAttribute("Gemini Focuser .NET")]
+[assembly: ASCOM.ServedClassName("Gemini Focuser .NET")]
