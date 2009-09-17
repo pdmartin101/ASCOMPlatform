@@ -111,7 +111,7 @@ Public Class TraceLogger
 
 #End Region
 
-#Region "ITraceLogger Implementation"
+#Region "TraceLogger Implementation"
 
     ''' <summary>
     ''' Logs an issue, closing any open line and opening a continuation line if necessary after the 
@@ -136,6 +136,35 @@ Public Class TraceLogger
 
     End Sub
 
+    ''' <summary>
+    ''' Logs a complete message in one call
+    ''' </summary>
+    ''' <param name="Identifier">Identifies the meaning of the the message e.g. name of modeule or method logging the message.</param>
+    ''' <param name="Message">Message to log</param>
+    ''' <remarks>
+    ''' <para>Use this for straightforward logging requrements. Writes all information in one command.</para>
+    ''' <para>Will create a LOGISSUE message in the log if called before a line started by LogStart has been closed with LogFinish. 
+    ''' Posible reasons for this are exceptions causing the normal flow of code to be bypassed or logic errors.</para>
+    ''' <para>This overload is not available through COM, please use 
+    ''' "LogMessage(ByVal Identifier As String, ByVal Message As String, ByVal HexDump As Boolean)"
+    ''' with HexDump set False to achieve this effect.</para>
+    ''' </remarks>
+    <ComVisible(False)> _
+    Public Overloads Sub LogMessage(ByVal Identifier As String, ByVal Message As String) Implements ITraceLoggerExtra.LogMessage
+        Try
+            mut.WaitOne()
+            If g_LineStarted Then
+                LogFinish("LOGISSUE: LogMessage has been called before LogFinish. Parameters: " & Identifier & " " & Message)
+            Else
+                If g_Enabled Then
+                    If g_LogFile Is Nothing Then Call CreateLogFile()
+                    LogMsgFormatter(Identifier, Message, True)
+                End If
+            End If
+        Finally
+            mut.ReleaseMutex()
+        End Try
+    End Sub
     ''' <summary>
     ''' Logs a complete message in one call, including a hex translation of the message
     ''' </summary>
@@ -164,7 +193,6 @@ Public Class TraceLogger
             mut.ReleaseMutex()
         End Try
     End Sub
-
     ''' <summary>
     ''' Writes the time and identifier to the log, leaving the line ready for further content through LogContinue and LogFinish
     ''' </summary>
@@ -188,113 +216,6 @@ Public Class TraceLogger
                 If g_Enabled Then
                     If g_LogFile Is Nothing Then Call CreateLogFile()
                     LogMsgFormatter(Identifier, Message, False)
-                End If
-            End If
-        Finally
-            mut.ReleaseMutex()
-        End Try
-    End Sub
-
-    ''' <summary>
-    ''' Appends further message to a line started by LogStart, appends a hex translation of the message to the line, does not terminate the line.
-    ''' </summary>
-    ''' <param name="Message">The additional message to appear in the line</param>
-    ''' <param name="HexDump">True to append a hex translation of the message at the end of the message</param>
-    ''' <remarks>
-    ''' <para>This can be called multiple times to build up a complex log line if required.</para>
-    ''' <para>Will create a LOGISSUE message in the log if called before a line has been started with LogStart. 
-    ''' Posible reasons for this are exceptions causing the normal flow of code to be bypassed or logic errors.</para>
-    ''' </remarks>
-    Public Overloads Sub LogContinue(ByVal Message As String, ByVal HexDump As Boolean) Implements ITraceLogger.LogContinue
-        ' Append a full hex dump of the supplied string if p_Hex is true
-        Dim Msg As String = Message
-        If HexDump Then Msg = Message & "  (HEX" & MakeHex(Message) & ")"
-        LogContinue(Msg)
-    End Sub
-
-    ''' <summary>
-    ''' Closes a line started by LogStart with the supplied message and a hex translation of the message
-    ''' </summary>
-    ''' <param name="Message">The final message to terminate the line</param>
-    ''' <param name="HexDump">True to append a hex translation of the message at the end of the message</param>
-    ''' <remarks>
-    ''' <para>Will create a LOGISSUE message in the log if called before a line has been started with LogStart.  
-    ''' Posible reasons for this are exceptions causing the normal flow of code to be bypassed or logic errors.</para>
-    ''' </remarks>
-    Public Overloads Sub LogFinish(ByVal Message As String, ByVal HexDump As Boolean) Implements ITraceLogger.LogFinish
-        ' Append a full hex dump of the supplied string if p_Hex is true
-        Dim Msg As String = Message
-        If HexDump Then Msg = Message & "  (HEX" & MakeHex(Message) & ")"
-        LogFinish(Msg)
-    End Sub
-
-    ''' <summary>
-    ''' Enables or disables logging to the file.
-    ''' </summary>
-    ''' <value>True to enable logging</value>
-    ''' <returns>Boolean, current logging status (enabled/disabled).</returns>
-    ''' <remarks>If this property is false then calls to LogMsg, LogStart, LogContinue and LogFinish do nothing. If True, 
-    ''' supplied messages are written to the log file.</remarks>
-    Public Property Enabled() As Boolean Implements ITraceLogger.Enabled
-        Get
-            Return g_Enabled
-        End Get
-        Set(ByVal value As Boolean)
-            g_Enabled = value
-        End Set
-    End Property
-
-    ''' <summary>
-    ''' Sets the log filename and type if the constructor is called without parameters
-    ''' </summary>
-    ''' <param name="LogFileName">Fully qualified trace file name or null string to use automatic file naming (recommended)</param>
-    ''' <param name="LogFileType">String identifying the type of log e,g, Focuser, LX200, GEMINI, MoonLite, G11</param>
-    ''' <remarks>The LogFileType is used in the file name to allow you to quickly identify which of several logs contains the 
-    ''' information of interest.
-    ''' <para><b>Note </b>This command is only required if the tracelogger constructor is called with no
-    ''' parameters. It is provided for use in COM clients that can not call constructors with parameters.
-    ''' If you are writing a COM client then create the trace logger as:</para>
-    ''' <code>
-    ''' TL = New TraceLogger()
-    ''' TL.SetLogFile("","TraceName")
-    ''' </code>
-    ''' <para>If you are writing a .NET client then you can achieve the same end in one call:</para>
-    ''' <code>
-    ''' TL = New TraceLogger("",TraceName")
-    ''' </code>
-    ''' </remarks>
-    Public Sub SetLogFile(ByVal LogFileName As String, ByVal LogFileType As String) Implements ITraceLogger.SetLogFile
-        g_LogFileName = LogFileName 'Save parameters to use when the first call to write a record is made
-        g_LogFileType = LogFileType
-    End Sub
-
-#End Region
-
-#Region "ITraceLoggerExtra Implementation"
-
-    ''' <summary>
-    ''' Logs a complete message in one call
-    ''' </summary>
-    ''' <param name="Identifier">Identifies the meaning of the the message e.g. name of modeule or method logging the message.</param>
-    ''' <param name="Message">Message to log</param>
-    ''' <remarks>
-    ''' <para>Use this for straightforward logging requrements. Writes all information in one command.</para>
-    ''' <para>Will create a LOGISSUE message in the log if called before a line started by LogStart has been closed with LogFinish. 
-    ''' Posible reasons for this are exceptions causing the normal flow of code to be bypassed or logic errors.</para>
-    ''' <para>This overload is not available through COM, please use 
-    ''' "LogMessage(ByVal Identifier As String, ByVal Message As String, ByVal HexDump As Boolean)"
-    ''' with HexDump set False to achieve this effect.</para>
-    ''' </remarks>
-    <ComVisible(False)> _
-    Public Overloads Sub LogMessage(ByVal Identifier As String, ByVal Message As String) Implements ITraceLoggerExtra.LogMessage
-        Try
-            mut.WaitOne()
-            If g_LineStarted Then
-                LogFinish("LOGISSUE: LogMessage has been called before LogFinish. Parameters: " & Identifier & " " & Message)
-            Else
-                If g_Enabled Then
-                    If g_LogFile Is Nothing Then Call CreateLogFile()
-                    LogMsgFormatter(Identifier, Message, True)
                 End If
             End If
         Finally
@@ -330,7 +251,22 @@ Public Class TraceLogger
             mut.ReleaseMutex()
         End Try
     End Sub
-
+    ''' <summary>
+    ''' Appends further message to a line started by LogStart, appends a hex translation of the message to the line, does not terminate the line.
+    ''' </summary>
+    ''' <param name="Message">The additional message to appear in the line</param>
+    ''' <param name="HexDump">True to append a hex translation of the message at the end of the message</param>
+    ''' <remarks>
+    ''' <para>This can be called multiple times to build up a complex log line if required.</para>
+    ''' <para>Will create a LOGISSUE message in the log if called before a line has been started with LogStart. 
+    ''' Posible reasons for this are exceptions causing the normal flow of code to be bypassed or logic errors.</para>
+    ''' </remarks>
+    Public Overloads Sub LogContinue(ByVal Message As String, ByVal HexDump As Boolean) Implements ITraceLogger.LogContinue
+        ' Append a full hex dump of the supplied string if p_Hex is true
+        Dim Msg As String = Message
+        If HexDump Then Msg = Message & "  (HEX" & MakeHex(Message) & ")"
+        LogContinue(Msg)
+    End Sub
     ''' <summary>
     ''' Closes a line started by LogStart with the supplied message
     ''' </summary>
@@ -344,7 +280,7 @@ Public Class TraceLogger
     ''' with HexDump set False to achieve this effect.</para>
     ''' </remarks>
     <ComVisible(False)> _
-        Public Overloads Sub LogFinish(ByVal Message As String) Implements ITraceLoggerExtra.LogFinish
+    Public Overloads Sub LogFinish(ByVal Message As String) Implements ITraceLoggerExtra.LogFinish
         Try
             mut.WaitOne()
             If Not g_LineStarted Then
@@ -359,6 +295,60 @@ Public Class TraceLogger
         Finally
             mut.ReleaseMutex()
         End Try
+    End Sub
+    ''' <summary>
+    ''' Closes a line started by LogStart with the supplied message and a hex translation of the message
+    ''' </summary>
+    ''' <param name="Message">The final message to terminate the line</param>
+    ''' <param name="HexDump">True to append a hex translation of the message at the end of the message</param>
+    ''' <remarks>
+    ''' <para>Will create a LOGISSUE message in the log if called before a line has been started with LogStart.  
+    ''' Posible reasons for this are exceptions causing the normal flow of code to be bypassed or logic errors.</para>
+    ''' </remarks>
+    Public Overloads Sub LogFinish(ByVal Message As String, ByVal HexDump As Boolean) Implements ITraceLogger.LogFinish
+        ' Append a full hex dump of the supplied string if p_Hex is true
+        Dim Msg As String = Message
+        If HexDump Then Msg = Message & "  (HEX" & MakeHex(Message) & ")"
+        LogFinish(Msg)
+    End Sub
+    ''' <summary>
+    ''' Enables or disables logging to the file.
+    ''' </summary>
+    ''' <value>True to enable logging</value>
+    ''' <returns>Boolean, current logging status (enabled/disabled).</returns>
+    ''' <remarks>If this property is false then calls to LogMsg, LogStart, LogContinue and LogFinish do nothing. If True, 
+    ''' supplied messages are written to the log file.</remarks>
+    Public Property Enabled() As Boolean Implements ITraceLogger.Enabled
+        Get
+            Return g_Enabled
+        End Get
+        Set(ByVal value As Boolean)
+            g_Enabled = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' Sets the log filename and type if the constructor is called without parameters
+    ''' </summary>
+    ''' <param name="LogFileName">Fully qualified trace file name or null string to use automatic file naming (recommended)</param>
+    ''' <param name="LogFileType">String identifying the type of log e,g, Focuser, LX200, GEMINI, MoonLite, G11</param>
+    ''' <remarks>The LogFileType is used in the file name to allow you to quickly identify which of several logs contains the 
+    ''' information of interest.
+    ''' <para><b>Note </b>This command is only required if the tracelogger constructor is called with no
+    ''' parameters. It is provided for use in COM clients that can not call constructors with parameters.
+    ''' If you are writing a COM client then create the trace logger as:</para>
+    ''' <code>
+    ''' TL = New TraceLogger()
+    ''' TL.SetLogFile("","TraceName")
+    ''' </code>
+    ''' <para>If you are writing a .NET client then you can achieve the same end in one call:</para>
+    ''' <code>
+    ''' TL = New TraceLogger("",TraceName")
+    ''' </code>
+    ''' </remarks>
+    Sub SetLogFile(ByVal LogFileName As String, ByVal LogFileType As String) Implements ITraceLogger.SetLogFile
+        g_LogFileName = LogFileName 'Save parameters to use when the first call to write a record is made
+        g_LogFileType = LogFileType
     End Sub
 
 #End Region

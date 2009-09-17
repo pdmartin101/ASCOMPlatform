@@ -73,17 +73,15 @@ namespace ASCOM.GeminiTelescope
         }
         private void interpreter_DateTimeChanged(System.DateTime dateTime)
         {
-            if (checkBoxUpdateClock.Checked)
-            {
-                SystemTime updatedTime = new SystemTime();
-                updatedTime.Year = (ushort)dateTime.ToUniversalTime().Year;
-                updatedTime.Month = (ushort)dateTime.ToUniversalTime().Month;
-                updatedTime.Day = (ushort)dateTime.ToUniversalTime().Day;
-                updatedTime.Hour = (ushort)dateTime.ToUniversalTime().Hour;
-                updatedTime.Minute = (ushort)dateTime.ToUniversalTime().Minute;
-                updatedTime.Second = (ushort)dateTime.ToUniversalTime().Second;
-                Win32SetSystemTime(ref updatedTime);
-            }
+
+            SystemTime updatedTime = new SystemTime();
+            updatedTime.Year = (ushort)dateTime.ToUniversalTime().Year;
+            updatedTime.Month = (ushort)dateTime.ToUniversalTime().Month;
+            updatedTime.Day = (ushort)dateTime.ToUniversalTime().Day;
+            updatedTime.Hour = (ushort)dateTime.ToUniversalTime().Hour;
+            updatedTime.Minute = (ushort)dateTime.ToUniversalTime().Minute;
+            updatedTime.Second = (ushort)dateTime.ToUniversalTime().Second;
+            Win32SetSystemTime(ref updatedTime);
         }
         public double Latitude
         {
@@ -121,11 +119,6 @@ namespace ASCOM.GeminiTelescope
         {
             get { return comboBoxBaudRate.SelectedItem.ToString(); }
             set { comboBoxBaudRate.SelectedItem = value; }
-        }
-        public bool UpdateClock
-        {
-            get { return checkBoxUpdateClock.Checked; }
-            set { checkBoxUpdateClock.Checked = value; }
         }
         
         private void buttonQuery_Click(object sender, EventArgs e)

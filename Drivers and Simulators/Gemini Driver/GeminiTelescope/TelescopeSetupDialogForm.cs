@@ -15,7 +15,6 @@ namespace ASCOM.GeminiTelescope
     {
         private string m_GpsComPort;
         private string m_GpsBaudRate;
-        private bool m_GpsUpdateClock;
 
         public TelescopeSetupDialogForm()
         {
@@ -130,11 +129,6 @@ namespace ASCOM.GeminiTelescope
         {
             get { return m_GpsComPort; }
             set { m_GpsComPort = value; }
-        }
-        public bool GpsUpdateClock
-        {
-            get { return m_GpsUpdateClock; }
-            set { m_GpsUpdateClock = value; }
         }
 
         public string GpsBaudRate
@@ -283,7 +277,6 @@ namespace ASCOM.GeminiTelescope
 
             gpsForm.ComPort = m_GpsComPort;
             gpsForm.BaudRate = m_GpsBaudRate;
-            gpsForm.UpdateClock = m_GpsUpdateClock;
 
             DialogResult ans = gpsForm.ShowDialog(this);
             if (ans == DialogResult.OK)
@@ -296,21 +289,14 @@ namespace ASCOM.GeminiTelescope
                     {
                         Latitude = gpsForm.Latitude;
                         Longitude = gpsForm.Longitude;
-                        m_GpsUpdateClock = gpsForm.UpdateClock;
                         checkBoxUseGeminiSite.Checked = false;
-                        if (m_GpsUpdateClock) checkBoxUseGeminiTime.Checked = false;
+                        checkBoxUseGeminiTime.Checked = false;
                     }
                 }
                 catch
                 {
                 }
             }
-        }
-
-        private void pbGeminiSettings_Click(object sender, EventArgs e)
-        {
-            frmAdvancedSettings settings = new frmAdvancedSettings();
-            DialogResult re = settings.ShowDialog();
         }
 
         

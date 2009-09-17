@@ -1,8 +1,9 @@
 Option Strict On
 Option Explicit On
+Imports System
+Imports System.Collections
 Imports ASCOM.Utilities.Interfaces
 Imports System.Runtime.InteropServices
-Imports System.ComponentModel
 
 ''' <summary>
 ''' ASCOM Scope Driver Helper Registry Profile Object
@@ -45,17 +46,13 @@ Public Class Profile
     ' -----------------------------------------------------------------------------
 
     Private m_sDeviceType As String ' Device type specified by user
-    Private ProfileStore As XMLAccess
+    Private ProfileStore As IAccess
     Private TL As TraceLogger
 
 
 #Region "New and IDisposable Support "
     Private disposedValue As Boolean = False        ' To detect redundant calls
 
-    ''' <summary>
-    ''' Create a new Profile object
-    ''' </summary>
-    ''' <remarks></remarks>
     Public Sub New()
         MyBase.New()
         ProfileStore = New XMLAccess(ERR_SOURCE_PROFILE) 'Get access to the profile store
@@ -63,20 +60,6 @@ Public Class Profile
         TL = New TraceLogger("", "Profile")
         TL.Enabled = GetBool(TRACE_PROFILE, TRACE_PROFILE_DEFAULT) 'Get enabled / disabled state from the user registry
         TL.LogMessage("New", "Trace logger created OK")
-    End Sub
-
-    ''' <summary>
-    ''' Create a new profile object ignoring profile not found exceptions if generated
-    ''' </summary>
-    ''' <param name="IgnoreExceptions">Ignore ProfileNotFound exceptions</param>
-    ''' <remarks></remarks>
-    Public Sub New(ByVal IgnoreExceptions As Boolean)
-        MyBase.New()
-        ProfileStore = New XMLAccess(IgnoreExceptions) 'Get access to the profile store
-        m_sDeviceType = "Telescope"
-        TL = New TraceLogger("", "Profile")
-        TL.Enabled = GetBool(TRACE_PROFILE, TRACE_PROFILE_DEFAULT) 'Get enabled / disabled state from the user registry
-        TL.LogMessage("New", "Trace logger created OK - Ignoring any ProfileNotFound exceptions")
     End Sub
 
     ''' <summary>
@@ -152,7 +135,7 @@ Public Class Profile
     ''' profile store; this allows direct use of returned device types inside For Each loops as shown in 
     ''' the Profile code example.</para>
     ''' </remarks>
-    Public ReadOnly Property RegisteredDeviceTypes() As String() Implements IProfile.RegisteredDeviceTypes
+    ReadOnly Property RegisteredDeviceTypes() As String() Implements IProfile.RegisteredDeviceTypes
         Get
             Dim RootKeys As Generic.SortedList(Of String, String)
             Dim RegDevs As New Generic.List(Of String), DType As String
@@ -190,7 +173,7 @@ Public Class Profile
     ''' <para>If a DeviceType is supplied, where no device of that type has been registered before on this system,
     ''' an empty list will be returned</para>
     ''' </remarks>
-    Public ReadOnly Property RegisteredDevices(ByVal DeviceType As String) As ArrayList Implements IProfile.RegisteredDevices
+    ReadOnly Property RegisteredDevices(ByVal DeviceType As String) As ArrayList Implements IProfile.RegisteredDevices
         Get
             Dim RegDevs As Generic.SortedList(Of String, String) = Nothing
             Dim RetVal As New ArrayList
@@ -312,7 +295,7 @@ Public Class Profile
     End Sub
 
     ''' <summary>
-    ''' Return a list of the (unnamed and named variables) under the given DriverID and subkey.
+    ''' Return a list of the (unnamed and named variables) under the given DriverID. (for COM clients)
     ''' </summary>
     ''' <param name="DriverID">ProgID of the device to read from</param>
     ''' <param name="SubKey">Subkey from the profile root in which to write the value</param>
@@ -323,7 +306,7 @@ Public Class Profile
     ''' Key property set to an empty string.
     ''' <para>The KeyValuePair objects are instances of the <see cref="KeyValuePair">KeyValuePair class</see></para>
     '''  </remarks>
-    Public Overloads Function Values(ByVal DriverID As String, ByVal SubKey As String) As ArrayList Implements IProfile.Values
+    Function Values(ByVal DriverID As String, ByVal SubKey As String) As ArrayList Implements IProfile.Values
         Dim RetVal As New ArrayList
         'Return a hashtable of all values in a given key
         Dim Vals As Generic.SortedList(Of String, String)
@@ -379,7 +362,7 @@ Public Class Profile
     ''' the Key property is the sub-key name, and the Value property is the value. The unnamed ("default") value for that key is also returned.
     ''' <para>The KeyValuePair objects are instances of the <see cref="KeyValuePair">KeyValuePair class</see></para>
     ''' </remarks>
-    Public Overloads Function SubKeys(ByVal DriverID As String, ByVal SubKey As String) As ArrayList Implements IProfile.SubKeys
+    Function SubKeys(ByVal DriverID As String, ByVal SubKey As String) As ArrayList Implements IProfile.SubKeys
         Dim RetVal As New ArrayList, SKeys As Generic.SortedList(Of String, String)
 
         TL.LogMessage("SubKeys", "Driver: " & DriverID & " Subkey: """ & SubKey & """")
@@ -411,42 +394,6 @@ Public Class Profile
 
 #Region "IProfileExtra Implementation"
     ''' <summary>
-    ''' Migrate the ASCOM profile from registry to file store
-    ''' </summary>
-    ''' <remarks></remarks>
-    <EditorBrowsable(EditorBrowsableState.Never), _
-        ComVisible(False)> _
-        Public Sub MigrateProfile() Implements IProfileExtra.MigrateProfile
-        TL.LogMessage("MigrateProfile", "Migrating profile")
-        Try
-            ProfileStore.MigrateProfile()
-            ProfileStore.WriteProfile("", "PlatformVersion", PLATFORM_VERSION)
-            TL.LogMessage("MigrateProfile", "Completed migration to platform " & PLATFORM_VERSION)
-        Catch ex As Exception
-            TL.LogMessage("MigrateProfile", "Exception: " & ex.ToString)
-            Throw
-        End Try
-    End Sub
-
-
-    ''' <summary>
-    ''' Delete the value from the registry. Name may be an empty string for the unnamed value. 
-    ''' </summary>
-    ''' <param name="DriverID">ProgID of the device to read from</param>
-    ''' <param name="Name">Name of the variable whose value is retrieved</param>
-    ''' <exception cref="Exceptions.InvalidValueException">Thrown if DriverID is an empty string.</exception>
-    ''' <exception cref="Exceptions.DriverNotRegisteredException">Thrown if the driver is not registered,</exception>
-    ''' <remarks>Specify "" to delete the unnamed value which is also known as the "default" value for a registry key.
-    ''' <para>This overload is not available through COM, please use 
-    ''' "DeleteValue(ByVal DriverID As String, ByVal Name As String, ByVal SubKey As String)"
-    ''' with SubKey set to empty string achieve this effect.</para>
-    ''' </remarks>
-    <ComVisible(False)> _
-    Public Overloads Sub DeleteValue(ByVal DriverID As String, ByVal Name As String) Implements IProfileExtra.DeleteValue
-        Me.DeleteValue(DriverID, Name, "")
-    End Sub
-
-    ''' <summary>
     ''' Retrieve a string value from the profile for the given Driver ID and variable name
     ''' </summary>
     ''' <param name="DriverID">ProgID of the device to read from</param>
@@ -467,36 +414,6 @@ Public Class Profile
     End Function
 
     ''' <summary>
-    ''' Return a list of the sub-keys under the root of the given DriverID
-    ''' </summary>
-    ''' <param name="DriverID">ProgID of the device to read from</param>
-    ''' <returns>An ArrayList of key-value pairs</returns>
-    ''' <remarks>The returned object contains entries for each sub-key. For each KeyValuePair in the list, 
-    ''' the Key property is the sub-key name, and the Value property is the value. The unnamed ("default") value for that key is also returned.
-    ''' <para>The KeyValuePair objects are instances of the <see cref="KeyValuePair">KeyValuePair class</see></para>
-    ''' </remarks>
-    <ComVisible(False)> _
-    Public Overloads Function SubKeys(ByVal DriverID As String) As ArrayList Implements IProfileExtra.SubKeys
-        Return Me.SubKeys(DriverID, "")
-    End Function
-
-    ''' <summary>
-    ''' Return a list of the (unnamed and named variables) under the root of the given DriverID.
-    ''' </summary>
-    ''' <param name="DriverID">ProgID of the device to read from</param>
-    ''' <returns>An ArrayList of KeyValuePairs</returns>
-    ''' <remarks>The returned object contains entries for each value. For each entry, 
-    ''' the Key property is the value's name, and the Value property is the string value itself. Note that the unnamed (default) 
-    ''' value will be included if it has a value, even if the value is a blank string. The unnamed value will have its entry's 
-    ''' Key property set to an empty string.
-    ''' <para>The KeyValuePair objects are instances of the <see cref="KeyValuePair">KeyValuePair class</see></para>
-    '''  </remarks>
-    <ComVisible(False)> _
-    Public Overloads Function Values(ByVal DriverID As String) As ArrayList Implements IProfileExtra.Values
-        Return Me.Values(DriverID, "")
-    End Function
-
-    ''' <summary>
     ''' Writes a string value to the profile using the given Driver ID and variable name.
     ''' </summary>
     ''' <param name="DriverID">ProgID of the device to read from</param>
@@ -512,6 +429,23 @@ Public Class Profile
     <ComVisible(False)> _
     Public Overloads Sub WriteValue(ByVal DriverID As String, ByVal Name As String, ByVal Value As String) Implements IProfileExtra.WriteValue
         Me.WriteValue(DriverID, Name, Value, "")
+    End Sub
+
+    ''' <summary>
+    ''' Delete the value from the registry. Name may be an empty string for the unnamed value. 
+    ''' </summary>
+    ''' <param name="DriverID">ProgID of the device to read from</param>
+    ''' <param name="Name">Name of the variable whose value is retrieved</param>
+    ''' <exception cref="Exceptions.InvalidValueException">Thrown if DriverID is an empty string.</exception>
+    ''' <exception cref="Exceptions.DriverNotRegisteredException">Thrown if the driver is not registered,</exception>
+    ''' <remarks>Specify "" to delete the unnamed value which is also known as the "default" value for a registry key.
+    ''' <para>This overload is not available through COM, please use 
+    ''' "DeleteValue(ByVal DriverID As String, ByVal Name As String, ByVal SubKey As String)"
+    ''' with SubKey set to empty string achieve this effect.</para>
+    ''' </remarks>
+    <ComVisible(False)> _
+    Public Overloads Sub DeleteValue(ByVal DriverID As String, ByVal Name As String) Implements IProfileExtra.DeleteValue
+        Me.DeleteValue(DriverID, Name, "")
     End Sub
 #End Region
 
@@ -571,4 +505,74 @@ Public Class Profile
     End Sub
 #End Region
 
+End Class
+
+''' <summary>
+''' Class that returns a key and associated value
+''' </summary>
+''' <remarks>This class is used by some Profile properties and methods and
+''' compensates for the inability of .NET to return Generic classes to COM clients.
+''' <para>The properties and methods are: 
+''' <see cref="Profile.RegisteredDevices">Profile.RegisteredDevices</see>, 
+''' <see cref="Profile.SubKeys">Profile.SubKeys</see> and 
+''' <see cref="Profile.Values">Profile.Values</see>.</para></remarks>
+<ClassInterface(ClassInterfaceType.None), _
+Guid("69CFE7E6-E64F-4045-8D0D-C61F50F31CAC"), _
+ComVisible(True)> _
+Public Class KeyValuePair
+    Implements IKeyValuePair
+
+    Private m_Key As String
+    Private m_Value As String
+
+#Region "New"
+    ''' <summary>
+    ''' COM visible default constructor
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Sub New()
+        m_Key = ""
+        m_Value = ""
+    End Sub
+    ''' <summary>
+    ''' Constructor that can set the key and value simultaneously.
+    ''' </summary>
+    ''' <param name="Key">The Key element of a key value pair</param>
+    ''' <param name="Value">The Value element of a key value pair</param>
+    ''' <remarks></remarks>
+    Public Sub New(ByVal Key As String, ByVal Value As String)
+        m_Key = Key
+        m_Value = Value
+    End Sub
+#End Region
+
+    ''' <summary>
+    ''' The Key element of a key value pair
+    ''' </summary>
+    ''' <value>Key</value>
+    ''' <returns>Key as a string</returns>
+    ''' <remarks></remarks>
+    Public Property Key() As String Implements IKeyValuePair.Key
+        Get
+            Return m_Key
+        End Get
+        Set(ByVal value As String)
+            m_Key = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' The Value element of a key value pair.
+    ''' </summary>
+    ''' <value>Value</value>
+    ''' <returns>Value as a string</returns>
+    ''' <remarks></remarks>
+    Public Property Value() As String Implements IKeyValuePair.Value
+        Get
+            Return m_Value
+        End Get
+        Set(ByVal value As String)
+            m_Value = value
+        End Set
+    End Property
 End Class

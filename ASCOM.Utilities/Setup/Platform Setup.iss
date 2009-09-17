@@ -20,50 +20,20 @@
 ; Fixed PlatformHelp name incorrect in Help link
 ; Added ASCOM.Interfaces 5.0.0.0 and ASCOM.Attributes for Gemini drivers
 ; Removed ASCOM Interfaces 5.0.0.0 as we will now use the version 1.000 installed by platform 5a
-; Converted to use Release versions
-; Setup Build 0 Released
-
-; Added astrometry pia task i.e. removed 32bit astrometry pias from normal install
-; Installed new exceptions version 1.1 rather than overwriting 1.0
-; Installed client toolkit 1.0.5 but I won't uninstall it.
-; Fixed issue with uninstalling Astrometry and Utilities policies
-; Setup Build 1 Released
-
-; Added extra debug information on running assemblies in trace logs
-; Setup Build 2 Released
-
-; Removed extra {} from a number of file copies
-; Setup build 3 Released
-
-; Added MigrateProfile and desktop icon option
-; Changed setup name to ASCOM Platform Major.Minor Updater (vMajor.Minor.Release.Build)
-; Setup build 4 Released
-
-; Changed AppVer to access Release code rather than Debug code
-; Added pre-requisite test for Platform 5 as that must be present for the update to work
-; Changed Ad/Remove programs title to ASCOM Platform 5.5 Update (x.x.x.x)
-; Made erase profile run minimised
-; Fixed the application name to be ASCOM Platform 5.5 update
-; Setup build 5
 
 [Setup]
-#define Public SetupVersion 5; Setup program version number
-
 #define Public Major 0
 #define Public Minor 0
 #define Public Release 0
 #define Public Build 0
-#define AppVer ParseVersion("..\Utilities\bin\Release\ASCOM.Utilities.dll", Major ,Minor ,Release ,Build) ; define version variable
-#define AppVer str(Major) + "." + str(Minor) + "." + str(Release) + "." + str(SetupVersion) ; redefine to include setup version
-
+#define AppVer ParseVersion("..\Utilities\bin\Debug\ASCOM.Utilities.dll", Major ,Minor ,Release ,Build) ; define version variable
 AppCopyright=Copyright © 2009 ASCOM Initiative
 ;AppID must not change to maintain a consistent uninstall experience although AppName can be changed.
 ;This value is hard coded in the uninstall code below. If you do change this you must change the corresponding reference in
 ;the [Code] CurStepChanged section
 AppID=ASCOM.Platform.NET.Components
-;#emit "AppName=ASCOM Platform " + str(Major) + "." + str(Minor) + " Update" ;
-AppName=ASCOM Platform 5.5 Update
-#emit "AppVerName=ASCOM Platform 5.5 Update (" + Appver + ")"
+#emit "AppName=ASCOM Platform " + str(Major) + "." + str(Minor) + " Update" ;
+#emit "AppVerName=ASCOM Platform 5 Update " + Appver
 #emit "AppVersion=" + AppVer
 AppPublisher=ASCOM Initiative
 AppPublisherURL=http://ascom-standards.org/
@@ -76,7 +46,7 @@ DisableDirPage=true
 DisableProgramGroupPage=true
 OutputDir=.
 PrivilegesRequired=admin
-#emit "OutputBaseFilename=ASCOM Platform " + str(Major) +"." + str(Minor) + " Updater (v" + AppVer +")"
+#emit "OutputBaseFilename=Utilities(" + AppVer +")setup"
 Compression=lzma
 SolidCompression=true
 SetupIconFile=..\Utilities\Resources\ASCOM.ico
@@ -107,51 +77,49 @@ Name: {cf}\ASCOM\Uninstall\Utilities
 ;  Add an option to erase the HelperNET profile
 [Tasks]
 Name: cleanprofile; Description: Erase Utilities profile store (leaves registry profile intact); GroupDescription: """Installation Tasks"""; Flags: unchecked
-Name: desktopicons; Description: Install EraseProfile and MigrateProfile desktop icons; GroupDescription: """Installation Tasks"""
-Name: astrometrypias; Description: Install 32bit Astrometry PIAs (Please leave unchecked); GroupDescription: """Installation Tasks"""; Flags: unchecked
 
 [Files]
 ;Install the ASCOM.Utilities code
-Source: ..\Utilities\bin\Release\ASCOM.Utilities.dll; DestDir: {app}; Flags: ignoreversion
-Source: ..\Utilities\bin\Release\ASCOM.Utilities.pdb; DestDir: {app}; Flags: ignoreversion
-Source: ..\Utilities\bin\Release\ASCOM.Utilities.xml; DestDir: {app}; Flags: ignoreversion
+Source: ..\Utilities\bin\Debug\ASCOM.Utilities.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\Utilities\bin\Debug\ASCOM.Utilities.pdb; DestDir: {app}; Flags: ignoreversion
+Source: ..\Utilities\bin\Debug\ASCOM.Utilities.xml; DestDir: {app}; Flags: ignoreversion
 ;Debug symbols to the symbols directory
-Source: ..\Utilities\bin\Release\ASCOM.Utilities.pdb; DestDir: {win}\Symbols\dll; Flags: ignoreversion
+Source: ..\Utilities\bin\Debug\ASCOM.Utilities.pdb; DestDir: {win}\Symbols\dll; Flags: ignoreversion
 ;Install to 32bit directory as well on 64bit systems so that 32bit apps will find Utilities in the place they expect on a 64bit system
-Source: ..\Utilities\bin\Release\ASCOM.Utilities.dll; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
-Source: ..\Utilities\bin\Release\ASCOM.Utilities.pdb; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
-Source: ..\Utilities\bin\Release\ASCOM.Utilities.xml; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
+Source: ..\Utilities\bin\Debug\ASCOM.Utilities.dll; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
+Source: ..\Utilities\bin\Debug\ASCOM.Utilities.pdb; DestDir: {{cf32}\ASCOM\.net}; Flags: ignoreversion
+Source: ..\Utilities\bin\Debug\ASCOM.Utilities.xml; DestDir: {{cf32}\ASCOM\.net}; Flags: ignoreversion
 
 ;Install the Astrometry code
-Source: ..\..\ASCOM.Astrometry\Astrometry\bin\Release\ASCOM.Astrometry.dll; DestDir: {app}; Flags: ignoreversion
-Source: ..\..\ASCOM.Astrometry\Astrometry\bin\Release\ASCOM.Astrometry.pdb; DestDir: {app}; Flags: ignoreversion
-Source: ..\..\ASCOM.Astrometry\Astrometry\bin\Release\ASCOM.Astrometry.xml; DestDir: {app}; Flags: ignoreversion
+Source: ..\..\ASCOM.Astrometry\Astrometry\bin\Debug\ASCOM.Astrometry.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\..\ASCOM.Astrometry\Astrometry\bin\Debug\ASCOM.Astrometry.pdb; DestDir: {app}; Flags: ignoreversion
+Source: ..\..\ASCOM.Astrometry\Astrometry\bin\Debug\ASCOM.Astrometry.xml; DestDir: {app}; Flags: ignoreversion
 ;Debug symbols to the symbols directory
-Source: ..\..\ASCOM.Astrometry\Astrometry\bin\Release\ASCOM.Astrometry.pdb; DestDir: {win}\Symbols\dll; Flags: ignoreversion
+Source: ..\..\ASCOM.Astrometry\Astrometry\bin\Debug\ASCOM.Astrometry.pdb; DestDir: {win}\Symbols\dll; Flags: ignoreversion
 ;Install to 32bit directory as well on 64bit systems so that 32bit apps will find Utilities in the place they expect on a 64bit system
-Source: ..\..\ASCOM.Astrometry\Astrometry\bin\Release\ASCOM.Astrometry.dll; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
-Source: ..\..\ASCOM.Astrometry\Astrometry\bin\Release\ASCOM.Astrometry.pdb; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
-Source: ..\..\ASCOM.Astrometry\Astrometry\bin\Release\ASCOM.Astrometry.xml; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
+Source: ..\..\ASCOM.Astrometry\Astrometry\bin\Debug\ASCOM.Astrometry.dll; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
+Source: ..\..\ASCOM.Astrometry\Astrometry\bin\Debug\ASCOM.Astrometry.pdb; DestDir: {{cf32}\ASCOM\.net}; Flags: ignoreversion
+Source: ..\..\ASCOM.Astrometry\Astrometry\bin\Debug\ASCOM.Astrometry.xml; DestDir: {{cf32}\ASCOM\.net}; Flags: ignoreversion
 
 ;Install the IConform interface and classes
-Source: ..\..\ASCOM.IConform\ASCOM.IConform\bin\Release\ASCOM.IConform.dll; DestDir: {app}; Flags: ignoreversion
-Source: ..\..\ASCOM.IConform\ASCOM.IConform\bin\Release\ASCOM.IConform.pdb; DestDir: {app}; Flags: ignoreversion
-Source: ..\..\ASCOM.IConform\ASCOM.IConform\bin\Release\ASCOM.IConform.xml; DestDir: {app}; Flags: ignoreversion
+Source: ..\..\ASCOM.IConform\ASCOM.IConform\bin\Debug\ASCOM.IConform.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\..\ASCOM.IConform\ASCOM.IConform\bin\Debug\ASCOM.IConform.pdb; DestDir: {app}; Flags: ignoreversion
+Source: ..\..\ASCOM.IConform\ASCOM.IConform\bin\Debug\ASCOM.IConform.xml; DestDir: {app}; Flags: ignoreversion
 ;Debug symbols to the symbols directory
-Source: ..\..\ASCOM.IConform\ASCOM.IConform\bin\Release\ASCOM.IConform.pdb; DestDir: {win}\Symbols\dll; Flags: ignoreversion
+Source: ..\..\ASCOM.IConform\ASCOM.IConform\bin\Debug\ASCOM.IConform.pdb; DestDir: {win}\Symbols\dll; Flags: ignoreversion
 ;Install to 32bit directory as well on 64bit systems so that 32bit apps will find Utilities in the place they expect on a 64bit system
-Source: ..\..\ASCOM.IConform\ASCOM.IConform\bin\Release\ASCOM.IConform.dll; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
-Source: ..\..\ASCOM.IConform\ASCOM.IConform\bin\Release\ASCOM.IConform.pdb; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
-Source: ..\..\ASCOM.IConform\ASCOM.IConform\bin\Release\ASCOM.IConform.xml; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
+Source: ..\..\ASCOM.IConform\ASCOM.IConform\bin\Debug\ASCOM.IConform.dll; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
+Source: ..\..\ASCOM.IConform\ASCOM.IConform\bin\Debug\ASCOM.IConform.pdb; DestDir: {{cf32}\ASCOM\.net}; Flags: ignoreversion
+Source: ..\..\ASCOM.IConform\ASCOM.IConform\bin\Debug\ASCOM.IConform.xml; DestDir: {{cf32}\ASCOM\.net}; Flags: ignoreversion
 
 ;ASCOM Attributes
-Source: ..\..\ASCOM.Attributes\bin\Release\ASCOM.Attributes.dll; DestDir: {app}; Flags: ignoreversion
-Source: ..\..\ASCOM.Attributes\bin\Release\ASCOM.Attributes.pdb; DestDir: {app}; Flags: ignoreversion
+Source: ..\..\ASCOM.Attributes\bin\Debug\ASCOM.Attributes.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\..\ASCOM.Attributes\bin\Debug\ASCOM.Attributes.pdb; DestDir: {app}; Flags: ignoreversion
 ;Debug symbols to the symbols directory
-Source: ..\..\ASCOM.Attributes\bin\Release\ASCOM.Attributes.pdb; DestDir: {win}\Symbols\dll; Flags: ignoreversion
+Source: ..\..\ASCOM.Attributes\bin\Debug\ASCOM.Attributes.pdb; DestDir: {win}\Symbols\dll; Flags: ignoreversion
 ;Install to 32bit directory as well on 64bit systems so that 32bit apps will find Utilities in the place they expect on a 64bit system
-Source: ..\..\ASCOM.Attributes\bin\Release\ASCOM.Attributes.dll; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
-Source: ..\..\ASCOM.Attributes\bin\Release\ASCOM.Attributes.pdb; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
+Source: ..\..\ASCOM.Attributes\bin\Debug\ASCOM.Attributes.dll; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
+Source: ..\..\ASCOM.Attributes\bin\Debug\ASCOM.Attributes.pdb; DestDir: {{cf32}\ASCOM\.net}; Flags: ignoreversion
 
 ;VB6 Helpers
 Source: ..\VB6Helper\Helper.dll; DestDir: {cf32}\ASCOM; Flags: ignoreversion uninsneveruninstall 32bit
@@ -169,52 +137,36 @@ Source: ..\OriginalHelpers\RestoreOriginalHelpers.cmd; DestDir: {cf32}\ASCOM\Uti
 
 ;ASCOM Platform .NET Help files
 Source: ..\Help\Help\PlatformHelp.chm; DestDir: {cf}\ASCOM\Doc; Flags: ignoreversion
-Source: ..\Help\Help\Platform 5.5.pdf; DestDir: {cf}\ASCOM\Doc; Flags: ignoreversion
+Source: ..\Help\Help\HelperNET.pdf; DestDir: {cf}\ASCOM\Doc; Flags: ignoreversion
 Source: ReadMe55.txt; DestDir: {app}; Flags: ignoreversion
 
 ;Profile Explorer
-Source: ..\Profile Explorer\bin\Release\ProfileExplorer.exe; DestDir: {pf}\ASCOM\Profile Explorer; Flags: ignoreversion
-Source: ..\Profile Explorer\bin\Release\ProfileExplorer.pdb; DestDir: {pf}\ASCOM\Profile Explorer; Flags: ignoreversion
+Source: ..\Profile Explorer\bin\Debug\ProfileExplorer.exe; DestDir: {pf}\ASCOM\Profile Explorer; Flags: ignoreversion
+Source: ..\Profile Explorer\bin\Debug\ProfileExplorer.pdb; DestDir: {pf}\ASCOM\Profile Explorer; Flags: ignoreversion
 
-;Tools to erase and migrate profile
-Source: ..\EraseProfile\bin\Release\EraseProfile.exe; DestDir: {cf32}\ASCOM\Utilities; Flags: ignoreversion
-Source: ..\EraseProfile\bin\Release\EraseProfile.pdb; DestDir: {cf32}\ASCOM\Utilities; Flags: ignoreversion
-Source: ..\MigrateProfile\bin\Release\MigrateProfile.exe; DestDir: {cf32}\ASCOM\Utilities; Flags: ignoreversion
-Source: ..\MigrateProfile\bin\Release\MigrateProfile.pdb; DestDir: {cf32}\ASCOM\Utilities; Flags: ignoreversion
+;Tool to erase profile
+Source: ..\EraseProfile\bin\Debug\EraseProfile.exe; DestDir: {cf32}\ASCOM\Utilities; Flags: ignoreversion
 
 ;Tool to install into GAC
-Source: ..\..\GACInstall\bin\Release\GACInstall.exe; DestDir: {app}; Flags: ignoreversion
+Source: ..\..\GACInstall\bin\Debug\GACInstall.exe; DestDir: {app}; Flags: ignoreversion
 
 ;ASCOM Icon
 Source: ..\Utilities\Resources\ASCOM.ico; DestDir: {app}; Flags: ignoreversion
 
-;ASCOM Exceptions - Removed Interfaces as we will use the platform 5a version already installed
-Source: ..\..\Interfaces\ASCOMExceptions\bin\Release\ASCOM.Exceptions.dll; DestDir: {app}; Flags: ignoreversion
-Source: ..\..\Interfaces\ASCOMExceptions\bin\Release\ASCOM.Exceptions.XML; DestDir: {app}; Flags: ignoreversion
+;NOVAS and Kepler PIAs and TLBs - Removed these as we now have .NET versions of Transform / NOVAS2 Kepler etc.
+;Source: ..\..\Interfaces\NOVAS PIAs\ASCOM.NOVAS.DLL; DestDir: {app}; Flags: ignoreversion
+;Source: ..\..\Interfaces\Kepler PIAs\ASCOM.Kepler.DLL; DestDir: {app}; Flags: ignoreversion
+;Source: ..\..\Interfaces\NOVAS PIAs\NOVAS.tlb; DestDir: {app}; Flags: ignoreversion regtypelib 32bit
+;Source: ..\..\Interfaces\Kepler PIAs\Kepler.tlb; DestDir: {app}; Flags: ignoreversion regtypelib 32bit
+
+;ASCOM Interfaces and Exceptions - Removed Interfaces as we will use the platform 5a version already installed
+;Source: ..\..\Interfaces\Master Interfaces\ASCOM.Interfaces.dll; DestDir: {app}; Flags: ignoreversion
+;Source: ..\..\Interfaces\Master Interfaces\AscomMasterInterfaces.tlb; DestDir: {app}; Flags: ignoreversion regtypelib
+Source: ..\..\Interfaces\ASCOMExceptions\bin\Debug\ASCOM.Exceptions.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\..\Interfaces\ASCOMExceptions\bin\Debug\ASCOM.Exceptions.XML; DestDir: {app}; Flags: ignoreversion
 ;...and for 32bit directories on a 64bit system
-Source: ..\..\Interfaces\ASCOMExceptions\bin\Release\ASCOM.Exceptions.dll; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
-Source: ..\..\Interfaces\ASCOMExceptions\bin\Release\ASCOM.Exceptions.XML; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
-
-;Client toolbox 1.0.5, in case it isn't already installed
-Source: ..\..\ClientToolbox\bin\Release\ASCOM.DriverAccess.dll; DestDir: {app}; Flags: ignoreversion
-Source: ..\..\ClientToolbox\bin\Release\ASCOM.DriverAccess.pdb; DestDir: {app}; Flags: ignoreversion
-Source: ..\..\ClientToolbox\bin\Release\ASCOM.DriverAccess.XML; DestDir: {app}; Flags: ignoreversion
-;Policy file to redirect to 1.0.5
-Source: ..\..\ClientToolbox\SimpsonBitsPolicyStuff\PolicyInstaller\policy.1.0.ASCOM.DriverAccess.dll; DestDir: {app}; Flags: ignoreversion
-Source: ..\..\ClientToolbox\SimpsonBitsPolicyStuff\PolicyInstaller\driveraccess.config; DestDir: {app}; Flags: ignoreversion
-;32bit directories
-Source: ..\..\ClientToolbox\bin\Release\ASCOM.DriverAccess.dll; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
-Source: ..\..\ClientToolbox\bin\Release\ASCOM.DriverAccess.pdb; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
-Source: ..\..\ClientToolbox\bin\Release\ASCOM.DriverAccess.XML; DestDir: {cf32}\ASCOM\.net; Flags: ignoreversion
-
-;Debug symbols directory
-Source: ..\..\ClientToolbox\bin\Release\ASCOM.DriverAccess.pdb; DestDir: {win}\Symbols\dll; Flags: ignoreversion
-
-;NOVAS and Kepler PIAs and TLBs- optional through task checkbox
-Source: ..\..\Interfaces\NOVAS PIAs\ASCOM.NOVAS.DLL; DestDir: {app}; Flags: ignoreversion; Tasks: astrometrypias
-Source: ..\..\Interfaces\Kepler PIAs\ASCOM.Kepler.DLL; DestDir: {app}; Flags: ignoreversion; Tasks: astrometrypias
-Source: ..\..\Interfaces\NOVAS PIAs\NOVAS.tlb; DestDir: {app}; Flags: ignoreversion regtypelib 32bit; Tasks: astrometrypias
-Source: ..\..\Interfaces\Kepler PIAs\Kepler.tlb; DestDir: {app}; Flags: ignoreversion regtypelib 32bit; Tasks: astrometrypias
+Source: ..\..\Interfaces\ASCOMExceptions\bin\Debug\ASCOM.Exceptions.dll; DestDir: {{cf32}\ASCOM\.net}; Flags: ignoreversion
+Source: ..\..\Interfaces\ASCOMExceptions\bin\Debug\ASCOM.Exceptions.XML; DestDir: {{cf32}\ASCOM\.net}; Flags: ignoreversion
 
 ;NOVAS C DLLs
 Source: ..\NOVAS-C x86-x64\Release\NOVAS-C.dll; DestDir: {app}; Flags: ignoreversion
@@ -233,10 +185,8 @@ Root: HKLM32; Subkey: SOFTWARE\Microsoft\.NETFramework\v2.0.50727\AssemblyFolder
 
 [Icons]
 Name: {commonprograms}\ASCOM Platform\Docs\ASCOM Platform Update 5.5; Filename: {cf}\ASCOM\Doc\PlatformHelp.chm
-Name: {commonprograms}\ASCOM Platform\Docs\ASCOM Platform Architecture; Filename: {cf}\ASCOM\Doc\Platform 5.5.pdf
+Name: {commonprograms}\ASCOM Platform\Docs\ASCOM Platform Architecture; Filename: {cf}\ASCOM\Doc\HelperNET.pdf
 Name: {commonprograms}\ASCOM Platform\Tools\Profile Explorer; Filename: {pf}\ASCOM\Profile Explorer\ProfileExplorer.exe
-Name: {commondesktop}\Migrate Profile; Filename: {cf32}\ASCOM\Utilities\MigrateProfile.exe; Tasks: desktopicons
-Name: {commondesktop}\Erase Profile; Filename: {cf32}\ASCOM\Utilities\EraseProfile.exe; Tasks: desktopicons
 
 [Run]
 ; Install Utilties, Astrometry and IConform to the GAC and register COM types for 32and 64bit COM
@@ -251,24 +201,19 @@ Filename: {dotnet2032}\regasm.exe; Parameters: "/TLB ""{cf32}\ASCOM\.net\ASCOM.U
 Filename: {dotnet2032}\regasm.exe; Parameters: "/TLB ""{cf32}\ASCOM\.net\ASCOM.Astrometry.dll"""; Flags: runhidden; Check: IsWin64; StatusMsg: Registering ASCOM.Astrometry for 32bit COM
 Filename: {dotnet2032}\regasm.exe; Parameters: "/TLB ""{cf32}\ASCOM\.net\ASCOM.IConform.dll"""; Flags: runhidden; Check: IsWin64; StatusMsg: Registering ASCOM.IConform for 32bit COM
 
-;Erase and migrate the profile if needed
-Filename: {cf32}\ASCOM\Utilities\EraseProfile.exe; Tasks: cleanprofile; Flags: runminimized; statusMsg: Erasing Profile
-Filename: {cf32}\ASCOM\Utilities\MigrateProfile.exe; Parameters: /MIGRATEIFNEEDED; Flags: runminimized; statusMsg: Migrating Profile if necessary
+Filename: {cf32}\ASCOM\Utilities\EraseProfile.exe; Tasks: cleanprofile
 
 ;NOVAS and Kepler 32 bit interface components
-Filename: {app}\GACInstall.exe; Parameters: ASCOM.NOVAS.dll; Flags: runhidden; StatusMsg: Installing NOVAS 2 to the assembly cache; Tasks: astrometrypias
-Filename: {app}\GACInstall.exe; Parameters: ASCOM.Kepler.dll; Flags: runhidden; StatusMsg: Installing Kepler to the assembly cache; Tasks: astrometrypias
-Filename: {dotnet2032}\regasm.exe; Parameters: """{cf32}\ASCOM\.net\ASCOM.NOVAS.dll"""; Flags: runhidden; StatusMsg: Registering NOVAS for COM; Tasks: astrometrypias
-Filename: {dotnet2032}\regasm.exe; Parameters: """{cf32}\ASCOM\.net\ASCOM.Kepler.dll"""; Flags: runhidden; StatusMsg: Registering Kepler for COM; Tasks: astrometrypias
+;Filename: {app}\GACInstall.exe; Parameters: ASCOM.NOVAS.dll; Flags: runhidden; StatusMsg: Installing NOVAS 2 to the assembly cache
+;Filename: {app}\GACInstall.exe; Parameters: ASCOM.Kepler.dll; Flags: runhidden; StatusMsg: Installing Kepler to the assembly cache
+;Filename: {dotnet2032}\regasm.exe; Parameters: """{cf32}\ASCOM\.net\ASCOM.NOVAS.dll"""; Flags: runhidden; StatusMsg: Registering NOVAS for COM
+;Filename: {dotnet2032}\regasm.exe; Parameters: """{cf32}\ASCOM\.net\ASCOM.Kepler.dll"""; Flags: runhidden; StatusMsg: Registering Kepler for COM
 
-;ASCOM Exceptions
-Filename: {app}\GACInstall.exe; Parameters: ASCOM.Exceptions.dll; Flags: runhidden; StatusMsg: Instlling ASCOM.Exceptions to the assembly cache
+;ASCOM Interfaces and Exceptions
+; Filename: {app}\GACInstall.exe; Parameters: ASCOM.Interfaces.dll; Flags: runhidden; StatusMsg: Installing ASCOM.Interfaces to the assembly cache
+Filename: {app}\GACInstall.exe; Parameters: ASCOM.Exceptions.dll; Flags: runhidden; StatusMsg: Installing ASCOM.Exceptions to the assembly cache
 
-; ASCOM Client Toolkit 1.0.5
-Filename: {app}\GACInstall.exe; Parameters: ASCOM.DriverAccess.dll; Flags: runhidden; StatusMsg: Installing Client Access Toolkit to the assembly cache
-Filename: {app}\GACInstall.exe; Parameters: """{app}\policy.1.0.ASCOM.DriverAccess.dll"""; Flags: runhidden; StatusMsg: Installing Client Access Toolkit Policy to the assembly cache
-
-;Publisher policies for Astrometry and Utilities
+;Publisher policy
 #emit "Filename: {app}\GACInstall.exe; Parameters: policy." + str(Major) + "." + str(Minor) + ".ASCOM.Utilities.dll; Flags: runhidden; StatusMsg: Installing ASCOM Utilities policy to the assembly cache"
 #emit "Filename: {app}\GACInstall.exe; Parameters: policy." + str(Major) + "." + str(Minor) + ".ASCOM.Astrometry.dll; Flags: runhidden; StatusMsg: Installing ASCOM Astrometry policy to the assembly cache"
 Filename: {app}\ReadMe55.txt; Description: ReadMe file; StatusMsg: Displaying ReadMe file; Flags: shellexec skipifdoesntexist postinstall skipifsilent unchecked
@@ -289,20 +234,18 @@ Filename: {dotnet2032}\regasm.exe; Parameters: "/Unregister /TLB ""{cf32}\ASCOM\
 Filename: {cf32}\ASCOM\Utilities\RestoreOriginalHelpers.cmd; Parameters: """{cf32}\ASCOM\Utilities\*.dll"" ""{cf32}\ASCOM"""; StatusMsg: Restoring helper dlls; Flags: runhidden
 
 ;NOVAS and Kepler 32 bit interfaces
-Filename: {app}\GACInstall.exe; Parameters: "/U ""ASCOM.NOVAS"""; Flags: runhidden; StatusMsg: Uninstalling NOVAS 2 from the assembly cache; Tasks: astrometrypias
-Filename: {app}\GACInstall.exe; Parameters: "/U ""ASCOM.Kepler"""; Flags: runhidden; StatusMsg: Uninstalling Kepler from the assembly cache; Tasks: astrometrypias
-Filename: {dotnet2032}\regasm.exe; Parameters: "/Unregister /TLB ""{cf32}\ASCOM\.net\ASCOM.NOVAS.dll"""; Flags: runhidden; StatusMsg: Unregistering NOVAS for COM; Tasks: astrometrypias
-Filename: {dotnet2032}\regasm.exe; Parameters: "/Unregister /TLB ""{cf32}\ASCOM\.net\ASCOM.Kepler.dll"""; Flags: runhidden; StatusMsg: Unregistering Kepler for COM; Tasks: astrometrypias
+;Filename: {app}\GACInstall.exe; Parameters: "/U ""ASCOM.NOVAS"""; Flags: runhidden; StatusMsg: Uninstalling NOVAS 2 from the assembly cache
+;Filename: {app}\GACInstall.exe; Parameters: "/U ""ASCOM.Kepler"""; Flags: runhidden; StatusMsg: Uninstalling Kepler from the assembly cache
+;Filename: {dotnet2032}\regasm.exe; Parameters: "/Unregister /TLB ""{cf32}\ASCOM\.net\ASCOM.NOVAS.dll"""; Flags: runhidden; StatusMsg: Unregistering NOVAS for COM
+;Filename: {dotnet2032}\regasm.exe; Parameters: "/Unregister /TLB ""{cf32}\ASCOM\.net\ASCOM.Kepler.dll"""; Flags: runhidden; StatusMsg: Unregistering Kepler for COM
 
-;ASCOM Exceptions
+;ASCOM Interfaces and Exceptions
+;Filename: {app}\GACInstall.exe; Parameters: "/U ""ASCOM.Interfaces"""; Flags: runhidden; StatusMsg: Uninstalling ASCOM.Interfaces from the assembly cache
 Filename: {app}\GACInstall.exe; Parameters: "/U ""ASCOM.Exceptions"""; Flags: runhidden; StatusMsg: Uninstalling ASCOM.Exceptions from the assembly cache
 
-;ASCOM Client Toolkit
-;I'm deliberately leaving this installed as it is a prerequisite rather than part of this update
-
 ;Publisher policy
-#emit "Filename: {app}\GACInstall.exe; Parameters: ""/U """"policy." + str(Major) + "." + str(Minor) + ".ASCOM.Utilities""""""; Flags: runhidden; StatusMsg: Uninstalling ASCOM Utilities policy from the assembly cache"
-#emit "Filename: {app}\GACInstall.exe; Parameters: ""/U """"policy." + str(Major) + "." + str(Minor) + ".ASCOM.Astrometry""""""; Flags: runhidden; StatusMsg: Uninstalling ASCOM Astrometry policy from the assembly cache"
+#emit "Filename: {app}\GACInstall.exe; Parameters: ""/U """"policy." + str(Major) + "." + str(Minor) + ".ASCOM.Utilities.dll""""""; Flags: runhidden; StatusMsg: Uninstalling ASCOM Utilities policy from the assembly cache"
+#emit "Filename: {app}\GACInstall.exe; Parameters: ""/U """"policy." + str(Major) + "." + str(Minor) + ".ASCOM.Astrometry.dll""""""; Flags: runhidden; StatusMsg: Uninstalling ASCOM Astrometry policy from the assembly cache"
 
 [UninstallDelete]
 Type: files; Name: {cf32}\ASCOM\Utilities\*.*
@@ -311,20 +254,6 @@ Type: files; Name: {app}\ASCOM.Utilities.tlb
 Type: dirifempty; Name: {app}
 
 [Code]
-//This funciton is called automatically before install starts and will test whether platform 5 is installed
-function InitializeSetup(): Boolean;
-begin
-  // Initialise return value
-  Result:= True;
-
-  // Test for platform 5
-  if not FileExists(ExpandConstant('{cf32}\ASCOM\Interface\AscomMasterInterfaces.tlb')) then begin
-    MsgBox('ASCOM Platform 5 is not installed. You must install ASCOM Platform 5a before installing this update. You can download this from http:\\www.ascom.com\downloads', mbCriticalError, MB_OK);
-    Result:= False;
-  end;
-
-end;
-
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   ResultCode: Integer;
@@ -345,5 +274,5 @@ WelcomeLabel1=%n%n[name]%n
 [_ISToolPreCompile]
 Name: ASCOM Redirection Policies.exe; Parameters: ; Flags: runminimized abortonerror
 [_ISTool]
-LogFile=C:\Documents and Settings\Peter\My Documents\ASCOM Source\ASCOM.Utilities\Setup\Setup.log
+LogFile=C:\Documents and Settings\Peter\My Documents\ASCOM Source\ASCOM.Utilities\Setup\Setup
 LogFileAppend=false

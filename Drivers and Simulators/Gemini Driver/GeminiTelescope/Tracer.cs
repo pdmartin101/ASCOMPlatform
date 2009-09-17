@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ASCOM.GeminiTelescope
 {
-    public class Tracer
+    class Tracer
     {
         private int m_Level = 0;
         private ASCOM.Utilities.TraceLogger m_Log;
