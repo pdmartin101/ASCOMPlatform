@@ -690,6 +690,24 @@ namespace ASCOM.GeminiTelescope
 
         }
 
+        private void WaitForHomeOrPark(string where)
+        {
+            GeminiHardware.Trace.Enter(4, "WaitForHomeOrPark", where);
+
+            int count = 0;
+
+            // wait for parking move to begin, wait for a maximum of 16*250ms = 4 seconds
+            while (GeminiHardware.ParkState != "2" && count < 16) { System.Threading.Thread.Sleep(250); count++; }
+//            if (count == 16) throw new TimeoutException(where + " operation didn't start");
+
+            // now wait for it to end
+            while (GeminiHardware.ParkState == "2") { System.Threading.Thread.Sleep(1000); };
+
+            // 0 => didn't park.
+            //if (GeminiHardware.ParkState == "0") throw new DriverException("Failed to " + where, (int)SharedResources.ERROR_BASE);
+            GeminiHardware.Trace.Exit(4, "WaitForHomeOrPark", where);
+        }
+
         public void FindHome()
         {
             GeminiHardware.Trace.Enter("IT:FindHome");
@@ -700,9 +718,9 @@ namespace ASCOM.GeminiTelescope
             if (GeminiHardware.AtHome) return;
 
             GeminiHardware.DoCommandResult(":hP", GeminiHardware.MAX_TIMEOUT, false);
-            GeminiHardware.WaitForHomeOrPark("Home");
+            WaitForHomeOrPark("Home");
             GeminiHardware.DoCommandResult(":hW", GeminiHardware.MAX_TIMEOUT, false); //resume tracking, as FindHome isn't supposed to stop the mount
-            GeminiHardware.WaitForVelocity("TG", GeminiHardware.MAX_TIMEOUT);
+            WaitForVelocity("TG", GeminiHardware.MAX_TIMEOUT);
             m_FoundHome = true;
             GeminiHardware.Trace.Exit("IT:FindHome");
         }
@@ -791,7 +809,7 @@ namespace ASCOM.GeminiTelescope
                     else
                     {
                         GeminiHardware.DoCommandResult(new string[] { ":Qe", ":Qw" }, GeminiHardware.MAX_TIMEOUT/2, false); //stop motion in RA
-                        GeminiHardware.WaitForVelocity("T", GeminiHardware.MAX_TIMEOUT);
+                        WaitForVelocity("T", GeminiHardware.MAX_TIMEOUT);
                         GeminiHardware.Trace.Exit("IT:MoveAxis", Axis, Rate);
                         return;
                     }
@@ -803,7 +821,7 @@ namespace ASCOM.GeminiTelescope
                     else
                     {
                         GeminiHardware.DoCommandResult(new string[] { ":Qn", ":Qs" }, GeminiHardware.MAX_TIMEOUT/2, false); //stop motion in DEC
-                        GeminiHardware.WaitForVelocity("T", GeminiHardware.MAX_TIMEOUT);
+                        WaitForVelocity("T", GeminiHardware.MAX_TIMEOUT);
                         GeminiHardware.Trace.Exit("IT:MoveAxis", Axis, Rate);
                         return;
                     }
@@ -840,7 +858,7 @@ namespace ASCOM.GeminiTelescope
             }
 
             GeminiHardware.DoCommandResult(cmds, GeminiHardware.MAX_TIMEOUT/2, false);
-            GeminiHardware.WaitForVelocity("GCS", GeminiHardware.MAX_TIMEOUT);
+            WaitForVelocity("GCS", GeminiHardware.MAX_TIMEOUT);
             GeminiHardware.Trace.Exit("IT:MoveAxis", Axis, Rate);
         }
 
@@ -863,7 +881,7 @@ namespace ASCOM.GeminiTelescope
            // GeminiHardware.DoCommand(cmd);
             GeminiHardware.DoCommandResult(":hC", GeminiHardware.MAX_TIMEOUT, false);
 
-            GeminiHardware.WaitForHomeOrPark("Park");
+            WaitForHomeOrPark("Park");
             GeminiHardware.Trace.Exit("IT:Park");
         }
 
@@ -975,8 +993,8 @@ namespace ASCOM.GeminiTelescope
                 if ((value == PierSide.pierEast && GeminiHardware.SideOfPier == "W") || (value == PierSide.pierWest && GeminiHardware.SideOfPier == "E"))
                 {
                     GeminiHardware.DoCommandResult(":Mf", -1 , false);
-                    GeminiHardware.WaitForVelocity("S", GeminiHardware.MAX_TIMEOUT);
-                    GeminiHardware.WaitForVelocity("TN", GeminiHardware.MAX_TIMEOUT);  // shouldn't this be waiting forever??? depends on whether :Mf is synchronous or not: need to check
+                    WaitForVelocity("S", GeminiHardware.MAX_TIMEOUT);
+                    WaitForVelocity("TN", GeminiHardware.MAX_TIMEOUT);  // shouldn't this be waiting forever??? depends on whether :Mf is synchronous or not: need to check
                 }
                 GeminiHardware.Trace.Exit("IT:SideOfPier.Set", value);
 
@@ -1056,7 +1074,7 @@ namespace ASCOM.GeminiTelescope
             set {
                 GeminiHardware.Trace.Enter("IT:SlewSettleTime.Set", value);
 
-                if (value < 0 || value > 100) throw new ASCOM.InvalidValueException("SlewSettleTime", value.ToString(), "0-100 seconds");    
+                if (value < 1 || value > 120) throw new ASCOM.InvalidValueException("SlewSettleTime", value.ToString(), "1-120 seconds");    
                 GeminiHardware.SlewSettleTime = (int)value;
                 GeminiHardware.Trace.Exit("IT:SlewSettleTime.Set", value);
             }
@@ -1069,7 +1087,7 @@ namespace ASCOM.GeminiTelescope
             GeminiHardware.TargetAltitude = Altitude;
             GeminiHardware.Velocity = "S";
             GeminiHardware.SlewHorizon();
-            GeminiHardware.WaitForSlewToEnd();
+            WaitForSlewToEnd();
             GeminiHardware.Trace.Exit("IT:SlewToAltAz", Azimuth, Altitude);
         }
 
@@ -1082,7 +1100,7 @@ namespace ASCOM.GeminiTelescope
             if (Slewing) AbortSlew();
             GeminiHardware.Velocity = "S";
             GeminiHardware.SlewHorizonAsync();
-            GeminiHardware.WaitForVelocity("SC", GeminiHardware.MAX_TIMEOUT);
+            WaitForVelocity("SC", GeminiHardware.MAX_TIMEOUT);
             m_AsyncSlewStarted = true;
             GeminiHardware.Trace.Exit("IT:SlewToAltAzAsync", Azimuth, Altitude);
         }
@@ -1100,7 +1118,7 @@ namespace ASCOM.GeminiTelescope
             GeminiHardware.Velocity = "S";
             GeminiHardware.SlewEquatorial();
 
-            GeminiHardware.WaitForSlewToEnd();
+            WaitForSlewToEnd();
             GeminiHardware.Trace.Exit("IT:SlewToCoordinates", RightAscension, Declination);
         }
 
@@ -1116,9 +1134,26 @@ namespace ASCOM.GeminiTelescope
             if (Slewing) AbortSlew();
             GeminiHardware.Velocity = "S";
             GeminiHardware.SlewEquatorialAsync();
-            GeminiHardware.WaitForVelocity("SC", GeminiHardware.MAX_TIMEOUT);
+            WaitForVelocity("SC", GeminiHardware.MAX_TIMEOUT);
             m_AsyncSlewStarted = true;
             GeminiHardware.Trace.Exit("IT:SlewToCoordinatesAsync", RightAscension, Declination);
+        }
+
+        private void WaitForSlewToEnd()
+        {
+            GeminiHardware.Trace.Enter(4, "WaitForSlewToEnd");
+
+            GeminiHardware.Velocity = "";
+
+            int when = System.Environment.TickCount + 5000;
+            while (System.Environment.TickCount < when && !(GeminiHardware.Velocity=="S"  || GeminiHardware.Velocity=="C"))
+                System.Threading.Thread.Sleep(500);
+
+            while (GeminiHardware.Velocity=="S"  || GeminiHardware.Velocity=="C") System.Threading.Thread.Sleep(500);
+
+            System.Threading.Thread.Sleep(GeminiHardware.SlewSettleTime * 1000);
+
+            GeminiHardware.Trace.Exit(4, "WaitForSlewToEnd");
         }
 
         public void SlewToTarget()
@@ -1131,7 +1166,7 @@ namespace ASCOM.GeminiTelescope
             if (Slewing) AbortSlew();
             GeminiHardware.Velocity = "S";
             GeminiHardware.SlewEquatorial();
-            GeminiHardware.WaitForSlewToEnd();
+            WaitForSlewToEnd();
             GeminiHardware.Trace.Exit("IT:SlewToTarget", GeminiHardware.TargetRightAscension, GeminiHardware.TargetDeclination);
 
         }
@@ -1146,7 +1181,7 @@ namespace ASCOM.GeminiTelescope
             if (Slewing) AbortSlew();
             GeminiHardware.Velocity = "S";
             GeminiHardware.SlewEquatorialAsync();
-            GeminiHardware.WaitForVelocity("SC", GeminiHardware.MAX_TIMEOUT);
+            WaitForVelocity("SC", GeminiHardware.MAX_TIMEOUT);
             m_AsyncSlewStarted = true;
             GeminiHardware.Trace.Exit("IT:SlewToTargetAsync", GeminiHardware.TargetRightAscension, GeminiHardware.TargetDeclination);
         }
@@ -1166,7 +1201,7 @@ namespace ASCOM.GeminiTelescope
                 {
                     if (m_AsyncSlewStarted) // need to wait out the slewsettletime here...
                     {
-                        System.Threading.Thread.Sleep((GeminiHardware.SlewSettleTime+2) * 1000);
+                        System.Threading.Thread.Sleep(GeminiHardware.SlewSettleTime * 1000);
                         m_AsyncSlewStarted = false;
                     }
                     GeminiHardware.Trace.Enter("IT:Slewing.Get", false);
@@ -1266,17 +1301,34 @@ namespace ASCOM.GeminiTelescope
                 if (value && !GeminiHardware.Tracking)
                 {
                     GeminiHardware.DoCommandResult(":hW", GeminiHardware.MAX_TIMEOUT, false);
-                    GeminiHardware.WaitForVelocity("TG", GeminiHardware.MAX_TIMEOUT);
+                    WaitForVelocity("TG", GeminiHardware.MAX_TIMEOUT);
                 }
                 if (!value && GeminiHardware.Tracking)
                 {
                     GeminiHardware.DoCommandResult(":hN", GeminiHardware.MAX_TIMEOUT, false);
-                    GeminiHardware.WaitForVelocity("N", GeminiHardware.MAX_TIMEOUT);
+                    WaitForVelocity("N", GeminiHardware.MAX_TIMEOUT);
                 }
                 GeminiHardware.Trace.Exit("IT:Tracking.Set", value);
             }
         }
 
+        /// <summary>
+        /// wait for one or more possible velocity states of the mount
+        /// </summary>
+        /// <param name="p">contains one or more letters representing velocities we are waiting for: N, T, G, C, S</param>
+        /// <param name="tmout">how long to wait or -1 to wait indefinitely</param>
+        /// <returns></returns>
+        private bool WaitForVelocity(string p, int tmout)
+        {
+            GeminiHardware.Trace.Enter(4, "WaitForVelocity", p, tmout);
+
+            int timeout = System.Environment.TickCount + tmout;
+            while ((tmout<=0 || System.Environment.TickCount < timeout) && !p.Contains(GeminiHardware.Velocity)) System.Threading.Thread.Sleep(500);
+
+            GeminiHardware.Trace.Exit(4, "WaitForVelocity", p, tmout, GeminiHardware.Velocity);
+            if (p.Contains(GeminiHardware.Velocity)) return true;
+            return false;
+        }
 
         public DriveRates TrackingRate
         {
@@ -1340,7 +1392,7 @@ namespace ASCOM.GeminiTelescope
             GeminiHardware.Trace.Enter("IT:Unpark");
 
             GeminiHardware.DoCommandResult(":hW", GeminiHardware.MAX_TIMEOUT, false);
-            GeminiHardware.WaitForVelocity("T", GeminiHardware.MAX_TIMEOUT);
+            WaitForVelocity("T", GeminiHardware.MAX_TIMEOUT);
             GeminiHardware.Trace.Exit("IT:Unpark");
         }
 

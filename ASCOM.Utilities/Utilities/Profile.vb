@@ -2,7 +2,6 @@ Option Strict On
 Option Explicit On
 Imports ASCOM.Utilities.Interfaces
 Imports System.Runtime.InteropServices
-Imports System.ComponentModel
 
 ''' <summary>
 ''' ASCOM Scope Driver Helper Registry Profile Object
@@ -45,17 +44,13 @@ Public Class Profile
     ' -----------------------------------------------------------------------------
 
     Private m_sDeviceType As String ' Device type specified by user
-    Private ProfileStore As XMLAccess
+    Private ProfileStore As IAccess
     Private TL As TraceLogger
 
 
 #Region "New and IDisposable Support "
     Private disposedValue As Boolean = False        ' To detect redundant calls
 
-    ''' <summary>
-    ''' Create a new Profile object
-    ''' </summary>
-    ''' <remarks></remarks>
     Public Sub New()
         MyBase.New()
         ProfileStore = New XMLAccess(ERR_SOURCE_PROFILE) 'Get access to the profile store
@@ -63,20 +58,6 @@ Public Class Profile
         TL = New TraceLogger("", "Profile")
         TL.Enabled = GetBool(TRACE_PROFILE, TRACE_PROFILE_DEFAULT) 'Get enabled / disabled state from the user registry
         TL.LogMessage("New", "Trace logger created OK")
-    End Sub
-
-    ''' <summary>
-    ''' Create a new profile object ignoring profile not found exceptions if generated
-    ''' </summary>
-    ''' <param name="IgnoreExceptions">Ignore ProfileNotFound exceptions</param>
-    ''' <remarks></remarks>
-    Public Sub New(ByVal IgnoreExceptions As Boolean)
-        MyBase.New()
-        ProfileStore = New XMLAccess(IgnoreExceptions) 'Get access to the profile store
-        m_sDeviceType = "Telescope"
-        TL = New TraceLogger("", "Profile")
-        TL.Enabled = GetBool(TRACE_PROFILE, TRACE_PROFILE_DEFAULT) 'Get enabled / disabled state from the user registry
-        TL.LogMessage("New", "Trace logger created OK - Ignoring any ProfileNotFound exceptions")
     End Sub
 
     ''' <summary>
@@ -411,25 +392,6 @@ Public Class Profile
 
 #Region "IProfileExtra Implementation"
     ''' <summary>
-    ''' Migrate the ASCOM profile from registry to file store
-    ''' </summary>
-    ''' <remarks></remarks>
-    <EditorBrowsable(EditorBrowsableState.Never), _
-        ComVisible(False)> _
-        Public Sub MigrateProfile() Implements IProfileExtra.MigrateProfile
-        TL.LogMessage("MigrateProfile", "Migrating profile")
-        Try
-            ProfileStore.MigrateProfile()
-            ProfileStore.WriteProfile("", "PlatformVersion", PLATFORM_VERSION)
-            TL.LogMessage("MigrateProfile", "Completed migration to platform " & PLATFORM_VERSION)
-        Catch ex As Exception
-            TL.LogMessage("MigrateProfile", "Exception: " & ex.ToString)
-            Throw
-        End Try
-    End Sub
-
-
-    ''' <summary>
     ''' Delete the value from the registry. Name may be an empty string for the unnamed value. 
     ''' </summary>
     ''' <param name="DriverID">ProgID of the device to read from</param>
@@ -493,7 +455,7 @@ Public Class Profile
     '''  </remarks>
     <ComVisible(False)> _
     Public Overloads Function Values(ByVal DriverID As String) As ArrayList Implements IProfileExtra.Values
-        Return Me.Values(DriverID, "")
+        Return Me.values(DriverID, "")
     End Function
 
     ''' <summary>

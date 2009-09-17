@@ -1,5 +1,5 @@
 ﻿Public Class TransformExamples
-    Private T As ASCOM.Astrometry.Transform.Transform
+    Private T As ASCOM.Astrometry.Transform.ITransform
     Private U As ASCOM.Utilities.Util
 
     Sub Example()
