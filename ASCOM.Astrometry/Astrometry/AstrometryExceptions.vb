@@ -196,11 +196,9 @@ Namespace Exceptions
         Inherits HelperException
 
         ''' <summary>
-        ''' Create a new exception with message, function name and error code
+        ''' Create a new exception with message 
         ''' </summary>
         ''' <param name="message">Message to be reported by the exception</param>
-        ''' <param name="FuncName">Name of the NOVAS function giving rise to the exception</param>
-        ''' <param name="ErrCode">Error code returned by the NOVAS function</param>
         ''' <remarks></remarks>
         Public Sub New(ByVal message As String, ByVal FuncName As String, ByVal ErrCode As Short)
             MyBase.New(message & " Error returned from function " & FuncName & " - error code: " & ErrCode.ToString)

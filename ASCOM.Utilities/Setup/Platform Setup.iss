@@ -28,24 +28,15 @@
 ; Installed client toolkit 1.0.5 but I won't uninstall it.
 ; Fixed issue with uninstalling Astrometry and Utilities policies
 ; Setup Build 1 Released
-
 ; Added extra debug information on running assemblies in trace logs
 ; Setup Build 2 Released
-
 ; Removed extra {} from a number of file copies
-; Setup build 3 Released
-
+; Setup build 3
 ; Added MigrateProfile and desktop icon option
 ; Changed setup name to ASCOM Platform Major.Minor Updater (vMajor.Minor.Release.Build)
 ; Setup build 4 Released
-
 ; Changed AppVer to access Release code rather than Debug code
-; Added pre-requisite test for Platform 5 as that must be present for the update to work
-; Changed Ad/Remove programs title to ASCOM Platform 5.5 Update (x.x.x.x)
-; Made erase profile run minimised
-; Fixed the application name to be ASCOM Platform 5.5 update
 ; Setup build 5
-
 [Setup]
 #define Public SetupVersion 5; Setup program version number
 
@@ -61,9 +52,8 @@ AppCopyright=Copyright © 2009 ASCOM Initiative
 ;This value is hard coded in the uninstall code below. If you do change this you must change the corresponding reference in
 ;the [Code] CurStepChanged section
 AppID=ASCOM.Platform.NET.Components
-;#emit "AppName=ASCOM Platform " + str(Major) + "." + str(Minor) + " Update" ;
-AppName=ASCOM Platform 5.5 Update
-#emit "AppVerName=ASCOM Platform 5.5 Update (" + Appver + ")"
+#emit "AppName=ASCOM Platform " + str(Major) + "." + str(Minor) + " Update" ;
+#emit "AppVerName=ASCOM Platform 5 Update " + Appver
 #emit "AppVersion=" + AppVer
 AppPublisher=ASCOM Initiative
 AppPublisherURL=http://ascom-standards.org/
@@ -169,7 +159,7 @@ Source: ..\OriginalHelpers\RestoreOriginalHelpers.cmd; DestDir: {cf32}\ASCOM\Uti
 
 ;ASCOM Platform .NET Help files
 Source: ..\Help\Help\PlatformHelp.chm; DestDir: {cf}\ASCOM\Doc; Flags: ignoreversion
-Source: ..\Help\Help\Platform 5.5.pdf; DestDir: {cf}\ASCOM\Doc; Flags: ignoreversion
+Source: ..\Help\Help\HelperNET.pdf; DestDir: {cf}\ASCOM\Doc; Flags: ignoreversion
 Source: ReadMe55.txt; DestDir: {app}; Flags: ignoreversion
 
 ;Profile Explorer
@@ -233,7 +223,7 @@ Root: HKLM32; Subkey: SOFTWARE\Microsoft\.NETFramework\v2.0.50727\AssemblyFolder
 
 [Icons]
 Name: {commonprograms}\ASCOM Platform\Docs\ASCOM Platform Update 5.5; Filename: {cf}\ASCOM\Doc\PlatformHelp.chm
-Name: {commonprograms}\ASCOM Platform\Docs\ASCOM Platform Architecture; Filename: {cf}\ASCOM\Doc\Platform 5.5.pdf
+Name: {commonprograms}\ASCOM Platform\Docs\ASCOM Platform Architecture; Filename: {cf}\ASCOM\Doc\HelperNET.pdf
 Name: {commonprograms}\ASCOM Platform\Tools\Profile Explorer; Filename: {pf}\ASCOM\Profile Explorer\ProfileExplorer.exe
 Name: {commondesktop}\Migrate Profile; Filename: {cf32}\ASCOM\Utilities\MigrateProfile.exe; Tasks: desktopicons
 Name: {commondesktop}\Erase Profile; Filename: {cf32}\ASCOM\Utilities\EraseProfile.exe; Tasks: desktopicons
@@ -252,7 +242,7 @@ Filename: {dotnet2032}\regasm.exe; Parameters: "/TLB ""{cf32}\ASCOM\.net\ASCOM.A
 Filename: {dotnet2032}\regasm.exe; Parameters: "/TLB ""{cf32}\ASCOM\.net\ASCOM.IConform.dll"""; Flags: runhidden; Check: IsWin64; StatusMsg: Registering ASCOM.IConform for 32bit COM
 
 ;Erase and migrate the profile if needed
-Filename: {cf32}\ASCOM\Utilities\EraseProfile.exe; Tasks: cleanprofile; Flags: runminimized; statusMsg: Erasing Profile
+Filename: {cf32}\ASCOM\Utilities\EraseProfile.exe; Tasks: cleanprofile
 Filename: {cf32}\ASCOM\Utilities\MigrateProfile.exe; Parameters: /MIGRATEIFNEEDED; Flags: runminimized; statusMsg: Migrating Profile if necessary
 
 ;NOVAS and Kepler 32 bit interface components
@@ -311,20 +301,6 @@ Type: files; Name: {app}\ASCOM.Utilities.tlb
 Type: dirifempty; Name: {app}
 
 [Code]
-//This funciton is called automatically before install starts and will test whether platform 5 is installed
-function InitializeSetup(): Boolean;
-begin
-  // Initialise return value
-  Result:= True;
-
-  // Test for platform 5
-  if not FileExists(ExpandConstant('{cf32}\ASCOM\Interface\AscomMasterInterfaces.tlb')) then begin
-    MsgBox('ASCOM Platform 5 is not installed. You must install ASCOM Platform 5a before installing this update. You can download this from http:\\www.ascom.com\downloads', mbCriticalError, MB_OK);
-    Result:= False;
-  end;
-
-end;
-
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   ResultCode: Integer;

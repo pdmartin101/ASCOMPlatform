@@ -52,10 +52,6 @@ Public Class [Timer]
     'If you use a system timer it will  fire on its own thread and this will be invisble to the application!
     Private WithEvents m_Timer As System.Windows.Forms.Timer
 
-    ''' <summary>
-    ''' Timer tick event handler
-    ''' </summary>
-    ''' <remarks></remarks>
     <ComVisible(False)> _
     Public Delegate Sub TickEventHandler()
 
@@ -66,10 +62,9 @@ Public Class [Timer]
     Public Event Tick As TickEventHandler 'Implements ITimer.Tick ' Declare the tick event
 
 #Region "New and IDisposable Support"
-    ''' <summary>
-    ''' Create a new timer component
-    ''' </summary>
-    ''' <remarks></remarks>
+    ' ------------------------
+    ' Constructor / Destructor
+    ' ------------------------
     Public Sub New()
         m_Timer = New System.Windows.Forms.Timer ' Create a form timer
         m_Timer.Enabled = False ' Default settings

@@ -6,7 +6,6 @@ Imports System.Runtime.InteropServices
 #Region "Common Constants"
 
 Module CommonConstants
-    Friend Const PLATFORM_VERSION As String = "5.5" 'This platform version is set during profile migration
     Friend Const SERIAL_FILE_NAME_VARNAME As String = "SerTraceFile" 'Constant naming the profile trace file variable name
     Friend Const SERIAL_AUTO_FILENAME As String = "C:\SerialTraceAuto.txt" 'Special value to indicate use of automatic trace filenames
     Friend Const SERIAL_DEFAULT_FILENAME As String = "C:\SerialTrace.txt" 'Default manual trace filename
@@ -68,18 +67,21 @@ Module VersionCode
     End Sub
 
     Sub AssemblyInfo(ByVal TL As TraceLogger, ByVal AssName As String, ByVal Ass As Assembly)
-        Dim FileVer As FileVersionInfo
         If Not Ass Is Nothing Then
             TL.LogMessage("Versions", AssName & " Version: " & Ass.GetName.Version.ToString)
-            FileVer = FileVersionInfo.GetVersionInfo(Ass.Location.ToString)
-            TL.LogMessage("Versions", AssName & " FileVersion: " & FileVer.FileVersion.ToString)
             TL.LogMessage("Versions", AssName & " Name: " & Ass.GetName.FullName.ToString)
             TL.LogMessage("Versions", AssName & " CodeBase: " & Ass.GetName.CodeBase.ToString)
             TL.LogMessage("Versions", AssName & " Location: " & Ass.Location.ToString)
             TL.LogMessage("Versions", AssName & " From GAC: " & Ass.GlobalAssemblyCache.ToString)
+
         Else
             TL.LogMessage("Versions", AssName & " No assembly found")
+
         End If
+
     End Sub
+
+
+
 End Module
 #End Region

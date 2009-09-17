@@ -52,10 +52,6 @@ Public Class Profile
 #Region "New and IDisposable Support "
     Private disposedValue As Boolean = False        ' To detect redundant calls
 
-    ''' <summary>
-    ''' Create a new Profile object
-    ''' </summary>
-    ''' <remarks></remarks>
     Public Sub New()
         MyBase.New()
         ProfileStore = New XMLAccess(ERR_SOURCE_PROFILE) 'Get access to the profile store
@@ -65,11 +61,6 @@ Public Class Profile
         TL.LogMessage("New", "Trace logger created OK")
     End Sub
 
-    ''' <summary>
-    ''' Create a new profile object ignoring profile not found exceptions if generated
-    ''' </summary>
-    ''' <param name="IgnoreExceptions">Ignore ProfileNotFound exceptions</param>
-    ''' <remarks></remarks>
     Public Sub New(ByVal IgnoreExceptions As Boolean)
         MyBase.New()
         ProfileStore = New XMLAccess(IgnoreExceptions) 'Get access to the profile store
@@ -410,18 +401,13 @@ Public Class Profile
 #End Region
 
 #Region "IProfileExtra Implementation"
-    ''' <summary>
-    ''' Migrate the ASCOM profile from registry to file store
-    ''' </summary>
-    ''' <remarks></remarks>
     <EditorBrowsable(EditorBrowsableState.Never), _
-        ComVisible(False)> _
-        Public Sub MigrateProfile() Implements IProfileExtra.MigrateProfile
+    ComVisible(False)> _
+    Public Sub MigrateProfile() Implements IProfileExtra.MigrateProfile
         TL.LogMessage("MigrateProfile", "Migrating profile")
         Try
             ProfileStore.MigrateProfile()
-            ProfileStore.WriteProfile("", "PlatformVersion", PLATFORM_VERSION)
-            TL.LogMessage("MigrateProfile", "Completed migration to platform " & PLATFORM_VERSION)
+            TL.LogMessage("MigrateProfile", "Completed migration")
         Catch ex As Exception
             TL.LogMessage("MigrateProfile", "Exception: " & ex.ToString)
             Throw

@@ -1,4 +1,4 @@
-﻿'NOVASCOM component implementation
+﻿'NOVASCOM omponent implementation
 
 Option Strict On
 Imports ASCOM.Astrometry.NOVAS.NOVAS2
