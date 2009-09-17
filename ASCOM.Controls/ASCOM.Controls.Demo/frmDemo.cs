@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using ASCOM.Utilities;
+using ASCOM.HelperNET;
 using System.Diagnostics;
 
 namespace ASCOM.Controls.Demo

@@ -228,7 +228,7 @@ namespace ASCOM.TelescopeSimulator
             assyPath = assyPath.Remove(i, assyPath.Length - i) + "\\TelescopeSimulatorServedClasses";
 
             DirectoryInfo d = new DirectoryInfo(assyPath);
-            foreach (FileInfo fi in d.GetFiles("*.dll"))  //Modified to only load *.DLL
+            foreach (FileInfo fi in d.GetFiles("ASCOM.TelescopeSimulator.Telescope.dll"))  //Modified to only load the Simulator DLL
             {
                 string aPath = fi.FullName;
                 string fqClassName = fi.Name.Replace(fi.Extension, "");						// COM class FQN
@@ -239,14 +239,8 @@ namespace ASCOM.TelescopeSimulator
                 try
                 {
                     Assembly so = Assembly.LoadFrom(aPath);
-
-                    //Added check to see if the dll has the ServedClassNameAttribute
-                    object[] attributes = so.GetCustomAttributes(typeof(ServedClassNameAttribute),false);
-                    if (attributes.Length > 0)
-                    {
-                        m_ComObjectTypes.Add(so.GetType(fqClassName, true));
-                        m_ComObjectAssys.Add(so);
-                    }
+                    m_ComObjectTypes.Add(so.GetType(fqClassName, true));
+                    m_ComObjectAssys.Add(so);
                 }
                 catch (Exception e)
                 {
@@ -368,14 +362,10 @@ namespace ASCOM.TelescopeSimulator
                     // ASCOM 
                     //
                     assy = type.Assembly;
-                    //attr = Attribute.GetCustomAttribute(assy, typeof(AssemblyProductAttribute));
-                    //string chooserName = ((AssemblyProductAttribute)attr).Product;
-
-                    //Modified to pull from the custom Attribute ServedClassName
-                    attr = Attribute.GetCustomAttribute(assy, typeof(ServedClassNameAttribute));
-                    string chooserName = ((ServedClassNameAttribute)attr).ServedClassName;
-
-					var P = new ASCOM.Utilities.Profile { DeviceType = progid.Substring(progid.LastIndexOf('.') + 1) };
+                    attr = Attribute.GetCustomAttribute(assy, typeof(AssemblyProductAttribute));
+                    string chooserName = ((AssemblyProductAttribute)attr).Product;
+                    ASCOM.HelperNET.Profile P = new ASCOM.HelperNET.Profile();
+                    P.DeviceType = progid.Substring(progid.LastIndexOf('.') + 1);	//  Requires Helper 5.1 or later
                     P.Register(progid, chooserName);
                     try										// In case Helper becomes native .NET
                     {
@@ -444,7 +434,8 @@ namespace ASCOM.TelescopeSimulator
                     //
                     // ASCOM
                     //
-					var P = new ASCOM.Utilities.Profile { DeviceType = progid.Substring(progid.LastIndexOf('.') + 1) };
+                    ASCOM.HelperNET.Profile P = new ASCOM.HelperNET.Profile();
+                    P.DeviceType = progid.Substring(progid.LastIndexOf('.') + 1);	//  Requires Helper 5.1 or later
                     P.Unregister(progid);
                     try										// In case Helper becomes native .NET
                     {

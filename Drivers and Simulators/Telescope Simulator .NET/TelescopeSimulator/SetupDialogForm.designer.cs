@@ -41,10 +41,10 @@ namespace ASCOM.TelescopeSimulator
             this.label3 = new System.Windows.Forms.Label();
             this.textBoxElevation = new System.Windows.Forms.TextBox();
             this.comboBoxLongitude = new System.Windows.Forms.ComboBox();
-            this.textBoxLongitudeDegrees = new System.Windows.Forms.TextBox();
+            this.textBoxLongitudeDegress = new System.Windows.Forms.TextBox();
             this.picASCOM = new System.Windows.Forms.PictureBox();
-            this.checkBoxAutoTrack = new System.Windows.Forms.CheckBox();
-            this.checkBoxNoCoordinatesAtPark = new System.Windows.Forms.CheckBox();
+            this.checkBoxAutoUnpark = new System.Windows.Forms.CheckBox();
+            this.checkBoxCoordinatesOnPark = new System.Windows.Forms.CheckBox();
             this.checkBoxDisconnectOnPark = new System.Windows.Forms.CheckBox();
             this.buttonSetParkPosition = new System.Windows.Forms.Button();
             this.buttonResetParkPosition = new System.Windows.Forms.Button();
@@ -56,11 +56,11 @@ namespace ASCOM.TelescopeSimulator
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.textBoxFocalLength = new System.Windows.Forms.TextBox();
-            this.textBoxAperture = new System.Windows.Forms.TextBox();
+            this.textBoxApertureArea = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
-            this.textBoxApertureArea = new System.Windows.Forms.TextBox();
+            this.textBoxAperture = new System.Windows.Forms.TextBox();
             this.numericUpDownSlewRate = new System.Windows.Forms.NumericUpDown();
             this.label7 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
@@ -68,16 +68,16 @@ namespace ASCOM.TelescopeSimulator
             this.checkBoxCanPulseGuide = new System.Windows.Forms.CheckBox();
             this.checkBoxCanGuideRates = new System.Windows.Forms.CheckBox();
             this.checkBoxCanTrackingRates = new System.Windows.Forms.CheckBox();
-            this.checkBoxCanSetTracking = new System.Windows.Forms.CheckBox();
-            this.checkBoxCanAlignmentMode = new System.Windows.Forms.CheckBox();
-            this.checkBoxCanSlewAsync = new System.Windows.Forms.CheckBox();
+            this.checkBoxCanTrackOnOff = new System.Windows.Forms.CheckBox();
+            this.checkBoxCanAlignMode = new System.Windows.Forms.CheckBox();
+            this.checkBoxEquatorialAsync = new System.Windows.Forms.CheckBox();
             this.checkBoxCanAltAz = new System.Windows.Forms.CheckBox();
             this.checkBoxCanSlewAltAz = new System.Windows.Forms.CheckBox();
             this.checkBoxCanSlewAltAzAsync = new System.Windows.Forms.CheckBox();
             this.checkBoxCanSyncAltAz = new System.Windows.Forms.CheckBox();
             this.checkBoxCanEquatorial = new System.Windows.Forms.CheckBox();
-            this.checkBoxCanSlew = new System.Windows.Forms.CheckBox();
-            this.checkBoxCanSync = new System.Windows.Forms.CheckBox();
+            this.checkBoxCanSlewEquatorial = new System.Windows.Forms.CheckBox();
+            this.checkBoxCanSyncEquatorial = new System.Windows.Forms.CheckBox();
             this.checkBoxCanFindHome = new System.Windows.Forms.CheckBox();
             this.checkBoxCanPark = new System.Windows.Forms.CheckBox();
             this.checkBoxCanSetParkPosition = new System.Windows.Forms.CheckBox();
@@ -85,11 +85,11 @@ namespace ASCOM.TelescopeSimulator
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.comboBoxNumberMoveAxis = new System.Windows.Forms.ComboBox();
             this.label8 = new System.Windows.Forms.Label();
-            this.checkBoxCanPierSide = new System.Windows.Forms.CheckBox();
-            this.checkBoxCanSetPierSide = new System.Windows.Forms.CheckBox();
-            this.checkBoxCanDoesRefraction = new System.Windows.Forms.CheckBox();
-            this.checkBoxCanDualAxisPulseGuide = new System.Windows.Forms.CheckBox();
-            this.checkBoxCanSetEquatorialRates = new System.Windows.Forms.CheckBox();
+            this.checkBoxCanSideOfPier = new System.Windows.Forms.CheckBox();
+            this.checkBoxCanSetSideOfPier = new System.Windows.Forms.CheckBox();
+            this.checkBoxCanRefraction = new System.Windows.Forms.CheckBox();
+            this.checkBoxCanPulseGuideDualAxis = new System.Windows.Forms.CheckBox();
+            this.checkBoxCanRaDecRate = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             this.comboBoxEquatorialSystem = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
@@ -165,7 +165,7 @@ namespace ASCOM.TelescopeSimulator
             this.tableLayoutPanel1.Controls.Add(this.label3, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.textBoxElevation, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.comboBoxLongitude, 1, 1);
-            this.tableLayoutPanel1.Controls.Add(this.textBoxLongitudeDegrees, 2, 1);
+            this.tableLayoutPanel1.Controls.Add(this.textBoxLongitudeDegress, 2, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 16);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -254,12 +254,12 @@ namespace ASCOM.TelescopeSimulator
             this.comboBoxLongitude.Size = new System.Drawing.Size(38, 21);
             this.comboBoxLongitude.TabIndex = 8;
             // 
-            // textBoxLongitudeDegrees
+            // textBoxLongitudeDegress
             // 
-            this.textBoxLongitudeDegrees.Location = new System.Drawing.Point(113, 31);
-            this.textBoxLongitudeDegrees.Name = "textBoxLongitudeDegrees";
-            this.textBoxLongitudeDegrees.Size = new System.Drawing.Size(34, 20);
-            this.textBoxLongitudeDegrees.TabIndex = 11;
+            this.textBoxLongitudeDegress.Location = new System.Drawing.Point(113, 31);
+            this.textBoxLongitudeDegress.Name = "textBoxLongitudeDegress";
+            this.textBoxLongitudeDegress.Size = new System.Drawing.Size(34, 20);
+            this.textBoxLongitudeDegress.TabIndex = 11;
             // 
             // picASCOM
             // 
@@ -274,27 +274,27 @@ namespace ASCOM.TelescopeSimulator
             this.picASCOM.DoubleClick += new System.EventHandler(this.BrowseToAscom);
             this.picASCOM.Click += new System.EventHandler(this.BrowseToAscom);
             // 
-            // checkBoxAutoTrack
+            // checkBoxAutoUnpark
             // 
-            this.checkBoxAutoTrack.AutoSize = true;
-            this.checkBoxAutoTrack.ForeColor = System.Drawing.Color.White;
-            this.checkBoxAutoTrack.Location = new System.Drawing.Point(236, 29);
-            this.checkBoxAutoTrack.Name = "checkBoxAutoTrack";
-            this.checkBoxAutoTrack.Size = new System.Drawing.Size(159, 17);
-            this.checkBoxAutoTrack.TabIndex = 5;
-            this.checkBoxAutoTrack.Text = "Auto Unpark/Track on Start";
-            this.checkBoxAutoTrack.UseVisualStyleBackColor = true;
+            this.checkBoxAutoUnpark.AutoSize = true;
+            this.checkBoxAutoUnpark.ForeColor = System.Drawing.Color.White;
+            this.checkBoxAutoUnpark.Location = new System.Drawing.Point(236, 29);
+            this.checkBoxAutoUnpark.Name = "checkBoxAutoUnpark";
+            this.checkBoxAutoUnpark.Size = new System.Drawing.Size(159, 17);
+            this.checkBoxAutoUnpark.TabIndex = 5;
+            this.checkBoxAutoUnpark.Text = "Auto Unpark/Track on Start";
+            this.checkBoxAutoUnpark.UseVisualStyleBackColor = true;
             // 
-            // checkBoxNoCoordinatesAtPark
+            // checkBoxCoordinatesOnPark
             // 
-            this.checkBoxNoCoordinatesAtPark.AutoSize = true;
-            this.checkBoxNoCoordinatesAtPark.ForeColor = System.Drawing.Color.White;
-            this.checkBoxNoCoordinatesAtPark.Location = new System.Drawing.Point(236, 52);
-            this.checkBoxNoCoordinatesAtPark.Name = "checkBoxNoCoordinatesAtPark";
-            this.checkBoxNoCoordinatesAtPark.Size = new System.Drawing.Size(165, 17);
-            this.checkBoxNoCoordinatesAtPark.TabIndex = 6;
-            this.checkBoxNoCoordinatesAtPark.Text = "No Coordinates when Parked";
-            this.checkBoxNoCoordinatesAtPark.UseVisualStyleBackColor = true;
+            this.checkBoxCoordinatesOnPark.AutoSize = true;
+            this.checkBoxCoordinatesOnPark.ForeColor = System.Drawing.Color.White;
+            this.checkBoxCoordinatesOnPark.Location = new System.Drawing.Point(236, 52);
+            this.checkBoxCoordinatesOnPark.Name = "checkBoxCoordinatesOnPark";
+            this.checkBoxCoordinatesOnPark.Size = new System.Drawing.Size(165, 17);
+            this.checkBoxCoordinatesOnPark.TabIndex = 6;
+            this.checkBoxCoordinatesOnPark.Text = "No Coordinates when Parked";
+            this.checkBoxCoordinatesOnPark.UseVisualStyleBackColor = true;
             // 
             // checkBoxDisconnectOnPark
             // 
@@ -315,7 +315,6 @@ namespace ASCOM.TelescopeSimulator
             this.buttonSetParkPosition.TabIndex = 8;
             this.buttonSetParkPosition.Text = "Set Park Position";
             this.buttonSetParkPosition.UseVisualStyleBackColor = true;
-            this.buttonSetParkPosition.Click += new System.EventHandler(this.buttonSetParkPosition_Click);
             // 
             // buttonResetParkPosition
             // 
@@ -397,7 +396,7 @@ namespace ASCOM.TelescopeSimulator
             this.groupBox3.ForeColor = System.Drawing.Color.White;
             this.groupBox3.Location = new System.Drawing.Point(168, 134);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(205, 90);
+            this.groupBox3.Size = new System.Drawing.Size(182, 90);
             this.groupBox3.TabIndex = 11;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Optics";
@@ -405,14 +404,14 @@ namespace ASCOM.TelescopeSimulator
             // tableLayoutPanel3
             // 
             this.tableLayoutPanel3.ColumnCount = 2;
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 54.27136F));
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 45.72864F));
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel3.Controls.Add(this.textBoxFocalLength, 1, 2);
-            this.tableLayoutPanel3.Controls.Add(this.textBoxAperture, 1, 0);
+            this.tableLayoutPanel3.Controls.Add(this.textBoxApertureArea, 1, 1);
             this.tableLayoutPanel3.Controls.Add(this.label6, 0, 2);
             this.tableLayoutPanel3.Controls.Add(this.label4, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.label5, 0, 1);
-            this.tableLayoutPanel3.Controls.Add(this.textBoxApertureArea, 1, 1);
+            this.tableLayoutPanel3.Controls.Add(this.textBoxAperture, 1, 0);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel3.Location = new System.Drawing.Point(3, 16);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
@@ -420,29 +419,29 @@ namespace ASCOM.TelescopeSimulator
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(199, 71);
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(176, 71);
             this.tableLayoutPanel3.TabIndex = 0;
             // 
             // textBoxFocalLength
             // 
-            this.textBoxFocalLength.Location = new System.Drawing.Point(111, 53);
+            this.textBoxFocalLength.Location = new System.Drawing.Point(91, 53);
             this.textBoxFocalLength.Name = "textBoxFocalLength";
-            this.textBoxFocalLength.Size = new System.Drawing.Size(85, 20);
-            this.textBoxFocalLength.TabIndex = 14;
+            this.textBoxFocalLength.Size = new System.Drawing.Size(82, 20);
+            this.textBoxFocalLength.TabIndex = 11;
             // 
-            // textBoxAperture
+            // textBoxApertureArea
             // 
-            this.textBoxAperture.Location = new System.Drawing.Point(111, 3);
-            this.textBoxAperture.Name = "textBoxAperture";
-            this.textBoxAperture.Size = new System.Drawing.Size(85, 20);
-            this.textBoxAperture.TabIndex = 13;
+            this.textBoxApertureArea.Location = new System.Drawing.Point(91, 28);
+            this.textBoxApertureArea.Name = "textBoxApertureArea";
+            this.textBoxApertureArea.Size = new System.Drawing.Size(82, 20);
+            this.textBoxApertureArea.TabIndex = 10;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(3, 50);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(89, 13);
+            this.label6.Size = new System.Drawing.Size(72, 21);
             this.label6.TabIndex = 8;
             this.label6.Text = "Focal Length (m):";
             // 
@@ -460,16 +459,16 @@ namespace ASCOM.TelescopeSimulator
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(3, 25);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(101, 13);
+            this.label5.Size = new System.Drawing.Size(75, 25);
             this.label5.TabIndex = 7;
             this.label5.Text = "Aperture Area (m^2)";
             // 
-            // textBoxApertureArea
+            // textBoxAperture
             // 
-            this.textBoxApertureArea.Location = new System.Drawing.Point(111, 28);
-            this.textBoxApertureArea.Name = "textBoxApertureArea";
-            this.textBoxApertureArea.Size = new System.Drawing.Size(85, 20);
-            this.textBoxApertureArea.TabIndex = 12;
+            this.textBoxAperture.Location = new System.Drawing.Point(91, 3);
+            this.textBoxAperture.Name = "textBoxAperture";
+            this.textBoxAperture.Size = new System.Drawing.Size(82, 20);
+            this.textBoxAperture.TabIndex = 9;
             // 
             // numericUpDownSlewRate
             // 
@@ -524,26 +523,26 @@ namespace ASCOM.TelescopeSimulator
             this.tableLayoutPanel4.Controls.Add(this.checkBoxCanPulseGuide, 3, 3);
             this.tableLayoutPanel4.Controls.Add(this.checkBoxCanGuideRates, 3, 2);
             this.tableLayoutPanel4.Controls.Add(this.checkBoxCanTrackingRates, 3, 1);
-            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanSetTracking, 3, 0);
-            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanAlignmentMode, 2, 0);
-            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanSlewAsync, 0, 8);
+            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanTrackOnOff, 3, 0);
+            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanAlignMode, 2, 0);
+            this.tableLayoutPanel4.Controls.Add(this.checkBoxEquatorialAsync, 0, 8);
             this.tableLayoutPanel4.Controls.Add(this.checkBoxCanAltAz, 0, 0);
             this.tableLayoutPanel4.Controls.Add(this.checkBoxCanSlewAltAz, 0, 1);
             this.tableLayoutPanel4.Controls.Add(this.checkBoxCanSlewAltAzAsync, 0, 3);
             this.tableLayoutPanel4.Controls.Add(this.checkBoxCanSyncAltAz, 0, 2);
             this.tableLayoutPanel4.Controls.Add(this.checkBoxCanEquatorial, 0, 5);
-            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanSlew, 0, 6);
-            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanSync, 0, 7);
+            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanSlewEquatorial, 0, 6);
+            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanSyncEquatorial, 0, 7);
             this.tableLayoutPanel4.Controls.Add(this.checkBoxCanFindHome, 1, 0);
             this.tableLayoutPanel4.Controls.Add(this.checkBoxCanPark, 1, 1);
             this.tableLayoutPanel4.Controls.Add(this.checkBoxCanSetParkPosition, 1, 2);
             this.tableLayoutPanel4.Controls.Add(this.checkBoxCanUnpark, 1, 3);
             this.tableLayoutPanel4.Controls.Add(this.tableLayoutPanel5, 1, 4);
-            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanPierSide, 2, 1);
-            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanSetPierSide, 2, 2);
-            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanDoesRefraction, 2, 3);
-            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanDualAxisPulseGuide, 3, 4);
-            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanSetEquatorialRates, 3, 5);
+            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanSideOfPier, 2, 1);
+            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanSetSideOfPier, 2, 2);
+            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanRefraction, 2, 3);
+            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanPulseGuideDualAxis, 3, 4);
+            this.tableLayoutPanel4.Controls.Add(this.checkBoxCanRaDecRate, 3, 5);
             this.tableLayoutPanel4.Controls.Add(this.tableLayoutPanel6, 2, 4);
             this.tableLayoutPanel4.Controls.Add(this.checkBoxCanLatLongElev, 1, 7);
             this.tableLayoutPanel4.Controls.Add(this.checkBoxCanOptics, 1, 8);
@@ -600,38 +599,38 @@ namespace ASCOM.TelescopeSimulator
             this.checkBoxCanTrackingRates.Text = "Tracking Rates";
             this.checkBoxCanTrackingRates.UseVisualStyleBackColor = true;
             // 
-            // checkBoxCanSetTracking
+            // checkBoxCanTrackOnOff
             // 
-            this.checkBoxCanSetTracking.AutoSize = true;
-            this.checkBoxCanSetTracking.ForeColor = System.Drawing.Color.White;
-            this.checkBoxCanSetTracking.Location = new System.Drawing.Point(450, 3);
-            this.checkBoxCanSetTracking.Name = "checkBoxCanSetTracking";
-            this.checkBoxCanSetTracking.Size = new System.Drawing.Size(132, 17);
-            this.checkBoxCanSetTracking.TabIndex = 28;
-            this.checkBoxCanSetTracking.Text = "Track on / off Support";
-            this.checkBoxCanSetTracking.UseVisualStyleBackColor = true;
+            this.checkBoxCanTrackOnOff.AutoSize = true;
+            this.checkBoxCanTrackOnOff.ForeColor = System.Drawing.Color.White;
+            this.checkBoxCanTrackOnOff.Location = new System.Drawing.Point(450, 3);
+            this.checkBoxCanTrackOnOff.Name = "checkBoxCanTrackOnOff";
+            this.checkBoxCanTrackOnOff.Size = new System.Drawing.Size(132, 17);
+            this.checkBoxCanTrackOnOff.TabIndex = 28;
+            this.checkBoxCanTrackOnOff.Text = "Track on / off Support";
+            this.checkBoxCanTrackOnOff.UseVisualStyleBackColor = true;
             // 
-            // checkBoxCanAlignmentMode
+            // checkBoxCanAlignMode
             // 
-            this.checkBoxCanAlignmentMode.AutoSize = true;
-            this.checkBoxCanAlignmentMode.ForeColor = System.Drawing.Color.White;
-            this.checkBoxCanAlignmentMode.Location = new System.Drawing.Point(301, 3);
-            this.checkBoxCanAlignmentMode.Name = "checkBoxCanAlignmentMode";
-            this.checkBoxCanAlignmentMode.Size = new System.Drawing.Size(102, 17);
-            this.checkBoxCanAlignmentMode.TabIndex = 24;
-            this.checkBoxCanAlignmentMode.Text = "Alignment Mode";
-            this.checkBoxCanAlignmentMode.UseVisualStyleBackColor = true;
+            this.checkBoxCanAlignMode.AutoSize = true;
+            this.checkBoxCanAlignMode.ForeColor = System.Drawing.Color.White;
+            this.checkBoxCanAlignMode.Location = new System.Drawing.Point(301, 3);
+            this.checkBoxCanAlignMode.Name = "checkBoxCanAlignMode";
+            this.checkBoxCanAlignMode.Size = new System.Drawing.Size(102, 17);
+            this.checkBoxCanAlignMode.TabIndex = 24;
+            this.checkBoxCanAlignMode.Text = "Alignment Mode";
+            this.checkBoxCanAlignMode.UseVisualStyleBackColor = true;
             // 
-            // checkBoxCanSlewAsync
+            // checkBoxEquatorialAsync
             // 
-            this.checkBoxCanSlewAsync.AutoSize = true;
-            this.checkBoxCanSlewAsync.ForeColor = System.Drawing.Color.White;
-            this.checkBoxCanSlewAsync.Location = new System.Drawing.Point(3, 187);
-            this.checkBoxCanSlewAsync.Name = "checkBoxCanSlewAsync";
-            this.checkBoxCanSlewAsync.Size = new System.Drawing.Size(143, 17);
-            this.checkBoxCanSlewAsync.TabIndex = 22;
-            this.checkBoxCanSlewAsync.Text = "Equatorial Asynchronous";
-            this.checkBoxCanSlewAsync.UseVisualStyleBackColor = true;
+            this.checkBoxEquatorialAsync.AutoSize = true;
+            this.checkBoxEquatorialAsync.ForeColor = System.Drawing.Color.White;
+            this.checkBoxEquatorialAsync.Location = new System.Drawing.Point(3, 187);
+            this.checkBoxEquatorialAsync.Name = "checkBoxEquatorialAsync";
+            this.checkBoxEquatorialAsync.Size = new System.Drawing.Size(143, 17);
+            this.checkBoxEquatorialAsync.TabIndex = 22;
+            this.checkBoxEquatorialAsync.Text = "Equatorial Asynchronous";
+            this.checkBoxEquatorialAsync.UseVisualStyleBackColor = true;
             // 
             // checkBoxCanAltAz
             // 
@@ -688,27 +687,27 @@ namespace ASCOM.TelescopeSimulator
             this.checkBoxCanEquatorial.Text = "Equatorial Coordinates";
             this.checkBoxCanEquatorial.UseVisualStyleBackColor = true;
             // 
-            // checkBoxCanSlew
+            // checkBoxCanSlewEquatorial
             // 
-            this.checkBoxCanSlew.AutoSize = true;
-            this.checkBoxCanSlew.ForeColor = System.Drawing.Color.White;
-            this.checkBoxCanSlew.Location = new System.Drawing.Point(3, 141);
-            this.checkBoxCanSlew.Name = "checkBoxCanSlew";
-            this.checkBoxCanSlew.Size = new System.Drawing.Size(113, 17);
-            this.checkBoxCanSlew.TabIndex = 16;
-            this.checkBoxCanSlew.Text = "Equatorial Slewing";
-            this.checkBoxCanSlew.UseVisualStyleBackColor = true;
+            this.checkBoxCanSlewEquatorial.AutoSize = true;
+            this.checkBoxCanSlewEquatorial.ForeColor = System.Drawing.Color.White;
+            this.checkBoxCanSlewEquatorial.Location = new System.Drawing.Point(3, 141);
+            this.checkBoxCanSlewEquatorial.Name = "checkBoxCanSlewEquatorial";
+            this.checkBoxCanSlewEquatorial.Size = new System.Drawing.Size(113, 17);
+            this.checkBoxCanSlewEquatorial.TabIndex = 16;
+            this.checkBoxCanSlewEquatorial.Text = "Equatorial Slewing";
+            this.checkBoxCanSlewEquatorial.UseVisualStyleBackColor = true;
             // 
-            // checkBoxCanSync
+            // checkBoxCanSyncEquatorial
             // 
-            this.checkBoxCanSync.AutoSize = true;
-            this.checkBoxCanSync.ForeColor = System.Drawing.Color.White;
-            this.checkBoxCanSync.Location = new System.Drawing.Point(3, 164);
-            this.checkBoxCanSync.Name = "checkBoxCanSync";
-            this.checkBoxCanSync.Size = new System.Drawing.Size(100, 17);
-            this.checkBoxCanSync.TabIndex = 18;
-            this.checkBoxCanSync.Text = "Equatorial Sync";
-            this.checkBoxCanSync.UseVisualStyleBackColor = true;
+            this.checkBoxCanSyncEquatorial.AutoSize = true;
+            this.checkBoxCanSyncEquatorial.ForeColor = System.Drawing.Color.White;
+            this.checkBoxCanSyncEquatorial.Location = new System.Drawing.Point(3, 164);
+            this.checkBoxCanSyncEquatorial.Name = "checkBoxCanSyncEquatorial";
+            this.checkBoxCanSyncEquatorial.Size = new System.Drawing.Size(100, 17);
+            this.checkBoxCanSyncEquatorial.TabIndex = 18;
+            this.checkBoxCanSyncEquatorial.Text = "Equatorial Sync";
+            this.checkBoxCanSyncEquatorial.UseVisualStyleBackColor = true;
             // 
             // checkBoxCanFindHome
             // 
@@ -793,60 +792,60 @@ namespace ASCOM.TelescopeSimulator
             this.label8.TabIndex = 14;
             this.label8.Text = "Number of Axis For Move:";
             // 
-            // checkBoxCanPierSide
+            // checkBoxCanSideOfPier
             // 
-            this.checkBoxCanPierSide.AutoSize = true;
-            this.checkBoxCanPierSide.ForeColor = System.Drawing.Color.White;
-            this.checkBoxCanPierSide.Location = new System.Drawing.Point(301, 26);
-            this.checkBoxCanPierSide.Name = "checkBoxCanPierSide";
-            this.checkBoxCanPierSide.Size = new System.Drawing.Size(80, 17);
-            this.checkBoxCanPierSide.TabIndex = 25;
-            this.checkBoxCanPierSide.Text = "Side of Pier";
-            this.checkBoxCanPierSide.UseVisualStyleBackColor = true;
+            this.checkBoxCanSideOfPier.AutoSize = true;
+            this.checkBoxCanSideOfPier.ForeColor = System.Drawing.Color.White;
+            this.checkBoxCanSideOfPier.Location = new System.Drawing.Point(301, 26);
+            this.checkBoxCanSideOfPier.Name = "checkBoxCanSideOfPier";
+            this.checkBoxCanSideOfPier.Size = new System.Drawing.Size(80, 17);
+            this.checkBoxCanSideOfPier.TabIndex = 25;
+            this.checkBoxCanSideOfPier.Text = "Side of Pier";
+            this.checkBoxCanSideOfPier.UseVisualStyleBackColor = true;
             // 
-            // checkBoxCanSetPierSide
+            // checkBoxCanSetSideOfPier
             // 
-            this.checkBoxCanSetPierSide.AutoSize = true;
-            this.checkBoxCanSetPierSide.ForeColor = System.Drawing.Color.White;
-            this.checkBoxCanSetPierSide.Location = new System.Drawing.Point(301, 49);
-            this.checkBoxCanSetPierSide.Name = "checkBoxCanSetPierSide";
-            this.checkBoxCanSetPierSide.Size = new System.Drawing.Size(99, 17);
-            this.checkBoxCanSetPierSide.TabIndex = 26;
-            this.checkBoxCanSetPierSide.Text = "Set Side of Pier";
-            this.checkBoxCanSetPierSide.UseVisualStyleBackColor = true;
+            this.checkBoxCanSetSideOfPier.AutoSize = true;
+            this.checkBoxCanSetSideOfPier.ForeColor = System.Drawing.Color.White;
+            this.checkBoxCanSetSideOfPier.Location = new System.Drawing.Point(301, 49);
+            this.checkBoxCanSetSideOfPier.Name = "checkBoxCanSetSideOfPier";
+            this.checkBoxCanSetSideOfPier.Size = new System.Drawing.Size(99, 17);
+            this.checkBoxCanSetSideOfPier.TabIndex = 26;
+            this.checkBoxCanSetSideOfPier.Text = "Set Side of Pier";
+            this.checkBoxCanSetSideOfPier.UseVisualStyleBackColor = true;
             // 
-            // checkBoxCanDoesRefraction
+            // checkBoxCanRefraction
             // 
-            this.checkBoxCanDoesRefraction.AutoSize = true;
-            this.checkBoxCanDoesRefraction.ForeColor = System.Drawing.Color.White;
-            this.checkBoxCanDoesRefraction.Location = new System.Drawing.Point(301, 72);
-            this.checkBoxCanDoesRefraction.Name = "checkBoxCanDoesRefraction";
-            this.checkBoxCanDoesRefraction.Size = new System.Drawing.Size(112, 17);
-            this.checkBoxCanDoesRefraction.TabIndex = 27;
-            this.checkBoxCanDoesRefraction.Text = "RefractionSupport";
-            this.checkBoxCanDoesRefraction.UseVisualStyleBackColor = true;
+            this.checkBoxCanRefraction.AutoSize = true;
+            this.checkBoxCanRefraction.ForeColor = System.Drawing.Color.White;
+            this.checkBoxCanRefraction.Location = new System.Drawing.Point(301, 72);
+            this.checkBoxCanRefraction.Name = "checkBoxCanRefraction";
+            this.checkBoxCanRefraction.Size = new System.Drawing.Size(112, 17);
+            this.checkBoxCanRefraction.TabIndex = 27;
+            this.checkBoxCanRefraction.Text = "RefractionSupport";
+            this.checkBoxCanRefraction.UseVisualStyleBackColor = true;
             // 
-            // checkBoxCanDualAxisPulseGuide
+            // checkBoxCanPulseGuideDualAxis
             // 
-            this.checkBoxCanDualAxisPulseGuide.AutoSize = true;
-            this.checkBoxCanDualAxisPulseGuide.ForeColor = System.Drawing.Color.White;
-            this.checkBoxCanDualAxisPulseGuide.Location = new System.Drawing.Point(450, 95);
-            this.checkBoxCanDualAxisPulseGuide.Name = "checkBoxCanDualAxisPulseGuide";
-            this.checkBoxCanDualAxisPulseGuide.Size = new System.Drawing.Size(130, 17);
-            this.checkBoxCanDualAxisPulseGuide.TabIndex = 32;
-            this.checkBoxCanDualAxisPulseGuide.Text = "Dual Axis Pulse Guide";
-            this.checkBoxCanDualAxisPulseGuide.UseVisualStyleBackColor = true;
+            this.checkBoxCanPulseGuideDualAxis.AutoSize = true;
+            this.checkBoxCanPulseGuideDualAxis.ForeColor = System.Drawing.Color.White;
+            this.checkBoxCanPulseGuideDualAxis.Location = new System.Drawing.Point(450, 95);
+            this.checkBoxCanPulseGuideDualAxis.Name = "checkBoxCanPulseGuideDualAxis";
+            this.checkBoxCanPulseGuideDualAxis.Size = new System.Drawing.Size(130, 17);
+            this.checkBoxCanPulseGuideDualAxis.TabIndex = 32;
+            this.checkBoxCanPulseGuideDualAxis.Text = "Dual Axis Pulse Guide";
+            this.checkBoxCanPulseGuideDualAxis.UseVisualStyleBackColor = true;
             // 
-            // checkBoxCanSetEquatorialRates
+            // checkBoxCanRaDecRate
             // 
-            this.checkBoxCanSetEquatorialRates.AutoSize = true;
-            this.checkBoxCanSetEquatorialRates.ForeColor = System.Drawing.Color.White;
-            this.checkBoxCanSetEquatorialRates.Location = new System.Drawing.Point(450, 118);
-            this.checkBoxCanSetEquatorialRates.Name = "checkBoxCanSetEquatorialRates";
-            this.checkBoxCanSetEquatorialRates.Size = new System.Drawing.Size(103, 17);
-            this.checkBoxCanSetEquatorialRates.TabIndex = 33;
-            this.checkBoxCanSetEquatorialRates.Text = "RA / Dec Rates";
-            this.checkBoxCanSetEquatorialRates.UseVisualStyleBackColor = true;
+            this.checkBoxCanRaDecRate.AutoSize = true;
+            this.checkBoxCanRaDecRate.ForeColor = System.Drawing.Color.White;
+            this.checkBoxCanRaDecRate.Location = new System.Drawing.Point(450, 118);
+            this.checkBoxCanRaDecRate.Name = "checkBoxCanRaDecRate";
+            this.checkBoxCanRaDecRate.Size = new System.Drawing.Size(103, 17);
+            this.checkBoxCanRaDecRate.TabIndex = 33;
+            this.checkBoxCanRaDecRate.Text = "RA / Dec Rates";
+            this.checkBoxCanRaDecRate.UseVisualStyleBackColor = true;
             // 
             // tableLayoutPanel6
             // 
@@ -867,6 +866,12 @@ namespace ASCOM.TelescopeSimulator
             // comboBoxEquatorialSystem
             // 
             this.comboBoxEquatorialSystem.FormattingEnabled = true;
+            this.comboBoxEquatorialSystem.Items.AddRange(new object[] {
+            "Local",
+            "B1950",
+            "J2000",
+            "J2050",
+            "Other"});
             this.comboBoxEquatorialSystem.Location = new System.Drawing.Point(64, 3);
             this.comboBoxEquatorialSystem.Name = "comboBoxEquatorialSystem";
             this.comboBoxEquatorialSystem.Size = new System.Drawing.Size(75, 21);
@@ -941,7 +946,7 @@ namespace ASCOM.TelescopeSimulator
             // 
             this.checkBoxOnTop.AutoSize = true;
             this.checkBoxOnTop.ForeColor = System.Drawing.Color.White;
-            this.checkBoxOnTop.Location = new System.Drawing.Point(388, 207);
+            this.checkBoxOnTop.Location = new System.Drawing.Point(382, 207);
             this.checkBoxOnTop.Name = "checkBoxOnTop";
             this.checkBoxOnTop.Size = new System.Drawing.Size(98, 17);
             this.checkBoxOnTop.TabIndex = 16;
@@ -952,7 +957,7 @@ namespace ASCOM.TelescopeSimulator
             // 
             this.checkBoxRefraction.AutoSize = true;
             this.checkBoxRefraction.ForeColor = System.Drawing.Color.White;
-            this.checkBoxRefraction.Location = new System.Drawing.Point(388, 184);
+            this.checkBoxRefraction.Location = new System.Drawing.Point(382, 184);
             this.checkBoxRefraction.Name = "checkBoxRefraction";
             this.checkBoxRefraction.Size = new System.Drawing.Size(92, 17);
             this.checkBoxRefraction.TabIndex = 17;
@@ -971,9 +976,10 @@ namespace ASCOM.TelescopeSimulator
             // 
             // labelTime
             // 
+            this.labelTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.labelTime.AutoSize = true;
             this.labelTime.ForeColor = System.Drawing.Color.White;
-            this.labelTime.Location = new System.Drawing.Point(377, 473);
+            this.labelTime.Location = new System.Drawing.Point(431, 473);
             this.labelTime.Name = "labelTime";
             this.labelTime.Size = new System.Drawing.Size(185, 13);
             this.labelTime.TabIndex = 19;
@@ -997,8 +1003,8 @@ namespace ASCOM.TelescopeSimulator
             this.Controls.Add(this.buttonResetParkPosition);
             this.Controls.Add(this.buttonSetParkPosition);
             this.Controls.Add(this.checkBoxDisconnectOnPark);
-            this.Controls.Add(this.checkBoxNoCoordinatesAtPark);
-            this.Controls.Add(this.checkBoxAutoTrack);
+            this.Controls.Add(this.checkBoxCoordinatesOnPark);
+            this.Controls.Add(this.checkBoxAutoUnpark);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.picASCOM);
             this.Controls.Add(this.cmdCancel);
@@ -1049,9 +1055,9 @@ namespace ASCOM.TelescopeSimulator
         private System.Windows.Forms.TextBox textBoxLongitudeMinutes;
         private System.Windows.Forms.TextBox textBoxLatitudeMinutes;
         private System.Windows.Forms.TextBox textBoxLatitudeDegrees;
-        private System.Windows.Forms.TextBox textBoxLongitudeDegrees;
-        private System.Windows.Forms.CheckBox checkBoxAutoTrack;
-        private System.Windows.Forms.CheckBox checkBoxNoCoordinatesAtPark;
+        private System.Windows.Forms.TextBox textBoxLongitudeDegress;
+        private System.Windows.Forms.CheckBox checkBoxAutoUnpark;
+        private System.Windows.Forms.CheckBox checkBoxCoordinatesOnPark;
         private System.Windows.Forms.CheckBox checkBoxDisconnectOnPark;
         private System.Windows.Forms.Button buttonSetParkPosition;
         private System.Windows.Forms.Button buttonResetParkPosition;
@@ -1062,9 +1068,12 @@ namespace ASCOM.TelescopeSimulator
         private System.Windows.Forms.RadioButton radioButtonEquatorial;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
+        private System.Windows.Forms.TextBox textBoxFocalLength;
+        private System.Windows.Forms.TextBox textBoxApertureArea;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox textBoxAperture;
         private System.Windows.Forms.NumericUpDown numericUpDownSlewRate;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.GroupBox groupBox4;
@@ -1076,26 +1085,26 @@ namespace ASCOM.TelescopeSimulator
         private System.Windows.Forms.CheckBox checkBoxCanSlewAltAzAsync;
         private System.Windows.Forms.CheckBox checkBoxCanSyncAltAz;
         private System.Windows.Forms.CheckBox checkBoxCanEquatorial;
-        private System.Windows.Forms.CheckBox checkBoxCanSlew;
+        private System.Windows.Forms.CheckBox checkBoxCanSlewEquatorial;
         private System.Windows.Forms.CheckBox checkBoxCanFindHome;
-        private System.Windows.Forms.CheckBox checkBoxCanSync;
+        private System.Windows.Forms.CheckBox checkBoxCanSyncEquatorial;
         private System.Windows.Forms.CheckBox checkBoxCanPark;
         private System.Windows.Forms.CheckBox checkBoxCanSetParkPosition;
         private System.Windows.Forms.CheckBox checkBoxCanUnpark;
-        private System.Windows.Forms.CheckBox checkBoxCanSlewAsync;
+        private System.Windows.Forms.CheckBox checkBoxEquatorialAsync;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
         private System.Windows.Forms.ComboBox comboBoxNumberMoveAxis;
         private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.CheckBox checkBoxCanAlignmentMode;
-        private System.Windows.Forms.CheckBox checkBoxCanPierSide;
-        private System.Windows.Forms.CheckBox checkBoxCanSetPierSide;
-        private System.Windows.Forms.CheckBox checkBoxCanDoesRefraction;
+        private System.Windows.Forms.CheckBox checkBoxCanAlignMode;
+        private System.Windows.Forms.CheckBox checkBoxCanSideOfPier;
+        private System.Windows.Forms.CheckBox checkBoxCanSetSideOfPier;
+        private System.Windows.Forms.CheckBox checkBoxCanRefraction;
         private System.Windows.Forms.CheckBox checkBoxCanPulseGuide;
         private System.Windows.Forms.CheckBox checkBoxCanGuideRates;
         private System.Windows.Forms.CheckBox checkBoxCanTrackingRates;
-        private System.Windows.Forms.CheckBox checkBoxCanSetTracking;
-        private System.Windows.Forms.CheckBox checkBoxCanDualAxisPulseGuide;
-        private System.Windows.Forms.CheckBox checkBoxCanSetEquatorialRates;
+        private System.Windows.Forms.CheckBox checkBoxCanTrackOnOff;
+        private System.Windows.Forms.CheckBox checkBoxCanPulseGuideDualAxis;
+        private System.Windows.Forms.CheckBox checkBoxCanRaDecRate;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
         private System.Windows.Forms.ComboBox comboBoxEquatorialSystem;
         private System.Windows.Forms.Label label9;
@@ -1106,8 +1115,5 @@ namespace ASCOM.TelescopeSimulator
         private System.Windows.Forms.CheckBox checkBoxVersionOne;
         private System.Windows.Forms.Label labelVersion;
         private System.Windows.Forms.Label labelTime;
-        private System.Windows.Forms.TextBox textBoxApertureArea;
-        private System.Windows.Forms.TextBox textBoxFocalLength;
-        private System.Windows.Forms.TextBox textBoxAperture;
     }
 }

@@ -21,7 +21,7 @@
     <SccProvider>
     </SccProvider>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>ASCOM.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>TiGraNetworks.snk</AssemblyOriginatorKeyFile>
     <ApplicationIcon>ASCOM.ico</ApplicationIcon>
     <TargetFrameworkSubset>
     </TargetFrameworkSubset>
@@ -54,6 +54,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DeviceIdAttribute.cs" />
     <Compile Include="Diagnostics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SettingsProvider.cs" />
@@ -61,19 +62,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="ASCOM.snk" />
+    <None Include="TiGraNetworks.snk" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="ASCOM.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\ASCOM.Attributes\ASCOM.Attributes.csproj">
-      <Project>{2C40FAD9-DE75-4360-A0AD-911C4D24D98C}</Project>
-      <Name>ASCOM.Attributes</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ASCOM.Utilities\Utilities\Utilities.vbproj">
-      <Project>{C9BF0A8B-594F-4AB9-938A-EDC8448D8520}</Project>
-      <Name>Utilities</Name>
+    <ProjectReference Include="..\..\HelperNET\HelperNET\HelperNET.vbproj">
+      <Project>{D48EB9A3-AEBC-4EE0-A674-45EFD736926C}</Project>
+      <Name>HelperNET</Name>
+      <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Interfaces\ASCOMExceptions\ASCOM.Exceptions.csproj">
       <Project>{5F6CF410-7B16-4A32-99D2-0D92196C4490}</Project>

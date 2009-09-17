@@ -21,7 +21,13 @@
 // --------------------------------------------------------------------------------
 //
 using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Runtime.InteropServices;
+
+using ASCOM;
+using ASCOM.Helper;
+using ASCOM.Helper2;
 using ASCOM.Interface;
 
 namespace ASCOM.Simulator

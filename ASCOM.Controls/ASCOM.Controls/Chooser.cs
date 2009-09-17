@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using Microsoft.Win32;
 using ASCOM.DriverAccess;
 using System.Collections.Generic;
-using ASCOM.Utilities;
+using ASCOM.HelperNET;
 using System.Diagnostics;
 
 namespace ASCOM.Controls
@@ -213,7 +213,7 @@ namespace ASCOM.Controls
 
 			using (Profile P = new Profile())
 				{
-				ArrayList installedDrivers = P.get_RegisteredDevices(this.DeviceClass);// Changed from Generic.SortedList for COM compatibility
+				SortedList<string, string> installedDrivers = P.get_RegisteredDevices(this.DeviceClass);
 
 				if (installedDrivers.Count == 0)
 					{	// There is no registry key and therefore no drivers of this type are registered.

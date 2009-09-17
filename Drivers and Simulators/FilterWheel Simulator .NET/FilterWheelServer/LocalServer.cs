@@ -21,7 +21,7 @@ using System.Reflection;
 using Microsoft.Win32;
 using System.Text;
 using System.Threading;
-using Helper = ASCOM.Utilities;
+using Helper = ASCOM.HelperNET;
 
 namespace ASCOM.FilterWheelSim
 {
@@ -108,13 +108,12 @@ namespace ASCOM.FilterWheelSim
         private static int m_iObjsInUse;						// Keeps a count on the total number of objects alive.
         private static int m_iServerLocks;						// Keeps a lock count on this application.
         private static bool m_bComStart;						// True if server started by COM (-embedding)
+        private static frmMain m_MainForm = null;				// Reference to our main form
         private static ArrayList m_ComObjectAssys;				// Dynamically loaded assemblies containing served COM objects
         private static ArrayList m_ComObjectTypes;				// Served COM object types
         private static ArrayList m_ClassFactories;				// Served COM object class factories
         private static string m_sAppId = "{59ecdf97-54fd-4d98-9df1-2a88feb417b3}";	// Our AppId
         #endregion
-
-        public static frmHandbox m_MainForm = null;		    // Reference to our main form
 
         // This property returns the main thread's id.
         public static uint MainThreadId { get { return m_uiMainThreadId; } }
@@ -234,22 +233,18 @@ namespace ASCOM.FilterWheelSim
                 // First try to load the assembly and get the types for
                 // the class and the class facctory. If this doesn't work ????
                 //
-				try
-				{
-					Assembly so = Assembly.LoadFrom(aPath);
-					object[] attributes = so.GetCustomAttributes(typeof(ServedClassNameAttribute), false);
-					if (attributes.Length > 0)
-					{
-						m_ComObjectTypes.Add(so.GetType(fqClassName, true));
-						m_ComObjectAssys.Add(so);
-					}
-				}
-				catch (Exception e)
-				{
-					MessageBox.Show("Failed to load served COM class assembly " + fi.Name + " - " + e.Message,
-						"FilterWheelSim", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-					return false;
-				}
+                try
+                {
+                    Assembly so = Assembly.LoadFrom(aPath);
+                    m_ComObjectTypes.Add(so.GetType(fqClassName, true));
+                    m_ComObjectAssys.Add(so);
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show("Failed to load served COM class assembly " + fi.Name + " - " + e.Message,
+                        "FilterWheelSim", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    return false;
+                }
 
             }
             return true;
@@ -364,10 +359,10 @@ namespace ASCOM.FilterWheelSim
                     // ASCOM 
                     //
                     assy = type.Assembly;
-					attr = Attribute.GetCustomAttribute(assy, typeof(ServedClassNameAttribute));
-					string chooserName = ((ServedClassNameAttribute)attr).ServedClassName;
+                    attr = Attribute.GetCustomAttribute(assy, typeof(AssemblyProductAttribute));
+                    string chooserName = ((AssemblyProductAttribute)attr).Product;
                     Helper.Profile P = new Helper.Profile();
-                    P.DeviceType = progid.Substring(progid.LastIndexOf('.') + 1);
+                    P.DeviceType = progid.Substring(progid.LastIndexOf('.') + 1);	//  Requires Helper 5.0.3 or later
                     P.Register(progid, chooserName);
                     try										// In case Helper becomes native .NET
                     {
@@ -555,12 +550,8 @@ namespace ASCOM.FilterWheelSim
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            m_MainForm = new frmHandbox();
-            // if (m_bComStart) m_MainForm.WindowState = FormWindowState.Minimized;
-            // if (m_bComStart) m_MainForm.Visible = false;
-            
-            // Initialize hardware layer
-            SimulatedHardware.Initialize();
+            m_MainForm = new frmMain();
+            if (m_bComStart) m_MainForm.WindowState = FormWindowState.Minimized;
 
             // Register the class factories of the served objects
             RegisterClassFactories();

@@ -1,6 +1,4 @@
-﻿
-
-'tabs=4
+﻿'tabs=4
 ' --------------------------------------------------------------------------------
 '
 ' ASCOM Dome driver for DomeSimulator
@@ -41,7 +39,7 @@ Public Class Dome
 
 
 
-        g_Profile = New Utilities.Profile
+        g_Profile = New HelperNET.Profile
         g_Profile.DeviceType = "Dome"            ' Dome device type
 
 
@@ -157,7 +155,7 @@ Public Class Dome
         End If
 
         g_timer.Interval = TIMER_INTERVAL * 1000
-
+        
         g_handBox.LabelButtons()
         g_handBox.RefreshLEDs()
 
@@ -171,7 +169,7 @@ Public Class Dome
 
     Private Shared Sub RegUnregASCOM(ByVal bRegister As Boolean)
 
-        Dim P As New Utilities.Profile()
+        Dim P As New HelperNET.Profile()
         P.DeviceType = "Dome"           '  Requires Helper 5.0.3 or later
         If bRegister Then
             P.Register(g_csDriverID, g_csDriverDescription)
@@ -196,7 +194,7 @@ Public Class Dome
     Public Shared Sub UnregisterASCOM(ByVal T As Type)
         RegUnregASCOM(False)
     End Sub
-
+    
 #End Region
 
 #Region "Private Methods"
@@ -219,7 +217,7 @@ Public Class Dome
 
     End Sub
 
-
+    
 #End Region
 
 #Region "IDome Impelementation"
