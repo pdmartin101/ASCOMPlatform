@@ -42,16 +42,6 @@ namespace ASCOM.GeminiTelescope
 
         Dictionary<String, Func<CatalogObject, IComparable>> CList = new Dictionary<String, Func<CatalogObject, IComparable>>();
 
-        //Catalog-id is a character selecting
-        // one of the internal catalogues: '1':
-        // Messier, '2': NGC, '3': IC, '4': Sh2,
-        // '7': SAO, ':': LDN, ';': LBN.
-        // Object-id is a numeric designation
-        // of the object in the catalogue; it
-        // can be followed by an extension
-        // character for NGC and IC
-        // catalogues
-        Dictionary<string, string> m_GeminiCatalogs = new Dictionary<string, string>();
 
         public frmUserCatalog()
         {
@@ -69,23 +59,10 @@ namespace ASCOM.GeminiTelescope
             CList.Add("Catalog", o => o.Catalog);
             CList.Add("RA", o => o.RA);
             CList.Add("DEC", o => o.DEC);
-
-            m_GeminiCatalogs.Add("messier", "1");
-            m_GeminiCatalogs.Add("ngc", "2");
-            m_GeminiCatalogs.Add("ic", "3");
-            m_GeminiCatalogs.Add("sharpless hii regions", "4");
-            m_GeminiCatalogs.Add("sao catalog", "7");
-            m_GeminiCatalogs.Add("lynds dark nebulae", ":");  
-            m_GeminiCatalogs.Add("lynds bright nebulae", ";");
-
-
-            gvAllObjects.RowHeadersVisible = false;
-            gvGeminiCatalog.RowHeadersVisible = false;
         }
 
         private void PopulateCatalogs()
         {
-            Cursor.Current = Cursors.WaitCursor;
             string path = "";
             try
             {
@@ -109,7 +86,7 @@ namespace ASCOM.GeminiTelescope
             foreach (System.IO.FileInfo fi in files)
             {
                 string cn = fi.Name.Substring(0, fi.Name.Length - 4);
-                if (LoadCatalog(fi.FullName, cn, m_Objects))
+                if (LoadCatalog(fi.FullName, cn))
                 {
                     int idx = lbCatalogs.Items.Add(cn);
                     string v = GeminiHardware.m_Profile.GetValue(SharedResources.TELESCOPE_PROGRAM_ID, "Catalog " + cn);
@@ -122,10 +99,9 @@ namespace ASCOM.GeminiTelescope
                         lbCatalogs.SetItemChecked(idx, true);
                 }
             }
-            Cursor.Current = Cursors.Default;
         }
 
-        private bool LoadCatalog(string p, string catalog, SerializableDictionary<string, CatalogObject> dict)
+        private bool LoadCatalog(string p, string catalog)
         {
             System.IO.StreamReader fi = null;
 
@@ -136,19 +112,11 @@ namespace ASCOM.GeminiTelescope
                 {
                     string newl = fi.ReadLine();
                     newl.Trim();
-                    if (newl.Length > 0 )
+                    if (newl.Length > 0)
                     {
                         CatalogObject obj = null;
-                        if (newl.Contains(":"))
-                        {
-                            if (CatalogObject.TryParse(newl, catalog, out obj) && !dict.ContainsKey(obj.Name))
-                                dict.Add(obj.Name, obj);
-                        }
-                        else
-                        {
-                            if (CatalogObject.TryParseDouble(newl, catalog, out obj) && !dict.ContainsKey(obj.Name))
-                                dict.Add(obj.Name, obj);
-                        }
+                        if (CatalogObject.TryParse(newl, catalog, out obj) && !m_Objects.ContainsKey(obj.Name))
+                            m_Objects.Add(obj.Name, obj);
                     }
                 }
             }
@@ -170,30 +138,17 @@ namespace ASCOM.GeminiTelescope
             PopulateAllObjects("");
             UpdateGeminiCatalog();
             lbCatalogs.ItemCheck += new ItemCheckEventHandler(lbCatalogs_ItemCheck);
-            SetButtonState();
             GeminiHardware.OnConnect += new ConnectDelegate(OnConnect);
+            OnConnect(true, 1);
         }
 
-        void SetButtonState()
+        void OnConnect(bool bConnect, int clients)
         {
             pbToGemini.Enabled = GeminiHardware.Connected;
             pbFromGemini.Enabled = GeminiHardware.Connected;
             btnGoto.Enabled = GeminiHardware.Connected;
             btnSync.Enabled = GeminiHardware.Connected;
             btnAddAlign.Enabled = GeminiHardware.Connected;
-            if (gvAllObjects.SelectedRows.Count == 1)
-            {
-                string cat = gvAllObjects.SelectedRows[0].Cells["Catalog"].Value.ToString().ToLower();
-                if (GeminiHardware.Connected && m_GeminiCatalogs.ContainsKey(cat))
-                    pbSendtObject.Enabled = true;
-                else
-                    pbSendtObject.Enabled = false;
-            }
-        }
-
-        void OnConnect(bool bConnect, int clients)
-        {
-            SetButtonState();
         }
 
         void PopulateAllObjects(string clicked)
@@ -210,7 +165,7 @@ namespace ASCOM.GeminiTelescope
                 if (lbCatalogs.Items[i].ToString() == clicked) bChecked = !bChecked;
 
                 GeminiHardware.m_Profile.WriteValue(SharedResources.TELESCOPE_PROGRAM_ID, "Catalog " + lbCatalogs.Items[i],
-                    bChecked.ToString());
+                    lbCatalogs.GetItemChecked(i).ToString());
 
                 if (bChecked) wh = wh + lbCatalogs.Items[i].ToString() + ",";
             }
@@ -233,7 +188,6 @@ namespace ASCOM.GeminiTelescope
                 gvAllObjects.Columns["DEC"].DefaultCellStyle.Format = "0.00";
                 gvAllObjects.Columns["RA"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 gvAllObjects.Columns["DEC"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                gvAllObjects.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             }
             catch { }
         }
@@ -318,8 +272,6 @@ namespace ASCOM.GeminiTelescope
                 gvGeminiCatalog.Columns["DEC"].DefaultCellStyle.Format = "0.00";
                 gvGeminiCatalog.Columns["RA"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 gvGeminiCatalog.Columns["DEC"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                gvGeminiCatalog.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-
             }
             catch { }
         }
@@ -377,14 +329,14 @@ namespace ASCOM.GeminiTelescope
         {
             if (GeminiHardware.Connected)
             {
-                Cursor.Current = Cursors.WaitCursor;
+                this.UseWaitCursor = true;
                 SerializableDictionary<string, CatalogObject> cat = GeminiHardware.GetUserCatalog;
                 if (cat != null)
                 {
                     m_GeminiObjects = cat;
                     UpdateGeminiCatalog();
                 }
-                Cursor.Current = Cursors.Default;
+                this.UseWaitCursor = false;
             }
         }
 
@@ -400,7 +352,7 @@ namespace ASCOM.GeminiTelescope
                         res = MessageBox.Show("There are more than 4096 entries in the user catalog! Gemini will only accept the first 4096.\r\nDo you want to continue?", SharedResources.TELESCOPE_DRIVER_NAME, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
                         if (res != DialogResult.Yes) return;
                     }
-                    Cursor.Current = Cursors.WaitCursor;
+                    this.UseWaitCursor = true;
                     var qry = (from o in m_GeminiObjects.Values select o);
                     if (m_GeminiDirectionSort[m_GeminiOrderBy])
                         qry = qry.OrderByDescending(CList[m_GeminiOrderBy]).ThenBy(CList["Name"]);
@@ -408,7 +360,7 @@ namespace ASCOM.GeminiTelescope
                         qry = qry.OrderBy(CList[m_GeminiOrderBy]).ThenBy(CList["Name"]);
 
                     GeminiHardware.SetUserCatalog = qry.ToList();
-                    Cursor.Current = Cursors.Default;
+                    this.UseWaitCursor = false;
                 }
             }
         }
@@ -455,41 +407,25 @@ namespace ASCOM.GeminiTelescope
                     GeminiHardware.AlignEquatorial();
             }
             catch (Exception ex) {
-                MessageBox.Show(this, "Gemini reported an error: " + ex.Message, SharedResources.TELESCOPE_DRIVER_NAME, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("Gemini reported an error: " + ex.Message, SharedResources.TELESCOPE_DRIVER_NAME, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
         }
 
         private void pbToFile_Click(object sender, EventArgs e)
         {
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + "\\ASCOM\\" + SharedResources.TELESCOPE_DRIVER_NAME + "\\Catalogs\\User";
-            try
-            {
-                System.IO.Directory.CreateDirectory(path);
-            }
-            catch
-            {
-            }
-
-            saveFileDialog1.InitialDirectory = path;
-
-            var qry = (from o in m_GeminiObjects.Values select o);
-            if (m_GeminiDirectionSort[m_GeminiOrderBy])
-                qry = qry.OrderByDescending(CList[m_GeminiOrderBy]).ThenBy(CList["Name"]);
-            else
-                qry = qry.OrderBy(CList[m_GeminiOrderBy]).ThenBy(CList["Name"]);
-
-            List<CatalogObject> list = qry.ToList();
-
-
+            saveFileDialog1.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + "\\ASCOM\\" + SharedResources.TELESCOPE_DRIVER_NAME + "\\Catalogs";
             DialogResult res = saveFileDialog1.ShowDialog(this);
             if (res == DialogResult.OK)
             {
                 try
                 {
                     System.IO.StreamWriter fi = System.IO.File.CreateText(saveFileDialog1.FileName);
-                    foreach (CatalogObject obj in list)
+                    foreach (CatalogObject obj in m_GeminiObjects.Values)
                     {
-                        fi.Write(obj.ToString()+"\n");
+                        string s = string.Format("{0},{1},{2}#", obj.Name, GeminiHardware.m_Util.HoursToHMS(obj.RA, ":", ":", ""),
+                            GeminiHardware.m_Util.DegreesToDMS(obj.DEC, ":", ":", ""));
+                        fi.Write(s+"\n");
+
                     }
                     fi.Close();
                 }
@@ -500,75 +436,8 @@ namespace ASCOM.GeminiTelescope
             }
         }
 
-        private void pbFromFile_Click(object sender, EventArgs e)
-        {
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + "\\ASCOM\\" + SharedResources.TELESCOPE_DRIVER_NAME + "\\Catalogs\\User";
-            try
-            {
-                System.IO.Directory.CreateDirectory(path);
-            }
-            catch
-            {
-            }
 
-            openFileDialog1.InitialDirectory = path;
-            
-            DialogResult res = openFileDialog1.ShowDialog(this);
-            if (res == DialogResult.OK)
-            {
-                try
-                {
-                    System.IO.FileInfo fi = new System.IO.FileInfo(openFileDialog1.FileName);
-                    if (LoadCatalog(fi.FullName, fi.Name.Substring(0, fi.Name.Length - fi.Extension.Length), m_GeminiObjects))
-                    {
-                        UpdateGeminiCatalog();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error reading file: " + ex.Message, SharedResources.TELESCOPE_DRIVER_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
 
-            }
-        }
-
-        private void gvAllObjects_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
-        private void gvAllObjects_SelectionChanged(object sender, EventArgs e)
-        {
-            SetButtonState();
-        
-}
-
-        private void pbSendtObject_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (gvAllObjects.SelectedRows.Count == 1)
-                {
-                    string cat = gvAllObjects.SelectedRows[0].Cells["Catalog"].Value.ToString().ToLower();
-
-                    if (m_GeminiCatalogs.ContainsKey(cat))
-                    {
-                        string catnbr = m_GeminiCatalogs[cat];
-                        string id = gvAllObjects.SelectedRows[0].Cells["Name"].Value.ToString();
-                        // strip off the catalog name first:
-                        id = id.TrimStart("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray());
-
-                        // if there's a '-' (as in Sh2-xxx) then remove everything before and including the dash
-                        int i = id.IndexOf('-');
-                        if (i > 0) id = id.Substring(i + 1);
-
-                        string cmd = string.Format(":OI{0}{1}", catnbr, id);
-                        GeminiHardware.DoCommandResult(cmd, GeminiHardware.MAX_TIMEOUT, false);
-                    }
-                }
-            }
-            catch { }
-        }
     }
 
     public class CatalogObject
@@ -605,11 +474,6 @@ namespace ASCOM.GeminiTelescope
             ra = RA;
             dec =DEC;
 
-            GeminiHardware.m_Transform.SiteElevation = GeminiHardware.Elevation;
-            GeminiHardware.m_Transform.SiteLatitude = GeminiHardware.Latitude;
-            GeminiHardware.m_Transform.SiteLongitude = GeminiHardware.Longitude;
-
-
             if (!GeminiHardware.Refraction)
                 GeminiHardware.m_Transform.Refraction = true;
             else
@@ -620,40 +484,11 @@ namespace ASCOM.GeminiTelescope
             else
                 GeminiHardware.m_Transform.SetTopocentric(ra, dec);
 
+            GeminiHardware.m_Transform.SiteElevation = GeminiHardware.Elevation;
+            GeminiHardware.m_Transform.SiteLatitude = GeminiHardware.Latitude;
+            GeminiHardware.m_Transform.SiteLongitude = GeminiHardware.Longitude;
             ra = GeminiHardware.m_Transform.RATopocentric;
             dec = GeminiHardware.m_Transform.DECTopocentric;
-        }
-
-        public override string ToString()
-        {
-            return string.Format("{0},{1},{2}#", Name, GeminiHardware.m_Util.HoursToHMS(RA, ":", ":", ""),
-                        GeminiHardware.m_Util.DegreesToDMS(DEC, ":", ":", ""));
-        }
-
-        internal static bool TryParseDouble(string s, string catalog, out CatalogObject obj)
-        {
-            obj = null;
-            string[] sp = s.Split(new char[] { ',', '#' }, StringSplitOptions.RemoveEmptyEntries);
-            if (sp.Length != 3) return false;
-            try
-            {
-                double ra,dec;
-                if (!double.TryParse(sp[1], out ra)) return false;
-                if (!double.TryParse(sp[2], out dec)) return false;
-
-                obj = new CatalogObject
-                {
-                    Catalog = catalog,
-                    Name = sp[0],
-                    RA=ra/360.0 * 24.0,     // when specified as double, it is in degrees, so convert to hours 
-                    DEC=dec
-                };
-            }
-            catch
-            {
-                return false;
-            }
-            return true;
         }
     }
 }

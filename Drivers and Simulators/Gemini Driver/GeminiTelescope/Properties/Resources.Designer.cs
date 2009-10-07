@@ -725,13 +725,6 @@ namespace ASCOM.GeminiTelescope.Properties {
             }
         }
         
-        internal static System.Drawing.Bitmap minus {
-            get {
-                object obj = ResourceManager.GetObject("minus", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
         /// <summary>
         ///   Looks up a localized string similar to Mount.
         /// </summary>
@@ -1028,13 +1021,6 @@ namespace ASCOM.GeminiTelescope.Properties {
         internal static string PhotoMode {
             get {
                 return ResourceManager.GetString("PhotoMode", resourceCulture);
-            }
-        }
-        
-        internal static System.Drawing.Bitmap plus {
-            get {
-                object obj = ResourceManager.GetObject("plus", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
