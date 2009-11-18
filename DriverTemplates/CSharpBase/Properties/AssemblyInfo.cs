@@ -7,12 +7,12 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 //
 // TODO - Add your authorship information here
-[assembly: AssemblyTitle("$deviceid$")]
-[assembly: AssemblyDescription("ASCOM $deviceclass$ driver for $devicename$")]
+[assembly: AssemblyTitle("DeviceName $safeprojectname$ Driver")]
+[assembly: AssemblyDescription("ASCOM $safeprojectname$ Driver for DeviceName")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("ASCOM Initiative")]
-[assembly: AssemblyProduct("ASCOM $deviceclass$ driver for $devicename$")]
-[assembly: AssemblyCopyright("Copyright © $year$ The ASCOM Initiative")]
+[assembly: AssemblyProduct("")]
+[assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -35,5 +35,5 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 //
 // TODO - Set your driver's version here
-[assembly: AssemblyVersion("5.1.*")]
-[assembly: AssemblyFileVersion("5.1.0.0")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
