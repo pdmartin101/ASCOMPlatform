@@ -78,6 +78,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\CLSCompliant.cs">
+      <Link>CLSCompliant.cs</Link>
+    </Compile>
     <Compile Include="..\SwitchSimulatorDriver\ControllerDeviceState.cs">
       <Link>ControllerDeviceState.cs</Link>
     </Compile>

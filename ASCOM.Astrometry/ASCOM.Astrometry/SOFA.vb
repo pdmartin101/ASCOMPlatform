@@ -35,15 +35,15 @@ Namespace SOFA
     Public Class SOFA
         Implements ISOFA, IDisposable
 
-        Private Const SOFA32DLL As String = "SOFA.dll" 'Names of SOFA 32 and 64bit DLL files
-        Private Const SOFA64DLL As String = "SOFA-64.dll"
+        Private Const SOFA32DLL As String = "SOFA12.dll" 'Names of SOFA 32 and 64bit DLL files
+        Private Const SOFA64DLL As String = "SOFA12-64.dll"
         Private Const SOFA_DLL_LOCATION As String = "\ASCOM\Astrometry\" 'This is appended to the Common Files path so that the calling application can dind the SOFA DLLs
 
         ' Release and revision constants
-        Private Const SOFA_RELEASE_NUMBER As Integer = 14
-        Private Const SOFA_ISSUE_DATE As String = "2018-02-30"
-        Private Const SOFA_REVISION_NUMBER As Integer = 0 ' Not presented in the interface, maintained here for reference
-        Private Const SOFA_REVISION_DATE As String = "2018-02-30"
+        Private Const SOFA_RELEASE_NUMBER As Integer = 12
+        Private Const SOFA_ISSUE_DATE As String = "2016-05-03"
+        Private Const SOFA_REVISION_NUMBER As Integer = 3 ' Not presented in the interface, maintained here for reference
+        Private Const SOFA_REVISION_DATE As String = "2016-12-23"
 
         Private TL As TraceLogger
         Private Utl As Util
@@ -1564,8 +1564,8 @@ Namespace SOFA
         ''' <param name="lpFileName">Full path to the file to load</param>
         ''' <returns>A pointer to the loaded DLL image</returns>
         ''' <remarks>This is a wrapper for the Windows kernel32 function LoadLibraryA</remarks>
-        <DllImport("kernel32.dll", SetLastError:=True, EntryPoint:="LoadLibraryA")>
-        Private Shared Function LoadLibrary(ByVal lpFileName As String) As IntPtr
+        <DllImport("kernel32.dll", SetLastError:=True, EntryPoint:="LoadLibraryA")> _
+        Public Shared Function LoadLibrary(ByVal lpFileName As String) As IntPtr
         End Function
 
         ''' <summary>
@@ -1574,8 +1574,8 @@ Namespace SOFA
         ''' <param name="hModule">Pointer to the loaded library returned by the LoadLibrary function.</param>
         ''' <returns>True or false depending on whether the library was released.</returns>
         ''' <remarks></remarks>
-        <DllImport("kernel32.dll", SetLastError:=True, EntryPoint:="FreeLibrary")>
-        Private Shared Function FreeLibrary(ByVal hModule As IntPtr) As Boolean
+        <DllImport("kernel32.dll", SetLastError:=True, EntryPoint:="FreeLibrary")> _
+        Public Shared Function FreeLibrary(ByVal hModule As IntPtr) As Boolean
         End Function
 
         ''' <summary>

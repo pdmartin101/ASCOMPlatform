@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using ASCOM.Utilities;
 using ASCOM.DeviceInterface;
-using System.Globalization;
 
 namespace ASCOM.Simulator
 {
@@ -161,11 +160,8 @@ namespace ASCOM.Simulator
             {
                 if (testMode)
                 {
-                    Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-                    string driverVersion =  String.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major, version.Minor);
-
-                    TL.LogMessage(clientNumber, "DriverVersion", driverVersion);
-                    return driverVersion;
+                    TL.LogMessage(clientNumber, "DriverVersion", "6.2");
+                    return "6.2";
                 }
                 return Hub.DriverVersion(clientNumber);
             }

@@ -29,8 +29,6 @@ namespace ASCOM.Simulator
             txtMaxStepPosition.Text = _focuser.MaxStep.ToString(CultureInfo.CurrentCulture);
             txtStepSize.Text = _focuser.stepSize.ToString(CultureInfo.CurrentCulture);
             txtMaxIncrement.Text = _focuser.MaxIncrement.ToString(CultureInfo.CurrentCulture);
-            txtSettleTime.Text = _focuser.settleTime.ToString(CultureInfo.CurrentCulture);
-
             txtCurrentTemperature.Text = _focuser.Temperature.ToString(CultureInfo.CurrentCulture);
             txtMaximumTemperature.Text = _focuser.TempMax.ToString(CultureInfo.CurrentCulture);
             txtMinimumTemperature.Text = _focuser.TempMin.ToString(CultureInfo.CurrentCulture);
@@ -42,7 +40,6 @@ namespace ASCOM.Simulator
             chkCanChangeStepSize.Checked = _focuser.CanStepSize;
             chkCanHalt.Checked = _focuser.CanHalt;
             chkIsSynchronous.Checked = _focuser.Synchronous;
-            checkBoxLogging.Checked = _focuser.TL.Enabled;
 
             radAbsoluteFocuser.Checked = _focuser.Absolute;
             radRelativeFocuser.Checked = !radAbsoluteFocuser.Checked;
@@ -64,7 +61,6 @@ namespace ASCOM.Simulator
             _focuser.TempMin = Convert.ToDouble(txtMinimumTemperature.Text, CultureInfo.CurrentCulture);
             _focuser.TempPeriod = Convert.ToDouble(txtUpdatePeriod.Text, CultureInfo.CurrentCulture);
             _focuser.TempSteps = Convert.ToInt32(txtStepsPerDegree.Text, CultureInfo.CurrentCulture);
-            _focuser.settleTime = Convert.ToInt32(txtSettleTime.Text, CultureInfo.CurrentCulture);
 
             //save checkboxes
             _focuser.TempProbe = chkHasTempProbe.Checked;
@@ -72,7 +68,6 @@ namespace ASCOM.Simulator
             _focuser.CanStepSize = chkCanChangeStepSize.Checked;
             _focuser.CanHalt = chkCanHalt.Checked;
             _focuser.Synchronous = chkIsSynchronous.Checked;
-            _focuser.TL.Enabled = checkBoxLogging.Checked;
 
             //save radio button
             _focuser.Absolute = radAbsoluteFocuser.Checked;

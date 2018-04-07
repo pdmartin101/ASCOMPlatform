@@ -104,6 +104,9 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\CLSCompliant.vb">
+      <Link>CLSCompliant.vb</Link>
+    </Compile>
     <Compile Include="Enumerations.vb" />
     <Compile Include="IAxisRates.vb" />
     <Compile Include="ICameraV2.vb" />
@@ -119,7 +122,7 @@
     <Compile Include="IVideo.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="..\AssemblyVersionInfo.vb">
-      <Link>My Project\AssemblyVersionInfo.vb</Link>
+      <Link>My Project\AssemblyVersionInfo.cs</Link>
     </Compile>
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>

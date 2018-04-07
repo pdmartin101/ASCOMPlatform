@@ -14,8 +14,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: ComVisibleAttribute(false)]
-
 // Version information for an assembly consists of the following four values:
 //
 //      Major Version
@@ -23,4 +21,7 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("6.4.0.0")]
+[assembly: AssemblyVersion("6.2.0.0")]
+//[assembly: AssemblyFileVersion("6.0.0.0")]
+
+[assembly: ComVisibleAttribute(false)]

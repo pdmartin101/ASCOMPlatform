@@ -116,6 +116,9 @@
     <Import Include="System.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\CLSCompliant.vb">
+      <Link>CLSCompliant.vb</Link>
+    </Compile>
     <Compile Include="MigrateProfile.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="..\..\AssemblyVersionInfo.vb">

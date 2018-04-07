@@ -39,8 +39,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -53,7 +52,7 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugType>Full</DebugType>
     <DefineDebug>false</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
@@ -157,6 +156,9 @@
     <Import Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\CLSCompliant.vb">
+      <Link>CLSCompliant.vb</Link>
+    </Compile>
     <Compile Include="ApplicationEvents.vb" />
     <Compile Include="ConnectForm.Designer.vb">
       <DependentUpon>ConnectForm.vb</DependentUpon>
@@ -266,10 +268,6 @@
       <Project>{5F6CF410-7B16-4A32-99D2-0D92196C4490}</Project>
       <Name>ASCOM.Exceptions</Name>
       <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\ASCOM.Cache\ASCOM.Cache.csproj">
-      <Project>{e1fcce89-bd43-4625-83ab-44c9a5adb826}</Project>
-      <Name>ASCOM.Cache</Name>
     </ProjectReference>
     <ProjectReference Include="..\ASCOM.Utilities\ASCOM.Utilities.vbproj">
       <Project>{C9BF0A8B-594F-4AB9-938A-EDC8448D8520}</Project>

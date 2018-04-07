@@ -34,7 +34,6 @@ welcome.dfm.miaf
 wizard.dfm
 wizard.dfm.miaf
 $
-ASCOM Platform 6.4.mtx
 ASCOM.Exceptions.dll
 ASCOM.Exceptions.pdb
 FinaliseInstall.exe
@@ -51,17 +50,101 @@ moon.bmp
 readme.rtf
 RemoveASCOM.exe
 RemoveASCOM.pdb
-setup.bmp
 Sleep.exe
 SuppressWinErrors.exe
 SuppressWinErrors.pdb
 swoosh.avi
-translations.English
-translations.Map
-translations.Original
 UninstallAscom.exe
 UninstallAscom.pdb
 $
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1665,90 +1748,40 @@ B
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 $
-COMMONFILES
-COMMONFILES64
-COMMONFILES32
+SHORTCUTFOLDER
+SHORTCUTFILESALL
+SHORTCUTFILES
 $
 1
 4
 TRUE
 
 ASCOM Initiative
-ASCOM Platform 6.4
+ASCOM Platform 6.3
 {8961E141-B307-4882-ABAD-77A3E76A40C1}
 {A6BBF69E-978B-43BE-B8DF-21EFC599A93A}
-6.4.9999.9999
+6.3.9999.9999
 English
-ASCOM Platform 6.4
-ASCOM Platform 6.4 Installation
+ASCOM Platform 6.3
+ASCOM Platform 6.3 Installation
 ASCOM Initiative
 All rights reserved. http://www.ascom-standards.org
-{819B88E7-41DC-43F2-8E72-4BBE9F38744D}
+{C9B0090B-2AED-45CC-AA54-F2A548720FEA}
 ASCOM Initiative
 ASCOM Initiative
 http://tech.groups.yahoo.com/group/ASCOM-Talk
 http://ascom-standards.org/Downloads/Index.htm
-Copyright ï¿½ 1998-2018, The ASCOM Initiative. All rights reserved. 
+Copyright © 1998-2015, The ASCOM Initiative. All rights reserved. 
 FALSE
-ASCOMPlatform64
+ASCOMPlatform63
 TRUE
 FALSE
 
-|
+
 http://timestamp.verisign.com/scripts/timstamp.dll
 
-UAC=requireAdministrator,CACHESOURCES=TRUE,MSI_ALL=FALSE,VM_TARGETFOLDER=%TEMP%,VM_INSTALL_COMMANDLINE=/s,"VM_UNINSTALL_COMMANDLINE=/s MODIFY=FALSE REMOVE=TRUE","VM_UNITTEST=C:\Program Files (x86)\InstallAware X6 Creators Update\unit.exe"
+UAC=requireAdministrator,CACHESOURCES=TRUE
 $
 $
 
@@ -1766,11 +1799,11 @@ FALSE
 checknet351.mia
 checkmsi31.mia
 setupmsi31.mia
+checkvc10_x64.mia
+checkvc10_x86.mia
+setupvc10_x64.mia
+setupvc10_x86.mia
 checknet4client_x86.mia
-checkvc1410_25017_x86.mia
-setupvc1410_25017_x86.mia
-checkvc1410_25017_x64.mia
-setupvc1410_25017_x64.mia
 $
 FALSE
 

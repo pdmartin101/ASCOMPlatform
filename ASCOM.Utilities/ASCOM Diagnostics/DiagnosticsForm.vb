@@ -14,19 +14,10 @@ Imports System.Runtime.InteropServices
 Imports System.Security.AccessControl
 Imports System.Security.Principal
 Imports System.Threading
-Imports System.Text
 
 Public Class DiagnosticsForm
 
-#Region "Constants and Enums"
-    ' Controls to reduce the scope of tests to be run - only set to false to speed up testing during development. Must all be set True for production builds!
-    Private Const TEST_ASTROMETRY As Boolean = True
-    Private Const TEST_CACHE As Boolean = True
-    Private Const TEST_LOGS_AND_APPLICATIONS As Boolean = True
-    Private Const TEST_REGISTRY As Boolean = True
-    Private Const TEST_SIMULATORS As Boolean = True
-    Private Const TEST_UTILITIES As Boolean = True
-
+#Region "Constants and Variables"
     Private Const ASCOM_PLATFORM_NAME As String = "ASCOM Platform 6"
     Private Const INST_DISPLAY_NAME As String = "DisplayName"
     Private Const INST_DISPLAY_VERSION As String = "DisplayVersion"
@@ -50,18 +41,13 @@ Public Class DiagnosticsForm
     Private Const TOLERANCE_E7 As Double = 0.0000001 ' Used in evaluating precision match of double values
     Private Const TOLERANCE_E8 As Double = 0.00000001 ' Used in evaluating precision match of double values
     Private Const TOLERANCE_E9 As Double = 0.000000001
-    Private Const TOLERANCE_100_MILLISECONDS = 0.000027777778 ' 1 arc second in hours also 1 second in degrees
-    Private Const TOLERANCE_1_SECOND = 0.00027777778 ' 1 arc second in hours also 1 second in degrees
-    Private Const TOLERANCE_5_SECONDS = 0.00138888888 ' 1 arc second in hours also 1 second in degrees
-
-    Private Const RADIANS_TO_HOURS As Double = 12.0 / Math.PI
-    Private Const RADIANS_TO_DEGREES As Double = 180.0 / Math.PI
-
     Private Const DOME_SLEW_TIMEOUT As Integer = 240
     Private Const INST_UNINSTALL_STRING As String = "UninstallString"
     Private Const INST_DISPLAY_ICON As String = "DisplayIcon"
 
-    Private Const TEST_DATE As String = "Thursday, 30 December 2010 09:00:00" ' Arbitary test date used to generate NOVASCOM test data, it must conform to the "F" date format for the invariant culture
+    'Astrometry test data for planets obtained from the original 32bit  components
+    'The data is for the arbitary test date Thursday, 30 December 2010 09:00:00" 
+    Private Const TEST_DATE As String = "Thursday, 30 December 2010 09:00:00" ' Arbitary test date used to generate data above, it must conform to the "F" date format for the invariant culture
     Private Const J2000 As Double = 2451545.0 'Julian day for J2000 epoch
     Private Const INDENT As Integer = 3 ' Display indent for recursive loop output
 
@@ -72,25 +58,6 @@ Public Class DiagnosticsForm
     Private Const CSIDL_SYSTEM As Integer = 37 ' 0x0025,
     Private Const CSIDL_SYSTEMX86 As Integer = 41 ' 0x0029,
 
-    Private Const OPTIONS_REGISTRYKEY_BASE As String = "Software\ASCOM\Diagnostics"
-    Private Const OPTIONS_AUTOVIEW_REGISTRYKEY As String = "Diagnostics Auto View Log"
-    Private Const OPTIONS_AUTOVIEW_REGISTRYKEY_DEFAULT As Boolean = False
-
-    Private Enum DoubleType
-        Number
-        Hours0To24
-        Hours0To24InRadians
-        HoursMinus12ToPlus12
-        HoursMinus12ToPlus12InRadians
-        Degrees0To360
-        Degrees0To360InRadians
-        DegreesMinus180ToPlus180
-        DegreesMinus180ToPlus180InRadians
-    End Enum
-
-#End Region
-
-#Region "Variables"
     Private NMatches, NNonMatches, NExceptions As Integer
     Private ErrorList As New Generic.List(Of String)
 
@@ -117,16 +84,15 @@ Public Class DiagnosticsForm
     Private Const ArrayCopySize As Integer = 2
     Private IntArray1D(ArrayCopySize) As Integer, IntArray2D(ArrayCopySize, ArrayCopySize) As Integer, IntArray3D(ArrayCopySize, ArrayCopySize, ArrayCopySize) As Integer
 
-    Private DiagnosticsVersion As Version ' Assembly version number of this executable
-
 #End Region
 
     Private Sub DiagnosticsForm_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         'Initialise form
+        Dim MyVersion As Version
         Dim InstallInformation As Generic.SortedList(Of String, String)
 
         Try
-            DiagnosticsVersion = Assembly.GetExecutingAssembly.GetName.Version
+            MyVersion = Assembly.GetExecutingAssembly.GetName.Version
             InstallInformation = GetInstallInformation(PLATFORM_INSTALLER_PROPDUCT_CODE, False, True, False) 'Retrieve the current install information
             lblTitle.Text = InstallInformation.Item(INST_DISPLAY_NAME) & " - " & InstallInformation.Item(INST_DISPLAY_VERSION)
             lblResult.Text = ""
@@ -135,7 +101,7 @@ Public Class DiagnosticsForm
             lblMessage.Text = "Your diagnostic log will be created in:" & vbCrLf & vbCrLf &
             System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) & "\ASCOM\Logs " & Format(Now, "yyyy-MM-dd")
 
-            btnViewLastLog.Enabled = False 'Disable last log button
+            btnLastLog.Enabled = False 'Disable last log button
             sw = New Stopwatch
 
             If Environment.Is64BitOperatingSystem Then ' We are on a 64bit OS so make both 32 and 64bit Chooser forms available
@@ -147,35 +113,31 @@ Public Class DiagnosticsForm
             End If
 
             RefreshTraceItems() ' Get current values for the trace menu settings
-            MenuAutoViewLog.Checked = GetBool(OPTIONS_AUTOVIEW_REGISTRYKEY, OPTIONS_AUTOVIEW_REGISTRYKEY_DEFAULT) ' Get the auto view log setting
-
             AstroUtil = New AstroUtils.AstroUtils
             Nov3 = New NOVAS.NOVAS3
             Nov31 = New NOVAS.NOVAS31
             AscomUtil = New ASCOM.Utilities.Util
             Me.BringToFront()
-            Me.KeyPreview = True ' Ensure that keypress events are sent to the form so that the keypress event handler can respond to them
         Catch ex As Exception
             EventLogCode.LogEvent("Diagnostics Load", "Exception", EventLogEntryType.Error, EventLogErrors.DiagnosticsLoadException, ex.ToString)
             MsgBox(ex.ToString)
         End Try
     End Sub
 
-    Private Sub RunDiagnostics(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnRunDiagnostics.Click
+    Private Sub btnCOM_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnCOM.Click
         Dim ASCOMPath As String, ApplicationPath As String = "Path Not Set!"
         Dim PathShell As New System.Text.StringBuilder(260)
+        Dim MyVersion As Version
         Dim SuccessMessage As String
-
         Try
             Status("Diagnostics running...")
 
-            TL = New TraceLogger("", "Diagnostics") With {
-                .Enabled = True
-            }
+            TL = New TraceLogger("", "Diagnostics")
+            TL.Enabled = True
 
             btnExit.Enabled = False ' Disable buttons during run
-            btnViewLastLog.Enabled = False
-            btnRunDiagnostics.Enabled = False
+            btnLastLog.Enabled = False
+            btnCOM.Enabled = False
 
             ErrorList.Clear() 'Remove any errors from previous runs
             NMatches = 0
@@ -183,7 +145,8 @@ Public Class DiagnosticsForm
             NExceptions = 0
 
             'Log Diagnostics version information
-            TL.LogMessage("Diagnostics", "Version " & DiagnosticsVersion.ToString & ", " & Application.ProductVersion)
+            MyVersion = Assembly.GetExecutingAssembly.GetName.Version
+            TL.LogMessage("Diagnostics", "Version " & MyVersion.ToString & ", " & Application.ProductVersion)
             TL.BlankLine()
             TL.LogMessage("Date", Date.Now.ToString)
             TL.LogMessage("TimeZoneName", GetTimeZoneName)
@@ -199,13 +162,6 @@ Public Class DiagnosticsForm
                                             " " & CultureInfo.CurrentUICulture.Name &
                                             " Decimal Separator """ & CultureInfo.CurrentUICulture.NumberFormat.NumberDecimalSeparator & """" &
                                             " Number Group Separator """ & CultureInfo.CurrentUICulture.NumberFormat.NumberGroupSeparator & """")
-            If RunningInVM(False) Then
-                TL.LogMessage("Environment", "Diagnostics is running in a virtual machine")
-
-            Else
-                TL.LogMessage("Environment", "Diagnostics is running on a real PC")
-            End If
-
             TL.BlankLine()
 
             LastLogFile = TL.LogFileName
@@ -252,218 +208,189 @@ Public Class DiagnosticsForm
                 Catch ex As Exception
                     LogException("ScanFrameworks", ex.ToString)
                 End Try
-
                 Try
                     ScanSerial() 'Report serial port information
                 Catch ex As Exception
                     LogException("ScanSerial", ex.ToString)
                 End Try
+                Try
+                    ScanASCOMDrivers() : Action("") 'Report installed driver versions
+                Catch ex As Exception
+                    LogException("ScanASCOMDrivers", ex.ToString)
+                End Try
 
-                If TEST_REGISTRY Then
-                    'Scan registry security rights
-                    Try
-                        ScanRegistrySecurity()
-                    Catch ex As Exception
-                        LogException("ScanRegistrySecurity", ex.ToString)
-                    End Try
-                    Try
-                        ScanASCOMDrivers() : Action("") 'Report installed driver versions
-                    Catch ex As Exception
-                        LogException("ScanASCOMDrivers", ex.ToString)
-                    End Try
+                Try
+                    ScanDriverExceptions() : Action("") 'Report drivers listed as exceptions
+                Catch ex As Exception
+                    LogException("ScanDriverExceptions", ex.ToString)
+                End Try
 
-                    Try
-                        ScanDriverExceptions() : Action("") 'Report drivers listed as exceptions
-                    Catch ex As Exception
-                        LogException("ScanDriverExceptions", ex.ToString)
-                    End Try
+                Try
+                    ScanProgramFiles() 'Search for copies of Helper and Helper2.DLL in the wrong places
+                Catch ex As Exception
+                    LogException("ScanProgramFiles", ex.ToString)
+                End Try
 
-                    Try
-                        ScanProgramFiles() 'Search for copies of Helper and Helper2.DLL in the wrong places
-                    Catch ex As Exception
-                        LogException("ScanProgramFiles", ex.ToString)
-                    End Try
+                Try
+                    ScanProfile() : Action("") 'Report profile information
+                Catch ex As Exception
+                    LogException("ScanProfile", ex.ToString)
+                End Try
 
-                    Try
-                        ScanProfile() : Action("") 'Report profile information
-                    Catch ex As Exception
-                        LogException("ScanProfile", ex.ToString)
-                    End Try
+                Try
+                    ScanRegistry() 'Scan Old ASCOM Registry Profile
+                Catch ex As Exception
+                    LogException("ScanInstalledPlatform", ex.ToString)
+                End Try
 
-                    Try
-                        ScanRegistry() 'Scan Old ASCOM Registry Profile
-                    Catch ex As Exception
-                        LogException("ScanInstalledPlatform", ex.ToString)
-                    End Try
+                Try
+                    ScanProfile55Files() : Action("") 'List contents of Profile 5.5 XML files
+                Catch ex As Exception
+                    LogException("ScanProfile55Files", ex.ToString)
+                End Try
 
-                    Try
-                        ScanProfile55Files() : Action("") 'List contents of Profile 5.5 XML files
-                    Catch ex As Exception
-                        LogException("ScanProfile55Files", ex.ToString)
-                    End Try
+                Try
+                    ScanCOMRegistration() 'Report Com Registration
+                Catch ex As Exception
+                    LogException("ScanCOMRegistration", ex.ToString)
+                End Try
 
-                    Try
-                        ScanCOMRegistration() 'Report Com Registration
-                    Catch ex As Exception
-                        LogException("ScanCOMRegistration", ex.ToString)
-                    End Try
+                Try
+                    ScanForHelperHijacking()
+                Catch ex As Exception
+                    LogException("ScanInstalledPlatform", ex.ToString)
+                End Try
 
-                    Try
-                        ScanForHelperHijacking()
-                    Catch ex As Exception
-                        LogException("ScanInstalledPlatform", ex.ToString)
-                    End Try
+                'Scan files on 32 and 64bit systems
+                TL.LogMessage("Platform Files", "")
+                ASCOMPath = GetASCOMPath() 'Get relevant 32 or 64bit path to ACOM files
+                Try
+                    Call ScanPlatformFiles(ASCOMPath) : Action("")
+                Catch ex As Exception
+                    LogException("ScanPlatformFiles", ex.ToString)
+                End Try
 
-                    'Scan files on 32 and 64bit systems
-                    TL.LogMessage("Platform Files", "")
-                    ASCOMPath = GetASCOMPath() 'Get relevant 32 or 64bit path to ACOM files
-                    Try
-                        Call ScanPlatformFiles(ASCOMPath) : Action("")
-                    Catch ex As Exception
-                        LogException("ScanPlatformFiles", ex.ToString)
-                    End Try
+                Try
+                    ScanDeveloperFiles()
+                Catch ex As Exception
+                    LogException("ScanDeveloperFiles", ex.ToString)
+                End Try
 
-                    Try
-                        ScanDeveloperFiles()
-                    Catch ex As Exception
-                        LogException("ScanDeveloperFiles", ex.ToString)
-                    End Try
+                'List GAC contents
+                Try
+                    ScanGac()
+                Catch ex As Exception
+                    LogException("ScanGac", ex.ToString)
+                End Try
 
-                    'List GAC contents
-                    Try
-                        ScanGac()
-                    Catch ex As Exception
-                        LogException("ScanGac", ex.ToString)
-                    End Try
-                End If
+                'List setup files
+                Try
+                    ScanLogs()
+                Catch ex As Exception
+                    LogException("ScanLogs", ex.ToString)
+                End Try
 
-                If TEST_LOGS_AND_APPLICATIONS Then
-                    'List setup files
-                    Try
-                        ScanLogs()
-                    Catch ex As Exception
-                        LogException("ScanLogs", ex.ToString)
-                    End Try
+                'List Platform 6 install logs
+                Try
+                    ScanPlatform6Logs()
+                Catch ex As Exception
+                    LogException("ScanPlatform6Logs", ex.ToString)
+                End Try
 
-                    'List Platform 6 install logs
-                    Try
-                        ScanPlatform6Logs()
-                    Catch ex As Exception
-                        LogException("ScanPlatform6Logs", ex.ToString)
-                    End Try
+                'Scan registry security rights
+                Try
+                    ScanRegistrySecurity()
+                Catch ex As Exception
+                    LogException("ScanRegistrySecurity", ex.ToString)
+                End Try
 
-                    'Scan event log messages
-                    Try
-                        ScanEventLog()
-                    Catch ex As Exception
-                        LogException("ScanEventLog", ex.ToString)
-                    End Try
+                'Scan event log messages
+                Try
+                    ScanEventLog()
+                Catch ex As Exception
+                    LogException("ScanEventLog", ex.ToString)
+                End Try
 
-                    'Scan for ASCOM Applications
-                    Try
-                        ScanApplications()
-                    Catch ex As Exception
-                        LogException("ScanApplications", ex.ToString)
-                    End Try
-                End If
+                'Scan for ASCOM Applications
+                Try
+                    ScanApplications()
+                Catch ex As Exception
+                    LogException("ScanApplications", ex.ToString)
+                End Try
 
                 TL.BlankLine()
                 TL.LogMessage("Diagnostics", "Completed diagnostic run, starting function testing run")
                 TL.BlankLine()
                 TL.BlankLine()
+                Try
+                    'Functional tests
+                    UtilTests() : Action("")
+                Catch ex As Exception
+                    LogException("UtilTests", ex.ToString)
+                End Try
+                Try
+                    ProfileTests() : Action("")
+                Catch ex As Exception
+                    LogException("ProfileTests", ex.ToString)
+                End Try
+                Try
+                    TimerTests() : Action("")
+                Catch ex As Exception
+                    LogException("TimerTests", ex.ToString)
+                End Try
+                Try
+                    NovasComTests() : Action("")
+                Catch ex As Exception
+                    LogException("NovasComTests", ex.ToString)
+                End Try
+                Try
+                    KeplerTests() : Action("")
+                Catch ex As Exception
+                    LogException("KeplerTests", ex.ToString)
+                End Try
 
-                If TEST_UTILITIES Then
-                    Try
-                        'Functional tests
-                        UtilTests() : Action("")
-                    Catch ex As Exception
-                        LogException("UtilTests", ex.ToString)
-                    End Try
-                    Try
-                        ProfileTests() : Action("")
-                    Catch ex As Exception
-                        LogException("ProfileTests", ex.ToString)
-                    End Try
-                    Try
-                        TimerTests() : Action("")
-                    Catch ex As Exception
-                        LogException("TimerTests", ex.ToString)
-                    End Try
-                    Try
-                        VideoUtilsTests() : Action("")
-                    Catch ex As Exception
-                        LogException("VideoUtilsTests", ex.ToString)
-                    End Try
-                End If
+                Try
+                    TransformTest() : Action("")
+                Catch ex As Exception
+                    LogException("TransformTest", ex.ToString)
+                End Try
+                Try
+                    NOVAS2Tests() : Action("")
+                Catch ex As Exception
+                    LogException("NOVAS2Tests", ex.ToString)
+                End Try
+                Try
+                    NOVAS3Tests() : Action("")
+                Catch ex As Exception
+                    LogException("NOVAS3Tests", ex.ToString)
+                End Try
+                Try
+                    NOVAS31Tests() : Action("")
+                Catch ex As Exception
+                    LogException("NOVAS31Tests", ex.ToString)
+                End Try
 
-                If TEST_CACHE Then
-                    Try
-                        CacheTests() : Action("")
-                    Catch ex As Exception
-                        LogException("CacheTests", ex.ToString)
-                    End Try
-                End If
+                Try
+                    SimulatorTests() : Action("")
+                Catch ex As Exception
+                    LogException("SimulatorTests", ex.ToString)
+                End Try
+                Try
+                    AstroUtilsTests() : Action("")
+                Catch ex As Exception
+                    LogException("AstroUtilsTests", ex.ToString)
+                End Try
+                Try
+                    VideoUtilsTests() : Action("")
+                Catch ex As Exception
+                    LogException("VideoUtilsTests", ex.ToString)
+                End Try
 
-                If TEST_ASTROMETRY Then
-                    Try
-                        NovasComTests() : Action("")
-                    Catch ex As Exception
-                        LogException("NovasComTests", ex.ToString)
-                    End Try
-                    Try
-                        KeplerTests() : Action("")
-                    Catch ex As Exception
-                        LogException("KeplerTests", ex.ToString)
-                    End Try
-
-                    Try
-                        TransformTest() : Action("")
-                    Catch ex As Exception
-                        LogException("TransformTest", ex.ToString)
-                    End Try
-                    Try
-                        NOVAS2Tests() : Action("")
-                    Catch ex As Exception
-                        LogException("NOVAS2Tests", ex.ToString)
-                    End Try
-                    Try
-                        NOVAS3Tests() : Action("")
-                    Catch ex As Exception
-                        LogException("NOVAS3Tests", ex.ToString)
-                    End Try
-                    Try
-                        NOVAS31Tests() : Action("")
-                    Catch ex As Exception
-                        LogException("NOVAS31Tests", ex.ToString)
-                    End Try
-                    Try
-                        AstroUtilsTests() : Action("")
-                    Catch ex As Exception
-                        LogException("AstroUtilsTests", ex.ToString)
-                    End Try
-                    Try
-                        SOFATests() : Action("")
-                    Catch ex As Exception
-                        LogException("SOFATests", ex.ToString)
-                    End Try
-                End If
-
-                If TEST_SIMULATORS Then
-                    Try
-                        SimulatorTests() : Action("")
-                    Catch ex As Exception
-                        LogException("SimulatorTests", ex.ToString)
-                    End Try
-                End If
-
-                ' Check that none of the debug assist flags are set!
-                CompareBoolean("Test Configuration", "Astrometry Tests Enabled", TEST_ASTROMETRY, True)
-                CompareBoolean("Test Configuration", "Cache Tests Enabled", TEST_CACHE, True)
-                CompareBoolean("Test Configuration", "Logs and Applications Tests Enabled", TEST_LOGS_AND_APPLICATIONS, True)
-                CompareBoolean("Test Configuration", "Registry Tests Enabled", TEST_REGISTRY, True)
-                CompareBoolean("Test Configuration", "Simulators Tests Enabled", TEST_SIMULATORS, True)
-                CompareBoolean("Test Configuration", "Utilities Tests Enabled", TEST_UTILITIES, True)
-
+                Try
+                    SOFATests() : Action("")
+                Catch ex As Exception
+                    LogException("SOFATests", ex.ToString)
+                End Try
                 If (NNonMatches = 0) And (NExceptions = 0) Then
                     SuccessMessage = "Congratulations, all " & NMatches & " function tests passed!"
                 Else
@@ -494,17 +421,13 @@ Public Class DiagnosticsForm
                 Try : ASCOMRegistryAccess.Dispose() : Catch : End Try 'Clean up registryaccess object
                 ASCOMRegistryAccess = Nothing
             End Try
-
-            btnViewLastLog.Enabled = True ' Enable the view log control and set focus to it
-            Me.ActiveControl = btnViewLastLog
-
-            If (MenuAutoViewLog.Checked) Then Process.Start(LastLogFile) ' If autoi log opening is enabled, open the last log in the system's default text editor
+            btnLastLog.Enabled = True
 
         Catch ex1 As Exception
             lblResult.Text = "Can't create log: " & ex1.Message
         End Try
         btnExit.Enabled = True ' Enable buttons during run
-        btnRunDiagnostics.Enabled = True
+        btnCOM.Enabled = True
     End Sub
 
     Private Sub SOFATests()
@@ -538,9 +461,9 @@ Public Class DiagnosticsForm
 
         SOFA.CelestialToIntermediate(rc, dc, pr, pd, px, rv, date1, date2, ri, di, eo)
 
-        CompareDouble("SOFATests", "CelestialToIntermediate-ri", ri, 2.7101215729690389, TOLERANCE_100_MILLISECONDS, DoubleType.Hours0To24InRadians)
-        CompareDouble("SOFATests", "CelestialToIntermediate-di", di, 0.17293713672182304, TOLERANCE_100_MILLISECONDS, DoubleType.DegreesMinus180ToPlus180InRadians)
-        CompareDouble("SOFATests", "CelestialToIntermediate-eo", eo, -0.0029006187126573756, TOLERANCE_E8)
+        CompareDouble("SOFATests", "CelestialToIntermediate-r1", ri, 2.7101215729690389, 0.000000000001, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("SOFATests", "CelestialToIntermediate-r1", di, 0.17293713672182304, 0.000000000001, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("SOFATests", "CelestialToIntermediate-r1", eo, -0.0029006187126573756, 0.00000000000001)
 
         'Atco13 tests
         rc = 2.71
@@ -564,12 +487,12 @@ Public Class DiagnosticsForm
 
         j = SOFA.CelestialToObserved(rc, dc, pr, pd, px, rv, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, aob, zob, hob, dob, rob, eo)
 
-        CompareDouble("SOFATests", "CelestialToObserved-aob", aob, 0.0925177448538656, TOLERANCE_100_MILLISECONDS, DoubleType.Degrees0To360InRadians)
-        CompareDouble("SOFATests", "CelestialToObserved-zob", zob, 1.4076614052567671, TOLERANCE_100_MILLISECONDS, DoubleType.DegreesMinus180ToPlus180InRadians)
-        CompareDouble("SOFATests", "CelestialToObserved-hob", hob, -0.0926515443143121, TOLERANCE_100_MILLISECONDS, DoubleType.HoursMinus12ToPlus12InRadians)
-        CompareDouble("SOFATests", "CelestialToObserved-dob", dob, 0.17166265600755917, TOLERANCE_100_MILLISECONDS, DoubleType.DegreesMinus180ToPlus180InRadians)
-        CompareDouble("SOFATests", "CelestialToObserved-rob", rob, 2.7102604535030976, TOLERANCE_100_MILLISECONDS, DoubleType.Hours0To24InRadians)
-        CompareDouble("SOFATests", "CelestialToObserved-eo", eo, -0.0030205483548024128, TOLERANCE_E8)
+        CompareDouble("SOFATests", "CelestialToObserved-aob", aob, 0.0925177448535823, 0.000000000001, DoubleDisplayAs.DegreesMinutesSeconds)
+        CompareDouble("SOFATests", "CelestialToObserved-zob", zob, 1.4076614052567671, 0.000000000001, DoubleDisplayAs.DegreesMinutesSeconds)
+        CompareDouble("SOFATests", "CelestialToObserved-hob", hob, -0.092651544314031581, 0.000000000001, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("SOFATests", "CelestialToObserved-dob", dob, 0.17166265600755917, 0.000000000001, DoubleDisplayAs.DegreesMinutesSeconds)
+        CompareDouble("SOFATests", "CelestialToObserved-rob", rob, 2.7102604535030976, 0.000000000001, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("SOFATests", "CelestialToObserved-eo", eo, -0.0030205483548024128, 0.00000000000001)
         CompareInteger("SOFATests", "CelestialToObserved-status", j, 0)
 
         'Dtf2d tests
@@ -592,8 +515,8 @@ Public Class DiagnosticsForm
 
         SOFA.IntermediateToCelestial(ri, di, date1, date2, rc, dc, eo)
 
-        CompareDouble("SOFATests", "IntermediateToCelestial-rc", rc, 2.7101265045313747, TOLERANCE_100_MILLISECONDS, DoubleType.Hours0To24InRadians)
-        CompareDouble("SOFATests", "IntermediateToCelestial-dc", dc, 0.17406325376283424, TOLERANCE_100_MILLISECONDS, DoubleType.DegreesMinus180ToPlus180InRadians)
+        CompareDouble("SOFATests", "IntermediateToCelestial-rc", rc, 2.7101265045313747, 0.000000000001, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("SOFATests", "IntermediateToCelestial-dc", dc, 0.17406325376283424, 0.000000000001, DoubleDisplayAs.DegreesMinutesSeconds)
         CompareDouble("SOFATests", "IntermediateToCelestial-eo", eo, -0.0029006187126573756, 0.00000000000001)
 
         'Atio13 tests
@@ -614,11 +537,11 @@ Public Class DiagnosticsForm
 
         j = SOFA.IntermediateToObserved(ri, di, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, aob, zob, hob, dob, rob)
 
-        CompareDouble("SOFATests", "IntermediateToObserved-aob", aob, 0.0923395222479499, TOLERANCE_100_MILLISECONDS, DoubleType.Degrees0To360InRadians)
-        CompareDouble("SOFATests", "IntermediateToObserved-zob", zob, 1.4077587045137225, TOLERANCE_100_MILLISECONDS, DoubleType.DegreesMinus180ToPlus180InRadians)
-        CompareDouble("SOFATests", "IntermediateToObserved-hob", hob, -0.092476198797820056, TOLERANCE_100_MILLISECONDS, DoubleType.HoursMinus12ToPlus12InRadians)
-        CompareDouble("SOFATests", "IntermediateToObserved-dob", dob, 0.17176534357582651, TOLERANCE_100_MILLISECONDS, DoubleType.DegreesMinus180ToPlus180InRadians)
-        CompareDouble("SOFATests", "IntermediateToObserved-rob", rob, 2.7100851079868864, TOLERANCE_100_MILLISECONDS, DoubleType.Hours0To24InRadians)
+        CompareDouble("SOFATests", "IntermediateToObserved-aob", aob, 0.0923395222479499, 0.000000000001, DoubleDisplayAs.DegreesMinutesSeconds)
+        CompareDouble("SOFATests", "IntermediateToObserved-zob", zob, 1.4077587045137225, 0.000000000001, DoubleDisplayAs.DegreesMinutesSeconds)
+        CompareDouble("SOFATests", "IntermediateToObserved-hob", hob, -0.092476198797820056, 0.000000000001, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("SOFATests", "IntermediateToObserved-dob", dob, 0.17176534357582651, 0.000000000001, DoubleDisplayAs.DegreesMinutesSeconds)
+        CompareDouble("SOFATests", "IntermediateToObserved-rob", rob, 2.7100851079868864, 0.000000000001, DoubleDisplayAs.HoursMinutesSeconds)
         CompareInteger("SOFATests", "IntermediateToObserved-status", j, 0)
 
         'Atoc13 tests
@@ -638,22 +561,22 @@ Public Class DiagnosticsForm
         ob1 = 2.7100851079868864
         ob2 = 0.17176534357582651
         j = SOFA.ObservedToCelestial("R", ob1, ob2, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, rc, dc)
-        CompareDouble("SOFATests", "ObservedToCelestial-R-rc", rc, 2.7099567446610004, TOLERANCE_100_MILLISECONDS, DoubleType.Hours0To24InRadians)
-        CompareDouble("SOFATests", "ObservedToCelestial-R-dc", dc, 0.17416965008953986, TOLERANCE_100_MILLISECONDS, DoubleType.DegreesMinus180ToPlus180InRadians)
+        CompareDouble("SOFATests", "ObservedToCelestial-R-rc", rc, 2.7099567446610004, 0.000000000001, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("SOFATests", "ObservedToCelestial-R-dc", dc, 0.17416965008953986, 0.000000000001, DoubleDisplayAs.DegreesMinutesSeconds)
         CompareInteger("SOFATests", "ObservedToCelestial-R-status", j, 0)
 
         ob1 = -0.092476198797820056
         ob2 = 0.17176534357582651
         j = SOFA.ObservedToCelestial("H", ob1, ob2, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, rc, dc)
-        CompareDouble("SOFATests", "ObservedToCelestial-H-rc", rc, 2.7099567446610004, TOLERANCE_100_MILLISECONDS, DoubleType.Hours0To24InRadians)
-        CompareDouble("SOFATests", "ObservedToCelestial-H-dc", dc, 0.17416965008953986, TOLERANCE_100_MILLISECONDS, DoubleType.DegreesMinus180ToPlus180InRadians)
+        CompareDouble("SOFATests", "ObservedToCelestial-H-rc", rc, 2.7099567446610004, 0.000000000001, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("SOFATests", "ObservedToCelestial-H-dc", dc, 0.17416965008953986, 0.000000000001, DoubleDisplayAs.DegreesMinutesSeconds)
         CompareInteger("SOFATests", "ObservedToCelestial-H-status", j, 0)
 
         ob1 = 0.0923395222479499
         ob2 = 1.4077587045137225
         j = SOFA.ObservedToCelestial("A", ob1, ob2, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, rc, dc)
-        CompareDouble("SOFATests", "ObservedToCelestial-A-rc", rc, 2.7099567446610004, TOLERANCE_100_MILLISECONDS, DoubleType.Hours0To24InRadians)
-        CompareDouble("SOFATests", "ObservedToCelestial-A-dc", dc, 0.17416965008953986, TOLERANCE_100_MILLISECONDS, DoubleType.DegreesMinus180ToPlus180InRadians)
+        CompareDouble("SOFATests", "ObservedToCelestial-A-rc", rc, 2.7099567446610004, 0.000000000001, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("SOFATests", "ObservedToCelestial-A-dc", dc, 0.17416965008953986, 0.000000000001, DoubleDisplayAs.DegreesMinutesSeconds)
         CompareInteger("SOFATests", "ObservedToCelestial-A-status", j, 0)
 
         'Atoi13 tests
@@ -673,22 +596,22 @@ Public Class DiagnosticsForm
         ob1 = 2.7100851079868864
         ob2 = 0.17176534357582651
         j = SOFA.ObservedToIntermediate("R", ob1, ob2, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, ri, di)
-        CompareDouble("SOFATests", "ObservedToIntermediate-ri", ri, 2.7101215744491358, TOLERANCE_100_MILLISECONDS, DoubleType.Hours0To24InRadians)
-        CompareDouble("SOFATests", "ObservedToIntermediate-di", di, 0.17293718391145677, TOLERANCE_100_MILLISECONDS, DoubleType.DegreesMinus180ToPlus180InRadians)
+        CompareDouble("SOFATests", "ObservedToIntermediate-ri", ri, 2.7101215744491358, 0.000000000001, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("SOFATests", "ObservedToIntermediate-di", di, 0.17293718391145677, 0.000000000001, DoubleDisplayAs.DegreesMinutesSeconds)
         CompareInteger("SOFATests", "ObservedToIntermediate-status", j, 0)
 
         ob1 = -0.092476198797820056
         ob2 = 0.17176534357582651
         j = SOFA.ObservedToIntermediate("H", ob1, ob2, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, ri, di)
-        CompareDouble("SOFATests", "ObservedToIntermediate-ri", ri, 2.7101215744491358, TOLERANCE_100_MILLISECONDS, DoubleType.Hours0To24InRadians)
-        CompareDouble("SOFATests", "ObservedToIntermediate-di", di, 0.17293718391145677, TOLERANCE_100_MILLISECONDS, DoubleType.DegreesMinus180ToPlus180InRadians)
+        CompareDouble("SOFATests", "ObservedToIntermediate-ri", ri, 2.7101215744491358, 0.000000000001, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("SOFATests", "ObservedToIntermediate-di", di, 0.17293718391145677, 0.000000000001, DoubleDisplayAs.DegreesMinutesSeconds)
         CompareInteger("SOFATests", "ObservedToIntermediate-status", j, 0)
 
         ob1 = 0.0923395222479499
         ob2 = 1.4077587045137225
         j = SOFA.ObservedToIntermediate("A", ob1, ob2, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, ri, di)
-        CompareDouble("SOFATests", "ObservedToIntermediate-ri", ri, 2.7101215744491358, TOLERANCE_100_MILLISECONDS, DoubleType.Hours0To24InRadians)
-        CompareDouble("SOFATests", "ObservedToIntermediate-di", di, 0.17293718391145677, TOLERANCE_100_MILLISECONDS, DoubleType.DegreesMinus180ToPlus180InRadians)
+        CompareDouble("SOFATests", "ObservedToIntermediate-ri", ri, 2.7101215744491358, 0.000000000001, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("SOFATests", "ObservedToIntermediate-di", di, 0.17293718391145677, 0.000000000001, DoubleDisplayAs.DegreesMinutesSeconds)
         CompareInteger("SOFATests", "ObservedToIntermediate-status", j, 0)
 
         ' TaiTT tests
@@ -938,224 +861,200 @@ Public Class DiagnosticsForm
 
     Private Sub SimulatorTests()
         Dim Sim As SimulatorDescriptor
-        Dim DiagnosticsFullVersionNumber As String
-        Dim DiagnosticsMajorMinorVersionNumber As String
-        Dim DiagnosticsMajorNumber As String
 
-        DiagnosticsFullVersionNumber = DiagnosticsVersion.ToString()
-        DiagnosticsMajorMinorVersionNumber = DiagnosticsVersion.Major.ToString() & "." & DiagnosticsVersion.Minor.ToString()
-        DiagnosticsMajorNumber = DiagnosticsVersion.Major.ToString()
-
-        Sim = New SimulatorDescriptor With {
-            .ProgID = "ASCOM.Simulator.Telescope",
-            .Description = "Platform 6 Telescope Simulator",
-            .DeviceType = "Telescope",
-            .Name = "Simulator",
-            .DriverVersion = DiagnosticsFullVersionNumber,
-            .InterfaceVersion = 3,
-            .IsPlatform5 = False,
-            .SixtyFourBit = True,
-            .AxisRates = New Double(,) {{0.0, 0.5}, {1.0 / 3.0, 1.0}}, ' Axis rates relative to MaxRate
-            .AxisRatesRelative = True
-        }
+        Sim = New SimulatorDescriptor
+        Sim.ProgID = "ASCOM.Simulator.Telescope"
+        Sim.Description = "Platform 6 Telescope Simulator"
+        Sim.DeviceType = "Telescope"
+        Sim.Name = "Simulator"
+        Sim.DriverVersion = "6.2.0.0"
+        Sim.InterfaceVersion = 3
+        Sim.IsPlatform5 = False
+        Sim.SixtyFourBit = True
+        Sim.AxisRates = New Double(,) {{0.0, 0.5}, {1.0 / 3.0, 1.0}} ' Axis rates relative to MaxRate
+        Sim.AxisRatesRelative = True
         TestSimulator(Sim)
         Sim = Nothing
 
-        Sim = New SimulatorDescriptor With {
-            .ProgID = "ScopeSim.Telescope",
-            .Description = "Platform 5 Telescope Simulator",
-            .DeviceType = "Telescope",
-            .Name = "Simulator",
-            .DriverVersion = "5.0",
-            .InterfaceVersion = 2,
-            .IsPlatform5 = True,
-            .SixtyFourBit = True,
-            .AxisRates = New Double(,) {{0.0}, {8.0}}, ' Absolute axis rates
-            .AxisRatesRelative = False
-        }
+        Sim = New SimulatorDescriptor
+        Sim.ProgID = "ScopeSim.Telescope"
+        Sim.Description = "Platform 5 Telescope Simulator"
+        Sim.DeviceType = "Telescope"
+        Sim.Name = "Simulator"
+        Sim.DriverVersion = "5.0"
+        Sim.InterfaceVersion = 2
+        Sim.IsPlatform5 = True
+        Sim.SixtyFourBit = True
+        Sim.AxisRates = New Double(,) {{0.0}, {8.0}} ' Absolute axis rates
+        Sim.AxisRatesRelative = False
         TestSimulator(Sim)
         Sim = Nothing
-
         If True Then
-            Sim = New SimulatorDescriptor With {
-                .ProgID = "CCDSimulator.Camera",
-                .Description = "Platform 5 Camera Simulator",
-                .DeviceType = "Camera",
-                .Name = "ASCOM CCD camera simulator",
-                .DriverVersion = "5.0",
-                .InterfaceVersion = 2,
-                .SixtyFourBit = False,
-                .IsPlatform5 = True
-            }
+            Sim = New SimulatorDescriptor
+            Sim.ProgID = "CCDSimulator.Camera"
+            Sim.Description = "Platform 5 Camera Simulator"
+            Sim.DeviceType = "Camera"
+            Sim.Name = "ASCOM CCD camera simulator"
+            Sim.DriverVersion = "5.0"
+            Sim.InterfaceVersion = 2
+            Sim.SixtyFourBit = False
+            Sim.IsPlatform5 = True
             TestSimulator(Sim)
             Sim = Nothing
 
-            Sim = New SimulatorDescriptor With {
-                .ProgID = "ASCOM.Simulator.Camera",
-                .Description = "Platform 6 Camera Simulator",
-                .DeviceType = "Camera",
-                .Name = "Sim ",
-                .DriverVersion = DiagnosticsMajorMinorVersionNumber,
-                .InterfaceVersion = 2,
-                .IsPlatform5 = False,
-                .SixtyFourBit = True
-            }
+            Sim = New SimulatorDescriptor
+            Sim.ProgID = "ASCOM.Simulator.Camera"
+            Sim.Description = "Platform 6 Camera Simulator"
+            Sim.DeviceType = "Camera"
+            Sim.Name = "Sim "
+            Sim.DriverVersion = "6.2"
+            Sim.InterfaceVersion = 2
+            Sim.IsPlatform5 = False
+            Sim.SixtyFourBit = True
             TestSimulator(Sim)
             Sim = Nothing
 
-            Sim = New SimulatorDescriptor With {
-                .ProgID = "FilterWheelSim.FilterWheel",
-                .Description = "Platform 5 FilterWheel Simulator",
-                .DeviceType = "FilterWheel",
-                .Name = "xxxx",
-                .DriverVersion = "5.0",
-                .InterfaceVersion = 1,
-                .IsPlatform5 = True,
-                .SixtyFourBit = True
-            }
+            Sim = New SimulatorDescriptor
+            Sim.ProgID = "FilterWheelSim.FilterWheel"
+            Sim.Description = "Platform 5 FilterWheel Simulator"
+            Sim.DeviceType = "FilterWheel"
+            Sim.Name = "xxxx"
+            Sim.DriverVersion = "5.0"
+            Sim.InterfaceVersion = 1
+            Sim.IsPlatform5 = True
+            Sim.SixtyFourBit = True
             TestSimulator(Sim)
             Sim = Nothing
 
-            Sim = New SimulatorDescriptor With {
-                .ProgID = "ASCOM.Simulator.FilterWheel",
-                .Description = "Platform 6 FilterWheel Simulator",
-                .DeviceType = "FilterWheel",
-                .Name = "Filter Wheel Simulator .NET",
-                .DriverVersion = DiagnosticsMajorNumber & ".0",
-                .InterfaceVersion = 2,
-                .IsPlatform5 = False,
-                .SixtyFourBit = True
-            }
+            Sim = New SimulatorDescriptor
+            Sim.ProgID = "ASCOM.Simulator.FilterWheel"
+            Sim.Description = "Platform 6 FilterWheel Simulator"
+            Sim.DeviceType = "FilterWheel"
+            Sim.Name = "Filter Wheel Simulator .NET"
+            Sim.DriverVersion = "6.0"
+            Sim.InterfaceVersion = 2
+            Sim.IsPlatform5 = False
+            Sim.SixtyFourBit = True
             TestSimulator(Sim)
             Sim = Nothing
 
-            Sim = New SimulatorDescriptor With {
-                .ProgID = "FocusSim.Focuser",
-                .Description = "Platform 5 Focuser Simulator",
-                .DeviceType = "Focuser",
-                .Name = "Simulator",
-                .DriverVersion = "5.0",
-                .InterfaceVersion = 1,
-                .IsPlatform5 = True,
-                .SixtyFourBit = True
-            }
+            Sim = New SimulatorDescriptor
+            Sim.ProgID = "FocusSim.Focuser"
+            Sim.Description = "Platform 5 Focuser Simulator"
+            Sim.DeviceType = "Focuser"
+            Sim.Name = "Simulator"
+            Sim.DriverVersion = "5.0"
+            Sim.InterfaceVersion = 1
+            Sim.IsPlatform5 = True
+            Sim.SixtyFourBit = True
             TestSimulator(Sim)
             Sim = Nothing
 
-            Sim = New SimulatorDescriptor With {
-                .ProgID = "ASCOM.Simulator.Focuser",
-                .Description = "Platform 6 Focuser Simulator",
-                .DeviceType = "Focuser",
-                .Name = "ASCOM.Simulator.Focuser",
-                .DriverVersion = DiagnosticsMajorMinorVersionNumber,
-                .InterfaceVersion = 2,
-                .IsPlatform5 = False,
-                .SixtyFourBit = True
-            }
+            Sim = New SimulatorDescriptor
+            Sim.ProgID = "ASCOM.Simulator.Focuser"
+            Sim.Description = "Platform 6 Focuser Simulator"
+            Sim.DeviceType = "Focuser"
+            Sim.Name = "ASCOM.Simulator.Focuser"
+            Sim.DriverVersion = "6.0"
+            Sim.InterfaceVersion = 2
+            Sim.IsPlatform5 = False
+            Sim.SixtyFourBit = True
             TestSimulator(Sim)
             Sim = Nothing
 
-            Sim = New SimulatorDescriptor With {
-                .ProgID = "ASCOM.Simulator.SafetyMonitor",
-                .Description = "Platform 6 Safety Monitor Simulator",
-                .DeviceType = "SafetyMonitor",
-                .Name = "ASCOM.Simulator.SafetyMonitor",
-                .DriverVersion = DiagnosticsMajorNumber & ".0",
-                .InterfaceVersion = 2,
-                .IsPlatform5 = False,
-                .SixtyFourBit = True
-            }
+            Sim = New SimulatorDescriptor
+            Sim.ProgID = "ASCOM.Simulator.SafetyMonitor"
+            Sim.Description = "Platform 6 Safety Monitor Simulator"
+            Sim.DeviceType = "SafetyMonitor"
+            Sim.Name = "ASCOM.Simulator.SafetyMonitor"
+            Sim.DriverVersion = "6.0"
+            Sim.InterfaceVersion = 2
+            Sim.IsPlatform5 = False
+            Sim.SixtyFourBit = True
             TestSimulator(Sim)
             Sim = Nothing
 
-            Sim = New SimulatorDescriptor With {
-                .ProgID = "SwitchSim.Switch",
-                .Description = "Platform 5 Switch Simulator",
-                .DeviceType = "Switch",
-                .Name = "Switch Simulator",
-                .DriverVersion = "5.0",
-                .InterfaceVersion = 1,
-                .IsPlatform5 = True,
-                .SixtyFourBit = True
-            }
+            Sim = New SimulatorDescriptor
+            Sim.ProgID = "SwitchSim.Switch"
+            Sim.Description = "Platform 5 Switch Simulator"
+            Sim.DeviceType = "Switch"
+            Sim.Name = "Switch Simulator"
+            Sim.DriverVersion = "5.0"
+            Sim.InterfaceVersion = 1
+            Sim.IsPlatform5 = True
+            Sim.SixtyFourBit = True
             TestSimulator(Sim)
             Sim = Nothing
 
-            Sim = New SimulatorDescriptor With {
-                .ProgID = "ASCOM.Simulator.Switch",
-                .Description = "Platform 6 Switch Simulator",
-                .DeviceType = "Switch",
-                .Name = "ASCOM Switch V2 Simulator",
-                .DriverVersion = DiagnosticsMajorMinorVersionNumber,
-                .InterfaceVersion = 2,
-                .IsPlatform5 = False,
-                .SixtyFourBit = True
-            }
+            Sim = New SimulatorDescriptor
+            Sim.ProgID = "ASCOM.Simulator.Switch"
+            Sim.Description = "Platform 6 Switch Simulator"
+            Sim.DeviceType = "Switch"
+            Sim.Name = "ASCOM Switch V2 Simulator"
+            Sim.DriverVersion = "6.3"
+            Sim.InterfaceVersion = 2
+            Sim.IsPlatform5 = False
+            Sim.SixtyFourBit = True
             TestSimulator(Sim)
             Sim = Nothing
 
-            Sim = New SimulatorDescriptor With {
-                .ProgID = "DomeSim.Dome",
-                .Description = "Dome Simulator",
-                .DeviceType = "Dome",
-                .Name = "Simulator",
-                .DriverVersion = "5.0",
-                .InterfaceVersion = 1,
-                .IsPlatform5 = True,
-                .SixtyFourBit = True
-            }
+            Sim = New SimulatorDescriptor
+            Sim.ProgID = "DomeSim.Dome"
+            Sim.Description = "Dome Simulator"
+            Sim.DeviceType = "Dome"
+            Sim.Name = "Simulator"
+            Sim.DriverVersion = "5.0"
+            Sim.InterfaceVersion = 1
+            Sim.IsPlatform5 = True
+            Sim.SixtyFourBit = True
             TestSimulator(Sim)
             Sim = Nothing
 
-            Sim = New SimulatorDescriptor With {
-                .ProgID = "ASCOM.Simulator.Dome",
-                .Description = "Platform 6 Dome Simulator",
-                .DeviceType = "Dome",
-                .Name = "Simulator",
-                .DriverVersion = DiagnosticsMajorMinorVersionNumber,
-                .InterfaceVersion = 2,
-                .IsPlatform5 = False,
-                .SixtyFourBit = True
-            }
+            Sim = New SimulatorDescriptor
+            Sim.ProgID = "ASCOM.Simulator.Dome"
+            Sim.Description = "Platform 6 Dome Simulator"
+            Sim.DeviceType = "Dome"
+            Sim.Name = "Simulator"
+            Sim.DriverVersion = "6.2"
+            Sim.InterfaceVersion = 2
+            Sim.IsPlatform5 = False
+            Sim.SixtyFourBit = True
             TestSimulator(Sim)
             Sim = Nothing
 
-            Sim = New SimulatorDescriptor With {
-                .ProgID = "ASCOM.Simulator.Video",
-                .Description = "Platform 6 Video Simulator",
-                .DeviceType = "Video",
-                .Name = "Video Simulator",
-                .DriverVersion = DiagnosticsMajorMinorVersionNumber,
-                .InterfaceVersion = 1,
-                .IsPlatform5 = False,
-                .SixtyFourBit = True
-            }
+            Sim = New SimulatorDescriptor
+            Sim.ProgID = "ASCOM.Simulator.Video"
+            Sim.Description = "Platform 6 Video Simulator"
+            Sim.DeviceType = "Video"
+            Sim.Name = "Video Simulator"
+            Sim.DriverVersion = "6.2"
+            Sim.InterfaceVersion = 1
+            Sim.IsPlatform5 = False
+            Sim.SixtyFourBit = True
             TestSimulator(Sim)
             Sim = Nothing
 
-            Sim = New SimulatorDescriptor With {
-                .ProgID = "ASCOM.Simulator.ObservingConditions",
-                .Description = "Platform 6 ObservingConditions Simulator",
-                .DeviceType = "ObservingConditions",
-                .Name = "ASCOM Observing Conditions Simulator",
-                .DriverVersion = DiagnosticsMajorMinorVersionNumber,
-                .InterfaceVersion = 1,
-                .IsPlatform5 = False,
-                .SixtyFourBit = True
-            }
+            Sim = New SimulatorDescriptor
+            Sim.ProgID = "ASCOM.Simulator.ObservingConditions"
+            Sim.Description = "Platform 6 ObservingConditions Simulator"
+            Sim.DeviceType = "ObservingConditions"
+            Sim.Name = "ASCOM Observing Conditions Simulator"
+            Sim.DriverVersion = "6.2"
+            Sim.InterfaceVersion = 1
+            Sim.IsPlatform5 = False
+            Sim.SixtyFourBit = True
             TestSimulator(Sim)
             Sim = Nothing
 
-            Sim = New SimulatorDescriptor With {
-                .ProgID = "ASCOM.OCH.ObservingConditions",
-                .Description = "Platform 6 ObservingConditions Hub",
-                .DeviceType = "ObservingConditionsHub",
-                .Name = "ASCOM Observing Conditions Hub (OCH)",
-                .DriverVersion = DiagnosticsMajorMinorVersionNumber,
-                .InterfaceVersion = 1,
-                .IsPlatform5 = False,
-                .SixtyFourBit = True
-            }
+            Sim = New SimulatorDescriptor
+            Sim.ProgID = "ASCOM.OCH.ObservingConditions"
+            Sim.Description = "Platform 6 ObservingConditions Hub"
+            Sim.DeviceType = "ObservingConditionsHub"
+            Sim.Name = "ASCOM Observing Conditions Hub (OCH)"
+            Sim.DriverVersion = "6.2"
+            Sim.InterfaceVersion = 1
+            Sim.IsPlatform5 = False
+            Sim.SixtyFourBit = True
             TestSimulator(Sim)
             Sim = Nothing
 
@@ -1386,7 +1285,7 @@ Public Class DiagnosticsForm
     End Sub
 
     Private Function DeviceTest(ByVal Device As String, ByVal Test As String) As Object
-        Dim RetVal As Object = Nothing, SiderealTime, RetValDouble, TargetRA As Double, StartTime As Date
+        Dim RetVal As Object = Nothing, SiderealTime, RetValDouble As Double, StartTime As Date
         Dim DeviceTrackingRates As Object
         Dim FocuserMax, FocuserPosition As Integer, FocuserUpperPortion, FocuserTargetPosition As Integer
 
@@ -1508,39 +1407,36 @@ Public Class DiagnosticsForm
                             SiderealTime = DeviceObject.SiderealTime
                             TL.LogMessage(Device, "Received Sidereal time from telescope: " & SiderealTime)
                             RetValDouble = DeviceObject.SiderealTime
-                            CompareDouble(Device, Test, RetValDouble, SiderealTime, TOLERANCE_5_SECONDS, DoubleType.Hours0To24)
+                            CompareDouble(Device, Test, RetValDouble, SiderealTime, 0.000001)
                         Case "TargetDeclination"
                             DeviceObject.TargetDeclination = 0.0
                             RetValDouble = DeviceObject.TargetDeclination
-                            CompareDouble(Device, Test, RetValDouble, 0.0, TOLERANCE_5_SECONDS, DoubleType.DegreesMinus180ToPlus180)
+                            CompareDouble(Device, Test, RetValDouble, 0.0, TOLERANCE_E4)
                         Case "TargetRightAscension"
                             SiderealTime = DeviceObject.SiderealTime
-                            TL.LogMessage(Device, "Received Sidereal time from telescope: " & AscomUtil.HoursToHMS(SiderealTime, ":", ":", "", 3))
+                            TL.LogMessage(Device, "Received Sidereal time from telescope: " & SiderealTime)
                             DeviceObject.TargetRightAscension = SiderealTime
                             TL.LogMessage(Device, "Target RA set to: " & DeviceObject.TargetRightAscension)
                             RetValDouble = DeviceObject.TargetRightAscension
-                            CompareDouble(Device, Test, RetValDouble, SiderealTime, TOLERANCE_5_SECONDS, DoubleType.Hours0To24)
+                            CompareDouble(Device, Test, RetValDouble, SiderealTime, TOLERANCE_E4)
                         Case "Slew"
                             DeviceObject.UnPark()
                             DeviceObject.Tracking = True
                             SiderealTime = DeviceObject.SiderealTime
-                            TL.LogMessage(Device, "Received Sidereal time from telescope: " & AscomUtil.HoursToHMS(SiderealTime, ":", ":", "", 3))
-                            TargetRA = AstroUtil.ConditionRA(SiderealTime - 1.0) ' Set the RA target to be 1 hour before zenith
-                            TL.LogMessage(Device, "Target RA calculated as: " & AscomUtil.HoursToHMS(TargetRA, ":", ":", "", 3))
-                            DeviceObject.TargetRightAscension = TargetRA
-                            TL.LogMessage(Device, "Target RA set to: " & AscomUtil.HoursToHMS(DeviceObject.TargetRightAscension, ":", ":", "", 3))
+                            TL.LogMessage(Device, "Received Sidereal time from telescope: " & SiderealTime)
+                            DeviceObject.TargetRightAscension = SiderealTime
+                            TL.LogMessage(Device, "Target RA set to: " & DeviceObject.TargetRightAscension)
                             DeviceObject.TargetDeclination = 0.0
-                            TL.LogMessage(Device, "Pre-slew RA is: " & AscomUtil.HoursToHMS(DeviceObject.RightAscension, ":", ":", "", 3))
+                            TL.LogMessage(Device, "Pre slew RA is: " & DeviceObject.RightAscension)
                             DeviceObject.SlewToTarget()
-                            Thread.Sleep(1000) ' Wait a short while to ensure the simulator has stabilised
-                            TL.LogMessage(Device, "Post-slew RA is: " & AscomUtil.HoursToHMS(DeviceObject.RightAscension, ":", ":", "", 3))
-                            CompareDouble(Device, Test & " RA", DeviceObject.RightAscension, TargetRA, TOLERANCE_5_SECONDS, DoubleType.Hours0To24)
-                            CompareDouble(Device, Test & " Dec", DeviceObject.Declination, 0.0, TOLERANCE_5_SECONDS, DoubleType.DegreesMinus180ToPlus180)
+                            TL.LogMessage(Device, "Post slew RA is: " & DeviceObject.RightAscension)
+                            CompareDouble(Device, Test, DeviceObject.RightAscension, SiderealTime, TOLERANCE_E4)
+                            CompareDouble(Device, Test, DeviceObject.Declination, 0.0, TOLERANCE_E4)
                         Case "RightAscension"
                             SiderealTime = DeviceObject.SiderealTime
                             DeviceObject.TargetRightAscension = SiderealTime
                             RetValDouble = DeviceObject.TargetRightAscension
-                            CompareDouble(Device, Test, RetValDouble, SiderealTime, TOLERANCE_5_SECONDS, DoubleType.Hours0To24)
+                            CompareDouble(Device, Test, RetValDouble, SiderealTime, TOLERANCE_E4)
                         Case "TrackingRates"
                             Try
                                 DeviceTrackingRates = DeviceObject.TrackingRates
@@ -1603,7 +1499,7 @@ Public Class DiagnosticsForm
                                 Action(Test & " " & Now.Subtract(StartTime).Seconds & " seconds / " & DOME_SLEW_TIMEOUT)
                             Loop Until ((DeviceObject.Slewing = False) Or (Now.Subtract(StartTime).TotalSeconds) > DOME_SLEW_TIMEOUT)
                             Compare(Device, Test & " Not Complete", DeviceObject.Slewing.ToString, "False")
-                            CompareDouble(Device, Test, DeviceObject.Altitude, 45.0, TOLERANCE_5_SECONDS, DoubleType.DegreesMinus180ToPlus180)
+                            CompareDouble(Device, Test, DeviceObject.Altitude, 45.0, 0.00001)
                         Case "SlewToAzimuth"
                             StartTime = Now
                             DeviceObject.SlewToAzimuth(225.0)
@@ -1613,7 +1509,7 @@ Public Class DiagnosticsForm
                                 Action(Test & " " & Now.Subtract(StartTime).Seconds & " seconds / " & DOME_SLEW_TIMEOUT)
                             Loop Until ((DeviceObject.Slewing = False) Or (Now.Subtract(StartTime).TotalSeconds) > DOME_SLEW_TIMEOUT)
                             Compare(Device, Test & " Not Complete", DeviceObject.Slewing.ToString, "False")
-                            CompareDouble(Device, Test, DeviceObject.Azimuth, 225.0, TOLERANCE_5_SECONDS, DoubleType.Degrees0To360)
+                            CompareDouble(Device, Test, DeviceObject.Azimuth, 225.0, 0.00001)
                         Case Else
                             LogException("DeviceTest", "Unknown Dome Test: " & Test)
                     End Select
@@ -1654,7 +1550,7 @@ Public Class DiagnosticsForm
         Return RetVal
     End Function
 
-    Private Enum NOVAS3Functions
+    Enum NOVAS3Functions
         PlanetEphemeris
         ReadEph
         SolarSystem
@@ -1732,7 +1628,7 @@ Public Class DiagnosticsForm
         Wobble
     End Enum
 
-    Private Sub NOVAS3Tests()
+    Sub NOVAS3Tests()
         Status("NOVAS 3 Tests")
 
         NOVAS3Test(NOVAS3Functions.PlanetEphemeris)
@@ -1815,7 +1711,7 @@ Public Class DiagnosticsForm
 
     End Sub
 
-    Private Sub CheckoutStarsFull()
+    Sub CheckoutStarsFull()
         'Port of the NOVAS 3 ChecoutStarsFull.c program to confirm correct iplementation
 
         Const N_STARS As Integer = 3
@@ -1855,13 +1751,12 @@ Public Class DiagnosticsForm
         '/*
         'The(Observer) 's terrestrial coordinates (latitude, longitude, height).
         '*/
-        Dim geo_loc As New OnSurface With {
-            .Latitude = 45.0,
-            .Longitude = -75.0,
-            .Height = 0.0,
-            .Temperature = 10.0,
-            .Pressure = 1010.0
-        }
+        Dim geo_loc As New OnSurface
+        geo_loc.Latitude = 45.0
+        geo_loc.Longitude = -75.0
+        geo_loc.Height = 0.0
+        geo_loc.Temperature = 10.0
+        geo_loc.Pressure = 1010.0
 
         '/*
         'Compute the topocentric places of the three stars at the four
@@ -1903,7 +1798,7 @@ Public Class DiagnosticsForm
 
     End Sub
 
-    Private Sub NOVAS3Test(ByVal TestFunction As NOVAS3Functions)
+    Sub NOVAS3Test(ByVal TestFunction As NOVAS3Functions)
         Dim rc As Integer, CatEnt As New CatEntry3, ObjectJupiter As New Object3, Observer As New Observer, skypos, SkyPos1 As New SkyPos
         Dim OnSurf As New OnSurface
         Dim RA, Dec, Dis, JD, GST, JDTest As Double
@@ -2330,7 +2225,7 @@ Public Class DiagnosticsForm
                     NOVAS.NOVAS2.EarthTilt(JD, MObl, TObl, ee, DPSI, DEps)
                     NOVAS.NOVAS2.SiderealTime(JD, 0.0, ee, GST2)
                     rc = Nov3.SiderealTime(JD, 0.0, DeltaT, GstType.GreenwichApparentSiderealTime, Method.EquinoxBased, Accuracy.Full, GST)
-                    LogRCDouble(TestFunction, "Novas3", "GAST Equinox          ", rc, GST, GST2, TOLERANCE_E5)
+                    LogRCDouble(TestFunction, "Novas3", "GAST Equinox          ", rc, GST, GST2, TOLERANCE_E6)
                 Case NOVAS3Functions.Spin
                     rc = 0
                     Nov3.Spin(20.0, Pos1, Pos2)
@@ -2408,7 +2303,7 @@ Public Class DiagnosticsForm
         Action("")
     End Sub
 
-    Private Sub NOVAS31Tests()
+    Sub NOVAS31Tests()
         Status("NOVAS 3.1 Tests")
 
         NOVAS31Test(NOVAS3Functions.PlanetEphemeris)
@@ -2491,7 +2386,7 @@ Public Class DiagnosticsForm
 
     End Sub
 
-    Private Sub CheckoutStarsFull31()
+    Sub CheckoutStarsFull31()
         'Port of the NOVAS 3 ChecoutStarsFull.c program to confirm correct iplementation
 
         Const N_STARS As Integer = 3
@@ -2530,13 +2425,12 @@ Public Class DiagnosticsForm
         '/*
         'The(Observer) 's terrestrial coordinates (latitude, longitude, height).
         '*/
-        Dim geo_loc As New OnSurface With {
-            .Latitude = 45.0,
-            .Longitude = -75.0,
-            .Height = 0.0,
-            .Temperature = 10.0,
-            .Pressure = 1010.0
-        }
+        Dim geo_loc As New OnSurface
+        geo_loc.Latitude = 45.0
+        geo_loc.Longitude = -75.0
+        geo_loc.Height = 0.0
+        geo_loc.Temperature = 10.0
+        geo_loc.Pressure = 1010.0
 
         '/*
         'Compute the topocentric places of the three stars at the four
@@ -2572,7 +2466,7 @@ Public Class DiagnosticsForm
 
     End Sub
 
-    Private Sub NOVAS31Test(ByVal TestFunction As NOVAS3Functions)
+    Sub NOVAS31Test(ByVal TestFunction As NOVAS3Functions)
         Dim rc As Integer, CatEnt As New CatEntry3, ObjectJupiter As New Object3, Observer As New Observer, skypos, SkyPos1 As New SkyPos
         Dim OnSurf As New OnSurface
         Dim RA, Dec, Dis, JD, GST, JDTest As Double
@@ -3002,7 +2896,7 @@ Public Class DiagnosticsForm
                     NOVAS.NOVAS2.EarthTilt(JD, MObl, TObl, ee, DPSI, DEps)
                     NOVAS.NOVAS2.SiderealTime(JD, 0.0, ee, GST2)
                     rc = Nov31.SiderealTime(JD, 0.0, DeltaT, GstType.GreenwichApparentSiderealTime, Method.EquinoxBased, Accuracy.Full, GST)
-                    LogRCDouble(TestFunction, "Novas31", "GAST Equinox          ", rc, GST, GST2, TOLERANCE_E5)
+                    LogRCDouble(TestFunction, "Novas31", "GAST Equinox          ", rc, GST, GST2, TOLERANCE_E6)
                 Case NOVAS3Functions.Spin
                     rc = 0
                     Nov31.Spin(20.0, Pos1, Pos2)
@@ -3082,7 +2976,7 @@ Public Class DiagnosticsForm
         Action("")
     End Sub
 
-    Private Sub LogRC31(ByVal Test As NOVAS3Functions, ByVal Note As String, ByVal rc As Integer, ByVal msg As String, ByVal Comparison As String)
+    Sub LogRC31(ByVal Test As NOVAS3Functions, ByVal Note As String, ByVal rc As Integer, ByVal msg As String, ByVal Comparison As String)
         Dim LMsg As String
         If Note <> "" Then
             Note = Note & ": "
@@ -3108,7 +3002,7 @@ Public Class DiagnosticsForm
         End If
     End Sub
 
-    Private Sub LogRC(ByVal Test As NOVAS3Functions, ByVal Note As String, ByVal rc As Integer, ByVal msg As String, ByVal Comparison As String)
+    Sub LogRC(ByVal Test As NOVAS3Functions, ByVal Note As String, ByVal rc As Integer, ByVal msg As String, ByVal Comparison As String)
         Dim LMsg As String
         If Note <> "" Then
             Note = Note & ": "
@@ -3134,7 +3028,7 @@ Public Class DiagnosticsForm
         End If
     End Sub
 
-    Private Sub LogRCDouble(ByVal Test As NOVAS3Functions, ByVal Component As String, ByVal Note As String, ByVal rc As Integer, ByVal msg As Double, ByVal Comparison As Double, ByVal Tolerance As Double)
+    Sub LogRCDouble(ByVal Test As NOVAS3Functions, ByVal Component As String, ByVal Note As String, ByVal rc As Integer, ByVal msg As Double, ByVal Comparison As Double, ByVal Tolerance As Double)
 
         If rc = Integer.MaxValue Then ' Test is not implemented
             TL.LogMessage(Component & " *****", "Test " & Test.ToString & " is not implemented")
@@ -3147,7 +3041,7 @@ Public Class DiagnosticsForm
         End If
     End Sub
 
-    Private Enum NOVAS2Functions
+    Enum NOVAS2Functions
         Abberation
         App_Planet
         App_Star
@@ -3193,7 +3087,7 @@ Public Class DiagnosticsForm
         Sun_Eph
     End Enum
 
-    Private Sub NOVAS2Tests()
+    Sub NOVAS2Tests()
         Dim T As Transform.Transform = New Transform.Transform
         Dim u As New Util
         Dim EarthBody, SunBody As New BodyDescription, StarStruct As New CatEntry, LocationStruct As New SiteInfo
@@ -3237,45 +3131,45 @@ Public Class DiagnosticsForm
 
         NOVAS.NOVAS2.StarVectors(StarStruct, POS, VEL)
         NOVAS.NOVAS2.Vector2RADec(POS, RATarget, DECTarget)
-        CompareDouble("Novas2Tests", "J2000 RA Target", RATarget, StarRAJ2000, TOLERANCE_E9, DoubleType.Hours0To24)
-        CompareDouble("Novas2Tests", "J2000 Dec Target", DECTarget, StarDecJ2000, TOLERANCE_E9, DoubleType.Degrees0To360)
+        CompareDouble("Novas2Tests", "J2000 RA Target", RATarget, StarRAJ2000, TOLERANCE_E9, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("Novas2Tests", "J2000 Dec Target", DECTarget, StarDecJ2000, TOLERANCE_E9, DoubleDisplayAs.DegreesMinutesSeconds)
 
         NOVAS.NOVAS2.Precession(J2000, POS, u.JulianDate, POSNow)
         NOVAS.NOVAS2.Vector2RADec(POSNow, RANow, DECNow)
         RC = NOVAS.NOVAS2.TopoStar(JD, EarthBody, 0, StarStruct, LocationStruct, RANow, DECNow)
         Compare("Novas2Tests", "TopoStar RC", RC, 0)
-        CompareDouble("Novas2Tests", "Topo RA", RANow, 12.0098595883453, TOLERANCE_E9, DoubleType.Hours0To24)
-        CompareDouble("Novas2Tests", "Topo Dec", DECNow, 29.933637435611, TOLERANCE_E9, DoubleType.Degrees0To360)
+        CompareDouble("Novas2Tests", "Topo RA", RANow, 12.0098595883453, TOLERANCE_E9, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("Novas2Tests", "Topo Dec", DECNow, 29.933637435611, TOLERANCE_E9, DoubleDisplayAs.DegreesMinutesSeconds)
 
         NOVAS.NOVAS2.RADec2Vector(StarRAJ2000, StarDecJ2000, 10000000000.0, POS)
         NOVAS.NOVAS2.Vector2RADec(POS, RATarget, DECTarget)
-        CompareDouble("Novas2Tests", "RADec2Vector", RATarget, StarRAJ2000, TOLERANCE_E9, DoubleType.Hours0To24)
-        CompareDouble("Novas2Tests", "RADec2Vector", DECTarget, StarDecJ2000, TOLERANCE_E9, DoubleType.Degrees0To360)
+        CompareDouble("Novas2Tests", "RADec2Vector", RATarget, StarRAJ2000, TOLERANCE_E9, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("Novas2Tests", "RADec2Vector", DECTarget, StarDecJ2000, TOLERANCE_E9, DoubleDisplayAs.DegreesMinutesSeconds)
 
         CompareDouble("Novas2Tests", "JulianDate", NOVAS.NOVAS2.JulianDate(2010, 12, 30, 9.0), TestJulianDate, TOLERANCE_E9)
 
         RC = NOVAS.NOVAS2.AstroPlanet(JD, SunBody, EarthBody, RATarget, DECTarget, Distance)
         Compare("Novas2Tests", "AstroPlanet RC", RC, 0)
-        CompareDouble("Novas2Tests", "AstroPlanet RA", RATarget, 18.6090529142058, TOLERANCE_E9, DoubleType.Hours0To24)
-        CompareDouble("Novas2Tests", "AstroPlanet Dec", DECTarget, -23.172110257017, TOLERANCE_E9, DoubleType.Degrees0To360)
+        CompareDouble("Novas2Tests", "AstroPlanet RA", RATarget, 18.6090529142058, TOLERANCE_E9, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("Novas2Tests", "AstroPlanet Dec", DECTarget, -23.172110257017, TOLERANCE_E9, DoubleDisplayAs.DegreesMinutesSeconds)
         CompareDouble("Novas2Tests", "AstroPlanet Dist", Distance, 0.983376046291495, TOLERANCE_E9)
 
         RC = NOVAS.NOVAS2.VirtualPlanet(JD, SunBody, EarthBody, RANow, DECNow, Distance)
         Compare("Novas2Tests", "VirtualPlanet RC", RC, 0)
-        CompareDouble("Novas2Tests", "VirtualPlanet RA", RANow, 18.6086339599669, TOLERANCE_E9, DoubleType.Hours0To24)
-        CompareDouble("Novas2Tests", "VirtualPlanet Dec", DECNow, -23.1724757087899, TOLERANCE_E9, DoubleType.Degrees0To360)
+        CompareDouble("Novas2Tests", "VirtualPlanet RA", RANow, 18.6086339599669, TOLERANCE_E9, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("Novas2Tests", "VirtualPlanet Dec", DECNow, -23.1724757087899, TOLERANCE_E9, DoubleDisplayAs.DegreesMinutesSeconds)
         CompareDouble("Novas2Tests", "VirtualPlanet Dist", Distance, 0.983376046291495, TOLERANCE_E9)
 
         RC = NOVAS.NOVAS2.AppPlanet(JD, SunBody, EarthBody, RANow, DECNow, Distance)
         Compare("Novas2Tests", "AppPlanet RC", RC, 0)
-        CompareDouble("Novas2Tests", "AppPlanet RA", RANow, 18.620097981585, TOLERANCE_E9, DoubleType.Hours0To24)
-        CompareDouble("Novas2Tests", "AppPlanet Dec", DECNow, -23.162343811122, TOLERANCE_E9, DoubleType.Degrees0To360)
+        CompareDouble("Novas2Tests", "AppPlanet RA", RANow, 18.620097981585, TOLERANCE_E9, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("Novas2Tests", "AppPlanet Dec", DECNow, -23.162343811122, TOLERANCE_E9, DoubleDisplayAs.DegreesMinutesSeconds)
         CompareDouble("Novas2Tests", "AppPlanet Dist", Distance, 0.983376046291495, TOLERANCE_E9)
 
         RC = NOVAS.NOVAS2.TopoPlanet(JD, SunBody, EarthBody, 0.0, LocationStruct, RANow, DECNow, Distance)
         Compare("Novas2Tests", "TopoPlanet RC", RC, 0)
-        CompareDouble("Novas2Tests", "TopoPlanet RA", RANow, 18.6201822342814, TOLERANCE_E9, DoubleType.Hours0To24)
-        CompareDouble("Novas2Tests", "TopoPlanet Dec", DECNow, -23.1645247136453, TOLERANCE_E9, DoubleType.Degrees0To360)
+        CompareDouble("Novas2Tests", "TopoPlanet RA", RANow, 18.6201822342814, TOLERANCE_E9, DoubleDisplayAs.HoursMinutesSeconds)
+        CompareDouble("Novas2Tests", "TopoPlanet Dec", DECNow, -23.1645247136453, TOLERANCE_E9, DoubleDisplayAs.DegreesMinutesSeconds)
         CompareDouble("Novas2Tests", "TopoPlanet Dist", Distance, 0.983371860482251, TOLERANCE_E9)
         TL.BlankLine()
 
@@ -3435,11 +3329,11 @@ Public Class DiagnosticsForm
         TL.BlankLine()
     End Sub
 
-    Private Sub CheckRC(ByVal RC As Short, ByVal Section As String, ByVal Name As String)
+    Sub CheckRC(ByVal RC As Short, ByVal Section As String, ByVal Name As String)
         Compare(Section, Name & " Return Code", RC.ToString, "0")
     End Sub
 
-    Private Sub NOVAS2StaticTest(ByVal TestFunction As NOVAS2Functions)
+    Sub NOVAS2StaticTest(ByVal TestFunction As NOVAS2Functions)
         Dim RA, DEC, Dis, POS(2), VEL(2), POS2(2), VEL2(2), EarthVector(2), LightTime, Hour, MObl, TObl, Eq, DPsi, DEps As Double
         Dim RadVel, JD, TDB, DeltaT, x, y, ZD, Az, rar, decr, a(4) As Double, SiteInfo As New ASCOM.Astrometry.SiteInfo
         Dim Gast, MRA, MDEC, LongNutation, ObliqueNutation, TdtJD, SecDiff, ST As Double
@@ -3605,14 +3499,14 @@ Public Class DiagnosticsForm
         End Try
     End Sub
 
-    Private Sub TransformTest()
+    Sub TransformTest()
         TransformTest2000("Deneb", "20:41:25.916", "45:16:49.23", TOLERANCE_E5, TOLERANCE_E4)
         TransformTest2000("Polaris", "02:31:51.263", "89:15:50.68", TOLERANCE_E5, TOLERANCE_E4)
         TransformTest2000("Arcturus", "14:15:38.943", "19:10:37.93", TOLERANCE_E5, TOLERANCE_E4)
         TL.BlankLine()
     End Sub
 
-    Private Sub TransformTest2000(ByVal Name As String, ByVal AstroRAString As String, ByVal AstroDECString As String, ByVal RATolerance As Double, DecTolerance As Double)
+    Sub TransformTest2000(ByVal Name As String, ByVal AstroRAString As String, ByVal AstroDECString As String, ByVal RATolerance As Double, DecTolerance As Double)
         Dim Util As New Util
         Dim AstroRA, AstroDEC As Double
         Dim SiteLat, SiteLong, SiteElev As Double
@@ -3650,8 +3544,8 @@ Public Class DiagnosticsForm
             rc = Nov31.TopoStar(AstroUtil.JulianDateTT(0.0), AstroUtil.DeltaT, Cat3, OnSurface3, Accuracy.Full, RA, DEC)
             TL.LogMessage("TransformTest", Name & " Novas31 RA/DEC Actual  : " & Util.HoursToHMS(TR.RATopocentric, ":", ":", "", 3) & " " & Util.DegreesToDMS(TR.DECTopocentric, ":", ":", "", 3))
             TL.LogMessage("TransformTest", Name & " Novas31 RA/DEC Expected: " & Util.HoursToHMS(RA, ":", ":", "", 3) & " " & Util.DegreesToDMS(DEC, ":", ":", "", 3))
-            CompareDouble("TransformTest", Name & " Novas31 Topocentric RA", TR.RATopocentric, RA, RATolerance, DoubleType.Hours0To24)
-            CompareDouble("TransformTest", Name & " Novas31 Topocentric Dec", TR.DECTopocentric, DEC, DecTolerance, DoubleType.Degrees0To360)
+            CompareDouble("TransformTest", Name & " Novas31 Topocentric RA", TR.RATopocentric, RA, RATolerance, DoubleDisplayAs.HoursMinutesSeconds)
+            CompareDouble("TransformTest", Name & " Novas31 Topocentric Dec", TR.DECTopocentric, DEC, DecTolerance, DoubleDisplayAs.DegreesMinutesSeconds)
 
         Catch ex As Exception
             LogException("TransformTest2000 Exception", ex.ToString)
@@ -3659,12 +3553,10 @@ Public Class DiagnosticsForm
 
     End Sub
 
-    Private Sub NovasComTests()
+    Sub NovasComTests()
         Dim JD As Double
         Dim EA As New ASCOM.Astrometry.NOVASCOM.Earth
 
-        'Astrometry test data for planets obtained from the original 32bit  components
-        'The data is for the arbitary test date Thursday, 30 December 2010 09:00:00" 
         Dim Mercury() As Double = New Double() {-0.146477263357071, -0.739730529540394, -0.275237058490435,
                                                 -0.146552680905756, -0.73971718813053, -0.275232768188589,
                                                 -0.144373027430296, -0.740086172152297, -0.275392756115203,
@@ -3727,13 +3619,12 @@ Public Class DiagnosticsForm
             TL.LogMessage("NovasCom Tests", "Julian Date = " & JD & " = " & TEST_DATE)
             CompareDouble("NovasCom", "JulianDate", JD, 2455560.875, TOLERANCE_E9)
 
-            Dim s As New NOVASCOM.Site With {
-                .Height = 80.0,
-                .Latitude = 51.0,
-                .Longitude = 0.0,
-                .Pressure = 1000.0,
-                .Temperature = 10.0
-            }
+            Dim s As New NOVASCOM.Site
+            s.Height = 80.0
+            s.Latitude = 51.0
+            s.Longitude = 0.0
+            s.Pressure = 1000.0
+            s.Temperature = 10.0
             Dim pv As New NOVASCOM.PositionVector
             pv.SetFromSite(s, 11.0)
             CompareDouble("NovasCom", "SetFromSite X", pv.x, -0.0000259698466733494, TOLERANCE_E9)
@@ -3798,7 +3689,7 @@ Public Class DiagnosticsForm
         Status("")
     End Sub
 
-    Private Sub ComparePosVec(ByVal TestName As String, ByVal st As NOVASCOM.Star, ByVal pv As NOVASCOM.PositionVector, ByVal Results() As Double, ByVal TestAzEl As Boolean, ByVal Tolerance As Double)
+    Sub ComparePosVec(ByVal TestName As String, ByVal st As NOVASCOM.Star, ByVal pv As NOVASCOM.PositionVector, ByVal Results() As Double, ByVal TestAzEl As Boolean, ByVal Tolerance As Double)
         CompareDouble(TestName, "RA Pos", pv.RightAscension, Results(0), Tolerance)
         CompareDouble(TestName, "DEC Pos", pv.Declination, Results(1), Tolerance)
         CompareDouble(TestName, "Dist", pv.Distance, Results(2), Tolerance)
@@ -3818,7 +3709,7 @@ Public Class DiagnosticsForm
         CompareDouble(TestName, "RadVel", st.RadialVelocity, Results(14), Tolerance)
     End Sub
 
-    Private Function TestJulianDate() As Double
+    Function TestJulianDate() As Double
         'Create the Julian date corresponding to the arbitary test date
         Dim Util As New ASCOM.Utilities.Util
         Dim JD As Double
@@ -3828,7 +3719,7 @@ Public Class DiagnosticsForm
         Return JD
     End Function
 
-    Private Sub NovasComTest(ByVal p_Name As String, ByVal p_Num As Double, ByVal JD As Double, ByVal Results() As Double, ByVal Tolerance As Double)
+    Sub NovasComTest(ByVal p_Name As String, ByVal p_Num As Double, ByVal JD As Double, ByVal Results() As Double, ByVal Tolerance As Double)
         Dim pl As New NOVASCOM.Planet
         Dim K, KE As New Kepler.Ephemeris
 
@@ -3882,7 +3773,7 @@ Public Class DiagnosticsForm
         End Try
     End Sub
 
-    Private Sub KeplerTests()
+    Sub KeplerTests()
         Dim JD As Double
         Dim MercuryPosVecs(,) As Double = New Double(,) {{-0.273826054895093, -0.332907079792611, -0.149433886467295, 0.0168077277855921, -0.0131641564589086, -0.00877483629689174},
                                                  {0.341715100611224, -0.15606206441965, -0.118796704430727, 0.00818341889620433, 0.0231859105741514, 0.0115367662530341},
@@ -3895,7 +3786,7 @@ Public Class DiagnosticsForm
         TL.BlankLine()
     End Sub
 
-    Private Sub KeplerTest(ByVal p_Name As String, ByVal p_KepNum As Body, ByVal JD As Double, ByVal Results(,) As Double, ByVal Tolerance As Double)
+    Sub KeplerTest(ByVal p_Name As String, ByVal p_KepNum As Body, ByVal JD As Double, ByVal Results(,) As Double, ByVal Tolerance As Double)
         Dim K As New Kepler.Ephemeris
         Dim POSVEC() As Double
         Dim u As New Util
@@ -3923,10 +3814,9 @@ Public Class DiagnosticsForm
         TL.LogMessage("TimerTests", "Started")
         Status("Timer tests")
         Try
-            ASCOMTimer = New ASCOM.Utilities.Timer With {
-                .Interval = TimerInterval,
-                .Enabled = True
-            }
+            ASCOMTimer = New ASCOM.Utilities.Timer
+            ASCOMTimer.Interval = TimerInterval
+            ASCOMTimer.Enabled = True
             StartTime = Now
             sw.Reset() : sw.Start()
             NumberOfTicks = 0 'Initialise counter
@@ -3956,7 +3846,7 @@ Public Class DiagnosticsForm
         ErrorList.Add(FailingModule & " - " & Msg)
     End Sub
 
-    Private Sub Cnt_TickNet() Handles ASCOMTimer.Tick
+    Private Sub cnt_TickNet() Handles ASCOMTimer.Tick
         Dim Duration As Double
 
         Duration = Now.Subtract(StartTime).TotalSeconds
@@ -3966,7 +3856,7 @@ Public Class DiagnosticsForm
         '        Application.DoEvents()
     End Sub
 
-    Private Sub ProfileTests()
+    Sub ProfileTests()
         Dim RetVal As String = "", RetValProfileKey As New ASCOMProfile
 
         'Dim DrvHlpProf As Object
@@ -4351,7 +4241,7 @@ Public Class DiagnosticsForm
 
     End Sub
 
-    Private Sub CheckSimulator(ByVal Devices As ArrayList, ByVal DeviceType As String, ByVal DeviceName As String)
+    Sub CheckSimulator(ByVal Devices As ArrayList, ByVal DeviceType As String, ByVal DeviceName As String)
         Dim Found As Boolean = False
         For Each Device In Devices
             If Device.Key = DeviceName Then Found = True
@@ -4364,7 +4254,7 @@ Public Class DiagnosticsForm
         End If
     End Sub
 
-    Private Sub ProfileThread(ByVal inst As Integer)
+    Sub ProfileThread(ByVal inst As Integer)
         Dim TL As New TraceLogger("", "ProfileTrace " & inst.ToString)
         Const ts As String = "Test Telescope"
         TL.Enabled = True
@@ -4415,19 +4305,6 @@ Public Class DiagnosticsForm
         End If
     End Sub
 
-    Private Sub CompareString(ByVal p_Section As String, ByVal p_Name As String, ByVal p_New As String, ByVal p_Orig As String)
-        Dim ErrMsg As String
-        If p_New = p_Orig Then
-            TL.LogMessage(p_Section, "Matched " & p_Name & " = " & p_New)
-            NMatches += 1
-        Else
-            ErrMsg = "##### NOT Matched - " & p_Name & " - Received: """ & p_New & """, Expected: """ & p_Orig & """"
-            TL.LogMessageCrLf(p_Section, ErrMsg)
-            NNonMatches += 1
-            ErrorList.Add(p_Section & " - " & ErrMsg)
-        End If
-    End Sub
-
     Private Sub CompareLongInteger(ByVal p_Section As String, ByVal p_Name As String, ByVal p_New As Int64, ByVal p_Orig As Int64)
         Dim ErrMsg As String
         If p_New = p_Orig Then
@@ -4454,140 +4331,74 @@ Public Class DiagnosticsForm
         End If
     End Sub
 
+    Private Enum DoubleDisplayAs
+        Number
+        HoursMinutesSeconds
+        DegreesMinutesSeconds
+    End Enum
+
     Private Sub CompareDouble(ByVal p_Section As String, ByVal p_Name As String, ByVal p_New As Double, ByVal p_Orig As Double, ByVal p_Tolerance As Double)
-        CompareDouble(p_Section, p_Name, p_New, p_Orig, p_Tolerance, DoubleType.Number)
+        CompareDouble(p_Section, p_Name, p_New, p_Orig, p_Tolerance, DoubleDisplayAs.Number)
     End Sub
 
-    Private Sub CompareDouble(ByVal SectionName As String, ByVal ValueName As String, ByVal ActualValue As Double, ByVal ExpectedValue As Double, ByVal Tolerance As Double, CompareType As DoubleType)
-        Dim Divisor, ComparisonValue, LowerValue, HigherValue As Double
-        Dim DisplayNew As String = ""
-        Dim DisplayOriginal As String = ""
-        Dim DisplayTolerance As String = ""
+    Private Sub CompareDouble(ByVal p_Section As String, ByVal p_Name As String, ByVal p_New As Double, ByVal p_Orig As Double, ByVal p_Tolerance As Double, p_DisplayAs As DoubleDisplayAs)
+        Dim ErrMsg As String, Divisor As Double
+        Dim DisplayNew, DisplayOriginal, DisplayTolerance As String
 
-        Divisor = ExpectedValue
+        Divisor = p_Orig
         If Divisor = 0.0 Then Divisor = 1.0 'Deal withpossible divide by zero error
 
-        If (ActualValue > ExpectedValue) Then ' Get the values to be compared into lower and higher values for use in the HMS and DMS comparisons
-            HigherValue = ActualValue
-            LowerValue = ExpectedValue
-        Else
-            HigherValue = ExpectedValue
-            LowerValue = ActualValue
-        End If
+        If System.Math.Abs((p_New - p_Orig) / Divisor) < p_Tolerance Then
+            Select Case p_DisplayAs
+                Case DoubleDisplayAs.DegreesMinutesSeconds
+                    DisplayNew = AscomUtil.DegreesToDMS(p_New, ":", ":", "", 3)
+                    DisplayTolerance = AscomUtil.DegreesToDMS(p_Tolerance, ":", ":", "", 3)
+                Case DoubleDisplayAs.HoursMinutesSeconds
+                    DisplayNew = AscomUtil.HoursToHMS(p_New, ":", ":", "", 3)
+                    DisplayTolerance = AscomUtil.HoursToHMS(p_Tolerance, ":", ":", "", 3)
+                Case DoubleDisplayAs.Number
+                    DisplayNew = p_New.ToString
+                    DisplayTolerance = p_Tolerance.ToString("0.0E0")
+                Case Else
+                    ErrMsg = "The DoubleDisplayAs value: " & p_DisplayAs.ToString & " is not configured in Sub CompareDouble"
+                    TL.LogMessage(p_Section, ErrMsg)
+                    NNonMatches += 1
+                    ErrorList.Add(p_Section & " - " & ErrMsg)
+                    DisplayNew = p_New.ToString
+                    DisplayTolerance = p_Tolerance.ToString
+            End Select
 
-        Select Case CompareType
-            Case DoubleType.Degrees0To360
-                If (HigherValue > 270.0) And (LowerValue < 90.0) Then ' We are comparing across the 0/360 degree discontinuity so we need to add the distances from 0/360 discontinuity of each value
-                    ComparisonValue = (360.0 - HigherValue) + LowerValue ' Calculate the distance of the high value from 360.0 degrees and add this to the lower value to get the difference between the two values.
-                Else
-                    ' No need for special action because both numbers are on the same side of the 0/360 degree discontinuity
-                    ComparisonValue = Math.Abs(ActualValue - ExpectedValue)
-                End If
-                DisplayNew = AscomUtil.DegreesToDMS(ActualValue, ":", ":", "", 3)
-                DisplayOriginal = AscomUtil.DegreesToDMS(ExpectedValue, ":", ":", "", 3)
-                DisplayTolerance = AscomUtil.DegreesToDMS(Tolerance, ":", ":", "", 3) & " Seconds"
-
-            Case DoubleType.Degrees0To360InRadians
-                ActualValue = ActualValue * RADIANS_TO_DEGREES ' Convert from radians to degrees
-                ExpectedValue = ExpectedValue * RADIANS_TO_DEGREES
-                If ((HigherValue > 270.0) And (LowerValue < 90.0)) Then ' We are comparing across the 0/2Pi radian discontinuity so we need to add the distances from 0/2Pi discontinuity of each value
-                    ComparisonValue = (360.0 - HigherValue) + LowerValue ' Calculate the distance of the high value from 360.0 degrees and add this to the lower value to get the difference between the two values.
-                Else
-                    ' No need for special action because both numbers are on the same side of the 0/360 degree discontinuity
-                    ComparisonValue = Math.Abs(ActualValue - ExpectedValue)
-                End If
-                DisplayNew = AscomUtil.DegreesToDMS(ActualValue, ":", ":", "", 3)
-                DisplayOriginal = AscomUtil.DegreesToDMS(ExpectedValue, ":", ":", "", 3)
-                DisplayTolerance = AscomUtil.DegreesToDMS(Tolerance, ":", ":", "", 3) & " Seconds"
-
-            Case DoubleType.DegreesMinus180ToPlus180
-                If (HigherValue > 90.0) And (LowerValue < -90.0) Then ' We are comparing across the -180/+180 degree discontinuity so we need to make both numbers fall onto a continuous stream
-                    ComparisonValue = (180.0 - HigherValue) + (180.0 + LowerValue) ' Calculate the distance of the high value from 180.0 degrees and add this to the lower value to get the difference between the two values.
-                Else
-                    ' No need for special action because both numbers are on the same side of the 0/360 degree discontinuity
-                    ComparisonValue = Math.Abs(ActualValue - ExpectedValue)
-                End If
-                DisplayNew = AscomUtil.DegreesToDMS(ActualValue, ":", ":", "", 3)
-                DisplayOriginal = AscomUtil.DegreesToDMS(ExpectedValue, ":", ":", "", 3)
-                DisplayTolerance = AscomUtil.DegreesToDMS(Tolerance, ":", ":", "", 3) & " Seconds"
-
-            Case DoubleType.DegreesMinus180ToPlus180InRadians
-                ActualValue = ActualValue * RADIANS_TO_DEGREES ' Convert from radians to degrees
-                ExpectedValue = ExpectedValue * RADIANS_TO_DEGREES
-                If (HigherValue > (0.5 * Math.PI)) And (LowerValue < -0.5 * Math.PI) Then ' We are comparing across the -Pi/+Pi degree discontinuity so we need to make both numbers fall onto a continuous stream
-                    ComparisonValue = (Math.PI - HigherValue) + (Math.PI + LowerValue) ' Calculate the distance of the high value from Pi radians and add this to the lower value to get the difference between the two values.
-                Else
-                    ' No need for special action because both numbers are on the same side of the 0/360 degree discontinuity
-                    ComparisonValue = Math.Abs(ActualValue - ExpectedValue)
-                End If
-                DisplayNew = AscomUtil.DegreesToDMS(ActualValue, ":", ":", "", 3)
-                DisplayOriginal = AscomUtil.DegreesToDMS(ExpectedValue, ":", ":", "", 3)
-                DisplayTolerance = AscomUtil.DegreesToDMS(Tolerance, ":", ":", "", 3) & " Seconds"
-
-            Case DoubleType.Hours0To24
-                If (HigherValue > 18.0) And (LowerValue < 6.0) Then ' We are comparing across the 0/24 hour discontinuity so we need to make both numbers fall onto a continuous stream
-                    ComparisonValue = (24.0 - HigherValue) + LowerValue  ' Calculate the distance of the high value from 24.0 hours and add this to the lower value to get the difference between the two values.
-                Else
-                    ' No need for special action because both numbers are on the same side of the 0/24 hour discontinuity
-                    ComparisonValue = Math.Abs(ActualValue - ExpectedValue)
-                End If
-                DisplayNew = AscomUtil.HoursToHMS(ActualValue, ":", ":", "", 3)
-                DisplayOriginal = AscomUtil.HoursToHMS(ExpectedValue, ":", ":", "", 3)
-                DisplayTolerance = AscomUtil.HoursToHMS(Tolerance, ":", ":", "", 3) & " ArcSeconds"
-
-            Case DoubleType.Hours0To24InRadians
-                ActualValue = ActualValue * RADIANS_TO_HOURS ' Convert from radians to hours
-                ExpectedValue = ExpectedValue * RADIANS_TO_HOURS
-                If (HigherValue > 18.0) And (LowerValue < 6.0) Then ' We are comparing across the 0/24 hour discontinuity so we need to make both numbers fall onto a continuous stream
-                    ComparisonValue = (24.0 - HigherValue) + LowerValue  ' Calculate the distance of the high value from 24.0 hours and add this to the lower value to get the difference between the two values.
-                Else
-                    ' No need for special action because both numbers are on the same side of the 0/360 degree discontinuity
-                    ComparisonValue = Math.Abs(ActualValue - ExpectedValue)
-                End If
-                DisplayNew = AscomUtil.HoursToHMS(ActualValue, ":", ":", "", 3)
-                DisplayOriginal = AscomUtil.HoursToHMS(ExpectedValue, ":", ":", "", 3)
-                DisplayTolerance = AscomUtil.HoursToHMS(Tolerance, ":", ":", "", 3) & " ArcSeconds"
-
-            Case DoubleType.HoursMinus12ToPlus12
-                If (HigherValue > 6.0) And (LowerValue < -6.0) Then ' We are comparing across the -12.0/+12.0 hour discontinuity so we need to make both numbers fall onto a continuous stream
-                    ComparisonValue = (12.0 - HigherValue) + (12.0 + LowerValue) ' Calculate the distance of the high value from 12.0 hours and add this to the lower value to get the differnce between the two values.
-                Else
-                    ' No need for special action because both numbers are on the same side of the 0/360 degree discontinuity
-                    ComparisonValue = Math.Abs(ActualValue - ExpectedValue)
-                End If
-                DisplayNew = AscomUtil.HoursToHMS(ActualValue, ":", ":", "", 3)
-                DisplayOriginal = AscomUtil.HoursToHMS(ExpectedValue, ":", ":", "", 3)
-                DisplayTolerance = AscomUtil.HoursToHMS(Tolerance, ":", ":", "", 3) & " ArcSeconds"
-
-            Case DoubleType.HoursMinus12ToPlus12InRadians
-                ActualValue = ActualValue * RADIANS_TO_HOURS ' Convert from radians to hours
-                ExpectedValue = ExpectedValue * RADIANS_TO_HOURS
-                If (HigherValue > 6.0) And (LowerValue < -6.0) Then ' We are comparing across the -12.0/+12.0 hour discontinuity so we need to make both numbers fall onto a continuous stream
-                    ComparisonValue = (12.0 - HigherValue) + (12.0 + LowerValue) ' Calculate the distance of the high value from 12.0 hours and add this to the lower value to get the differnce between the two values.
-                Else
-                    ' No need for special action because both numbers are on the same side of the 0/360 degree discontinuity
-                    ComparisonValue = Math.Abs(ActualValue - ExpectedValue)
-                End If
-                DisplayNew = AscomUtil.HoursToHMS(ActualValue, ":", ":", "", 3)
-                DisplayOriginal = AscomUtil.HoursToHMS(ExpectedValue, ":", ":", "", 3)
-                DisplayTolerance = AscomUtil.HoursToHMS(Tolerance, ":", ":", "", 3) & " ArcSeconds"
-
-            Case DoubleType.Number
-                ComparisonValue = Math.Abs((ActualValue - ExpectedValue) / Divisor) ' For other numbers we will look at the % difference
-                DisplayNew = ActualValue.ToString
-                DisplayOriginal = ExpectedValue.ToString
-                DisplayTolerance = Tolerance.ToString("0.0E0")
-
-            Case Else
-                LogError(SectionName, String.Format("The DoubleType value: {0} is not configured in Sub CompareDouble - this must be fixed before release!", CompareType.ToString))
-                Exit Sub
-        End Select
-
-        If ComparisonValue < Tolerance Then
-            TL.LogMessage(SectionName, String.Format("Matched {0} {1} = {2} within tolerance of {3}", ValueName, DisplayNew, DisplayOriginal, DisplayTolerance))
+            TL.LogMessage(p_Section, "Matched " & p_Name & " = " & DisplayNew & " within tolerance of " & DisplayTolerance)
             NMatches += 1
         Else
-            LogError(SectionName, String.Format("##### NOT Matched - {0} Received: {1}, Expected: {2} within tolerance of {3}", ValueName, DisplayNew, DisplayOriginal, DisplayTolerance))
+
+            Select Case p_DisplayAs
+                Case DoubleDisplayAs.DegreesMinutesSeconds
+                    DisplayNew = AscomUtil.DegreesToDMS(p_New, ":", ":", "", 3)
+                    DisplayOriginal = AscomUtil.DegreesToDMS(p_Orig, ":", ":", "", 3)
+                    DisplayTolerance = AscomUtil.DegreesToDMS(p_Tolerance, ":", ":", "", 3)
+                Case DoubleDisplayAs.HoursMinutesSeconds
+                    DisplayNew = AscomUtil.HoursToHMS(p_New, ":", ":", "", 3)
+                    DisplayOriginal = AscomUtil.HoursToHMS(p_Orig, ":", ":", "", 3)
+                    DisplayTolerance = AscomUtil.HoursToHMS(p_Tolerance, ":", ":", "", 3)
+                Case DoubleDisplayAs.Number
+                    DisplayNew = p_New.ToString
+                    DisplayOriginal = p_Orig.ToString
+                    DisplayTolerance = p_Tolerance.ToString
+                Case Else
+                    ErrMsg = "The DoubleDisplayAs value: " & p_DisplayAs.ToString & " is not configured in Sub CompareDouble"
+                    TL.LogMessage(p_Section, ErrMsg)
+                    NNonMatches += 1
+                    ErrorList.Add(p_Section & " - " & ErrMsg)
+                    DisplayNew = p_New.ToString
+                    DisplayOriginal = p_Orig.ToString
+                    DisplayTolerance = p_Tolerance.ToString
+            End Select
+
+            ErrMsg = "##### NOT Matched - " & p_Name & " - Received: " & DisplayNew & ", Expected: " & DisplayOriginal & " within tolerance of " & DisplayTolerance
+            TL.LogMessage(p_Section, ErrMsg)
+            NNonMatches += 1
+            ErrorList.Add(p_Section & " - " & ErrMsg)
         End If
     End Sub
 
@@ -4774,7 +4585,7 @@ Public Class DiagnosticsForm
     ''' </summary>
     ''' <param name="frame">The frame to initialise</param>
     ''' <remarks></remarks>
-    Private Sub InitFrame2D(ByRef frame As Integer(,))
+    Sub InitFrame2D(ByRef frame As Integer(,))
         Dim i, j As Integer
 
         For i = 0 To frame.GetUpperBound(0) - 1
@@ -4789,7 +4600,7 @@ Public Class DiagnosticsForm
     ''' </summary>
     ''' <param name="frame">The frame to initialise</param>
     ''' <remarks></remarks>
-    Private Sub InitFrame3D(ByRef frame As Integer(,,))
+    Sub InitFrame3D(ByRef frame As Integer(,,))
         Dim i, j, k As Integer
 
         For i = 0 To frame.GetUpperBound(0) - 1
@@ -4806,7 +4617,7 @@ Public Class DiagnosticsForm
     ''' </summary>
     ''' <param name="bm">The bitmap to initialise</param>
     ''' <remarks></remarks>
-    Private Sub InitBitMap(ByRef bm)
+    Sub InitBitMap(ByRef bm)
         bm = New Bitmap(Me.Icon.ToBitmap())
     End Sub
 
@@ -4815,7 +4626,7 @@ Public Class DiagnosticsForm
     ''' </summary>
     ''' <param name="byteArray">The byte array to initialise</param>
     ''' <remarks></remarks>
-    Private Sub ClearByteArray(ByRef byteArray As Byte())
+    Sub ClearByteArray(ByRef byteArray As Byte())
         Dim i As Integer
 
         For i = 0 To byteArray.LongLength - 1
@@ -4829,7 +4640,7 @@ Public Class DiagnosticsForm
     ''' <param name="frame">The frame to checksum</param>
     ''' <returns>The checksum of the frame</returns>
     ''' <remarks></remarks>
-    Private Function CheckSum2DFrame(frame As Integer(,)) As Int64
+    Function CheckSum2DFrame(frame As Integer(,)) As Int64
         Dim sum As Int64
 
         sum = 0
@@ -4848,7 +4659,7 @@ Public Class DiagnosticsForm
     ''' <param name="frame">The frame to checksum</param>
     ''' <returns>The checksum of the frame</returns>
     ''' <remarks></remarks>
-    Private Function CheckSum3DFrame(frame As Integer(,,)) As Int64
+    Function CheckSum3DFrame(frame As Integer(,,)) As Int64
         Dim sum As Int64
 
         sum = 0
@@ -4869,7 +4680,7 @@ Public Class DiagnosticsForm
     ''' <param name="byteArray">The byte array to checksum</param>
     ''' <returns>The checksum of the byte array</returns>
     ''' <remarks></remarks>
-    Private Function CheckSumByteArray(byteArray As Byte()) As Int64
+    Function CheckSumByteArray(byteArray As Byte()) As Int64
         Dim sum As Int64
 
         sum = 0
@@ -4880,537 +4691,7 @@ Public Class DiagnosticsForm
         Return sum
     End Function
 
-    Private Sub CacheTests()
-        If CacheTest("CacheTest", False) Then CacheTest("CacheTestLogged", True)
-    End Sub
-
-    Private Function CacheTest(TestName As String, LogCache As Boolean) As Boolean
-        Dim cache As Cache, returnDouble As Double, returnInt As Integer, returnBool As Boolean, returnString As String, inputObject, returnObject As KeyValuePair
-        Dim removedItemCount As Integer, errorOccured As Boolean = False, throttleLowerBound, throttleUpperBound, numerOfClearItemsToTest As Integer
-        Const THROTTLE_TEST_LOWER_BOUND_NORMAL As Integer = 4900 ' Limits for real PCs
-        Const THROTTLE_TEST_UPPER_BOUND_NORMAL As Integer = 5100
-        Const THROTTLE_TEST_LOWER_BOUND_WIDE As Integer = 4000 ' Limits for virtual machine tests
-        Const THROTTLE_TEST_UPPER_BOUND_WIDE As Integer = 6000
-
-        Const NUMBER_OF_CLEAR_CACHE_ITEMS As Integer = 1000
-        Const NUMBER_OF_THROTTLING_TEST_LOOPS As Integer = 10 ' 10 loops = 5 seconds
-
-        Const testInt As Integer = 23, intKey As String = "IntKey"
-        Const testDouble As Double = 45.639, doubleKey As String = "DoubleKey"
-        Const testBool As Boolean = True, boolKey As String = "BoolKey"
-        Const testString As String = "Cache test string.", stringKey As String = "StringKey"
-        Const testObjectKey As String = "TestKey23", testObjectValue As String = "TestValue23"
-
-        Status("Running Cache functional tests")
-
-        ' Test cached doubles
-        cache = Nothing
-        Try
-            cache = New Cache(IIf(LogCache, TL, Nothing))
-
-            ' Set appropriate timing limts depending on whether or not we are running in a VM
-            ' VM limits are wider because VMWare seems to loose time when threads are slept without pumping events. 
-            ' This approach is needed simply to avoid spurious failures when Diagnostics is run in VM test environments
-            If RunningInVM(True) Then
-                throttleLowerBound = THROTTLE_TEST_LOWER_BOUND_WIDE
-                throttleUpperBound = THROTTLE_TEST_UPPER_BOUND_WIDE
-            Else
-                throttleLowerBound = THROTTLE_TEST_LOWER_BOUND_NORMAL
-                throttleUpperBound = THROTTLE_TEST_UPPER_BOUND_NORMAL
-            End If
-            Try
-                Action("Test Doubles")
-                cache.SetDouble(doubleKey, testDouble, 0.1) ' Set a value with a 100ms lifetime
-                returnDouble = cache.GetDouble(doubleKey)
-                CompareDouble(TestName, "Get Double", returnDouble, testDouble, TOLERANCE_E6)
-            Catch ex As Exception
-                LogException(TestName, "Error getting double value: " & ex.ToString())
-                errorOccured = True
-            End Try
-            Thread.Sleep(150) ' Now wait until the value has timed out and been removed from the cache then test again to make sure an exception is generated
-            Try
-                returnDouble = cache.GetDouble(doubleKey)
-            Catch ex As NotInCacheException
-                NMatches += 1
-                TL.LogMessage(TestName, "InvalidOperationException thrown as expected for expired double value.")
-            Catch ex As Exception
-                LogException(TestName, "Error getting expired double value: " & ex.ToString())
-                errorOccured = True
-            End Try
-
-            ' Test cached int
-            Try
-                Action("Test Integers")
-                cache.SetInt(intKey, testInt, 0.1) ' Set a value with a 100ms lifetime
-                returnInt = cache.GetInt(intKey)
-                CompareInteger(TestName, "Get Int", returnInt, testInt)
-            Catch ex As Exception
-                LogException(TestName, "Error getting int value: " & ex.ToString())
-                errorOccured = True
-            End Try
-            Thread.Sleep(150) ' Now wait until the value has timed out and been removed from the cache then test again to make sure an exception is generated
-            Try
-                returnInt = cache.GetInt(intKey)
-            Catch ex As NotInCacheException
-                NMatches += 1
-                TL.LogMessage(TestName, "InvalidOperationException thrown as expected for expired int value.")
-            Catch ex As Exception
-                LogException(TestName, "Error getting expired int value: " & ex.ToString())
-                errorOccured = True
-            End Try
-
-            ' Test cached bool
-            Try
-                Action("Test Booleans")
-                cache.SetBool(boolKey, testBool, 0.1) ' Set a value with a 100ms lifetime
-                returnBool = cache.GetBool(boolKey)
-                CompareBoolean(TestName, "Get Int", returnBool, testBool)
-            Catch ex As Exception
-                LogException(TestName, "Error getting boolean value: " & ex.ToString())
-                errorOccured = True
-            End Try
-            Thread.Sleep(150) ' Now wait until the value has timed out and been removed from the cache then test again to make sure an exception is generated
-            Try
-                returnBool = cache.GetBool(boolKey)
-            Catch ex As NotInCacheException
-                NMatches += 1
-                TL.LogMessage(TestName, "InvalidOperationException thrown as expected for expired boolean value.")
-            Catch ex As Exception
-                LogException(TestName, "Error getting expired boolean value: " & ex.ToString())
-                errorOccured = True
-            End Try
-
-            ' Test cached string
-            Try
-                Action("Test Strings")
-                cache.SetString(stringKey, testString, 0.1) ' Set a value with a 100ms lifetime
-                returnString = cache.GetString(stringKey)
-                CompareString(TestName, "Get String", returnString, testString)
-            Catch ex As Exception
-                LogException(TestName, "Error getting string value: " & ex.ToString())
-                errorOccured = True
-            End Try
-            Thread.Sleep(150) ' Now wait until the value has timed out and been removed from the cache then test again to make sure an exception is generated
-            Try
-                returnString = cache.GetString(stringKey)
-            Catch ex As NotInCacheException
-                NMatches += 1
-                TL.LogMessage(TestName, "InvalidOperationException thrown as expected for expired string value.")
-            Catch ex As Exception
-                LogException(TestName, "Exception getting expired string value: " & ex.ToString())
-                errorOccured = True
-            End Try
-
-            ' Test cached object
-            Try
-                Action("Test Objects")
-                inputObject = New KeyValuePair With {
-                    .Key = testObjectKey,
-                    .Value = testObjectValue
-                } ' Create a test KeyValuePair oject
-
-                cache.Set(testObjectKey, inputObject, 0.1) ' Set a value with a 100ms lifetime
-                returnObject = cache.Get(testObjectKey)
-
-                CompareString(TestName, "Get Object Key", returnObject.Key, testObjectKey)
-                CompareString(TestName, "Get Object Value", returnObject.Value, testObjectValue)
-            Catch ex As Exception
-                LogException(TestName, "Error getting object: " & ex.ToString())
-                errorOccured = True
-            End Try
-            Thread.Sleep(150) ' Now wait until the value has timed out and been removed from the cache then test again to make sure an exception is generated
-            Try
-                returnObject = cache.Get(testObjectKey)
-            Catch ex As NotInCacheException
-                NMatches += 1
-                TL.LogMessage(TestName, "InvalidOperationException thrown as expected for expired object.")
-            Catch ex As Exception
-                LogException(TestName, "Exception getting expired object: " & ex.ToString())
-                errorOccured = True
-            End Try
-
-            ' Test throttling without pumped events
-            Try
-                cache.SetDouble(doubleKey, testDouble, 100.0) ' Set a value with a 100 second lifetime, so it doesn't time out within the text
-                cache.PumpMessagesInterval = 0
-                returnDouble = cache.GetDouble(doubleKey) ' Do a first get outside the loop so that all subsequqnt gets will be throttled 
-
-                ' Make 10 calls that should be limited to 2 calls per second, i.e. the overall test should take about 5 seconds
-                sw.Restart()
-                For i = 1 To NUMBER_OF_THROTTLING_TEST_LOOPS
-                    Action("Test Throttling without pumped events " & i & "/" & NUMBER_OF_THROTTLING_TEST_LOOPS)
-                    returnDouble = cache.GetDouble(doubleKey, 2.0) ' Get the value with a maximum rate of 2 calls per second
-                Next
-                sw.Stop()
-
-                If ((sw.ElapsedMilliseconds > THROTTLE_TEST_LOWER_BOUND_NORMAL) And (sw.ElapsedMilliseconds < throttleUpperBound)) Then ' elapsed time is within +-10% of expected 5 seconds
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("Cache throttling timing: {0} milliseconds is inside the expected range of {1} to {2} milliseconds", sw.ElapsedMilliseconds, throttleLowerBound, throttleUpperBound))
-                Else ' Outside the range so log an error
-                    LogError(TestName, String.Format("Cache throttling timing: {0} milliseconds is outside the expected range of {1} to {2} milliseconds", sw.ElapsedMilliseconds, throttleLowerBound, throttleUpperBound))
-                End If
-            Catch ex As Exception
-                LogException(TestName, "Exception testing throttling without pumped events: " & ex.ToString())
-                errorOccured = True
-            End Try
-
-            ' Test throttling with pumped events
-            Try
-                cache.SetDouble(doubleKey, testDouble, 100.0) ' Set a value with a 100 second lifetime, so it doesn't time out within the text
-                cache.PumpMessagesInterval = 20
-                returnDouble = cache.GetDouble(doubleKey) ' Do a first get outside the loop so that all subsequqnt gets will be throttled 
-
-                ' Make 10 calls that should be limited to 2 calls per second, i.e. the overall test should take about 5 seconds
-                sw.Restart()
-                For i = 1 To NUMBER_OF_THROTTLING_TEST_LOOPS
-                    Action("Test Throttling with pumped events " & i & "/" & NUMBER_OF_THROTTLING_TEST_LOOPS)
-                    returnDouble = cache.GetDouble(doubleKey, 2.0) ' Get the value with a maximum rate of 2 calls per second
-                Next
-                sw.Stop()
-
-                If ((sw.ElapsedMilliseconds > THROTTLE_TEST_LOWER_BOUND_NORMAL) And (sw.ElapsedMilliseconds < throttleUpperBound)) Then ' elapsed time is within +-10% of expected 5 seconds
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("Cache throttling timing (with event pumping ): {0} milliseconds is inside the expected range of {1} to {2} milliseconds", sw.ElapsedMilliseconds, throttleLowerBound, throttleUpperBound))
-                Else ' Outside the range so log an error
-                    LogError(TestName, String.Format("Cache throttling timing (with event pumping): {0} milliseconds is outside the expected range of {1} to {2} milliseconds", sw.ElapsedMilliseconds, throttleLowerBound, throttleUpperBound))
-                End If
-            Catch ex As Exception
-                LogException(TestName, "Exception testing throttling with pumped events: " & ex.ToString())
-                errorOccured = True
-            End Try
-
-            ' Test cache item removal
-            Try
-                cache = New Cache(IIf(LogCache, TL, Nothing)) ' Create a new cache with nothing in it
-                Action("Test item removal")
-                cache.SetInt(intKey, testInt, 0.1) ' Set a value with a 100ms lifetime
-                returnInt = cache.GetInt(intKey) ' Check that it is there
-                CompareInteger(TestName, "Get Int", returnInt, testInt)
-
-                ' Now remove the item and check that it is gone
-                cache.Remove(intKey)
-                Try
-                    returnInt = cache.GetInt(intKey)
-                Catch ex As NotInCacheException
-                    NMatches += 1
-                    TL.LogMessage(TestName, "InvalidOperationException thrown as expected for removed int value.")
-                End Try
-            Catch ex As Exception
-                LogException(TestName, "Error getting or removing item: " & ex.ToString())
-                errorOccured = True
-            End Try
-
-            ' Test clearing of entire cache
-            Try
-                cache = New Cache(IIf(LogCache, TL, Nothing)) ' Create a new cache with nothing in it
-                Action("Clear cache - Populating cache")
-                sw.Restart()
-                For i = 1 To NUMBER_OF_CLEAR_CACHE_ITEMS ' Create 100 entries in the cache
-                    cache.SetInt(intKey & i, testInt, 10.0) ' Set values with a 10s lifetime
-                Next
-                sw.Stop()
-                NMatches += 1
-                TL.LogMessage(TestName, String.Format("Cache populated {0} items in {1} milliseconds ({2} milliseconds per item).", NUMBER_OF_CLEAR_CACHE_ITEMS, sw.Elapsed.TotalMilliseconds.ToString("0.000"), (sw.Elapsed.TotalMilliseconds / NUMBER_OF_CLEAR_CACHE_ITEMS).ToString("0.000")))
-
-                ' Check that all can be read
-                Action("Clear cache - Reading items")
-                sw.Restart()
-                For i = 1 To NUMBER_OF_CLEAR_CACHE_ITEMS
-                    returnInt = cache.GetInt(intKey & i) ' Check that it is there
-                Next
-                sw.Stop()
-                NMatches += 1
-                TL.LogMessage(TestName, String.Format("Cache read back {0} items OK in {1} milliseconds ({2} milliseconds per item).", NUMBER_OF_CLEAR_CACHE_ITEMS, sw.Elapsed.TotalMilliseconds.ToString("0.000"), (sw.Elapsed.TotalMilliseconds / NUMBER_OF_CLEAR_CACHE_ITEMS).ToString("0.000")))
-
-                ' Now clear the cache and check that all values are gone
-                Action("Clear cache - clearing cache")
-                sw.Restart()
-                cache.ClearCache()
-                sw.Stop()
-                NMatches += 1
-                TL.LogMessage(TestName, String.Format("Cache cleared of {0} items in {1} milliseconds ({2} milliseconds per item).", NUMBER_OF_CLEAR_CACHE_ITEMS, sw.Elapsed.TotalMilliseconds.ToString("0.000"), (sw.Elapsed.TotalMilliseconds / NUMBER_OF_CLEAR_CACHE_ITEMS).ToString("0.000")))
-
-                Action("Clear cache - Confirming cache is empty")
-
-                If (Debugger.IsAttached) Then
-
-                End If
-
-                removedItemCount = 0 ' Initialise count of number of items removed
-
-                ' The "item is removed" test is very slow when run in Visual Studio, which attaches a debugger that slows exception handling, so reduce the number of tests in this circumstance.
-                numerOfClearItemsToTest = IIf(Debugger.IsAttached, NUMBER_OF_CLEAR_CACHE_ITEMS / 50, NUMBER_OF_CLEAR_CACHE_ITEMS)
-                sw.Restart()
-
-                For i = 1 To numerOfClearItemsToTest
-                    Try
-                        returnInt = cache.GetInt(intKey)
-                    Catch ex As NotInCacheException
-                        removedItemCount += 1
-                    End Try
-                Next
-                sw.Stop()
-
-                CompareInteger(TestName, "Clear cache", removedItemCount, numerOfClearItemsToTest)
-                TL.LogMessage(TestName, String.Format("Checked {0} items not present in {1} milliseconds ({2} milliseconds per item).", numerOfClearItemsToTest, sw.Elapsed.TotalMilliseconds.ToString("0.000"), (sw.Elapsed.TotalMilliseconds / numerOfClearItemsToTest).ToString("0.000")))
-            Catch ex As Exception
-                LogException(TestName, "Error testing Cache.ClearCache: " & ex.ToString())
-                errorOccured = True
-            End Try
-
-            ' Test invalid value handling
-            Try
-                cache = New Cache(IIf(LogCache, TL, Nothing)) ' Create a new cache with nothing in it
-
-                ' Test PumpMessagesInterval
-                Try
-                    Action("Test invalid values - PumpMessagesInterval")
-                    cache.PumpMessagesInterval = -1
-                    LogError(TestName, "InvalidValueException was not thrown when supplying a negative value for PumpMessagesInterval.")
-                    errorOccured = True
-                Catch ex As InvalidValueException
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("InvalidValueException correctly generated when supplying a negative value for PumpMessagesInterval: ""{0}""", ex.Message))
-                Catch ex As Exception
-                    LogError(TestName, "An unexpected exception was thrown when supplying a negative value for PumpMessagesInterval." & ex.ToString())
-                    errorOccured = True
-                End Try
-
-                ' Test GetDouble Key - empty string
-                Try
-                    Action("Test invalid values - GetDouble Key Empty")
-                    cache.GetDouble("")
-                    LogError(TestName, "InvalidValueException was not thrown when supplying an empty GetDouble key string.")
-                    errorOccured = True
-                Catch ex As InvalidValueException
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("InvalidValueException correctly generated when supplying an empty GetDouble key string: ""{0}""", ex.Message))
-                Catch ex As Exception
-                    LogError(TestName, "An unexpected exception was thrown when supplying an empty GetDouble key string." & ex.ToString())
-                    errorOccured = True
-                End Try
-
-                ' Test GetDouble Key - null value
-                Try
-                    Action("Test invalid values - GetDouble Key Null")
-                    cache.GetDouble(Nothing)
-                    LogError(TestName, "InvalidValueException was not thrown when supplying a null value as GetDouble key.")
-                    errorOccured = True
-                Catch ex As InvalidValueException
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("InvalidValueException correctly generated when supplying a null value as GetDouble key: ""{0}""", ex.Message))
-                Catch ex As Exception
-                    LogError(TestName, "An unexpected exception was thrown when supplying a null value as GetDouble key." & ex.ToString())
-                    errorOccured = True
-                End Try
-
-                ' Test GetDouble MaximumCallFrequency
-                Try
-                    Action("Test invalid values - GetDouble MaximumCallFrequency")
-                    cache.GetDouble(doubleKey, -1.0)
-                    LogError(TestName, "InvalidValueException was not thrown when supplying a GetDouble negative MaximumCallFrequency value.")
-                    errorOccured = True
-                Catch ex As InvalidValueException
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("InvalidValueException correctly generated when supplying a GetDouble negative MaximumCallFrequency value: ""{0}""", ex.Message))
-                Catch ex As Exception
-                    LogError(TestName, "An unexpected exception was thrown when supplying a negative GetDouble MaximumCallFrequency value." & ex.ToString())
-                    errorOccured = True
-                End Try
-
-                ' Test SetDouble Key - empty string
-                Try
-                    Action("Test invalid values - SetDouble Key Empty")
-                    cache.SetDouble("", 0.0, 0.0)
-                    LogError(TestName, "InvalidValueException was not thrown when supplying an empty SetDouble key string.")
-                    errorOccured = True
-                Catch ex As InvalidValueException
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("InvalidValueException correctly generated when supplying an empty SetDouble key string: ""{0}""", ex.Message))
-                Catch ex As Exception
-                    LogError(TestName, "An unexpected exception was thrown when supplying an empty SetDouble key string." & ex.ToString())
-                    errorOccured = True
-                End Try
-
-                ' Test SetDouble Key - null value
-                Try
-                    Action("Test invalid values - SetDouble Key Null")
-                    cache.SetDouble(Nothing, 0.0, 0.0)
-                    LogError(TestName, "InvalidValueException was not thrown when supplying a null value as SetDouble key.")
-                    errorOccured = True
-                Catch ex As InvalidValueException
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("InvalidValueException correctly generated when supplying a null value as SetDouble key: ""{0}""", ex.Message))
-                Catch ex As Exception
-                    LogError(TestName, "An unexpected exception was thrown when supplying a null value as SetDouble key." & ex.ToString())
-                    errorOccured = True
-                End Try
-
-                ' Test SetDouble CacheTime
-                Try
-                    Action("Test invalid values - CacheTime")
-                    cache.SetDouble(doubleKey, 123.45, -1.0)
-                    LogError(TestName, "InvalidValueException was not thrown when supplying a negative CacheTime value.")
-                    errorOccured = True
-                Catch ex As InvalidValueException
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("InvalidValueException correctly generated when supplying a negative SetDouble CacheTime value: ""{0}""", ex.Message))
-                Catch ex As Exception
-                    LogError(TestName, "An unexpected exception was thrown when supplying a negative CacheTime value." & ex.ToString())
-                    errorOccured = True
-                End Try
-
-                ' Test SetDouble MaximumCallFrequency
-                Try
-                    Action("Test invalid values - SetDouble MaximumCallFrequency")
-                    cache.SetDouble(doubleKey, 0.0, 1.0, -1.0)
-                    LogError(TestName, "InvalidValueException was not thrown when supplying a negative SetDouble MaximumCallFrequency value.")
-                    errorOccured = True
-                Catch ex As InvalidValueException
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("InvalidValueException correctly generated when supplying a negative SetDouble MaximumCallFrequency value: ""{0}""", ex.Message))
-                Catch ex As Exception
-                    LogError(TestName, "An unexpected exception was thrown when supplying a negative SetDouble MaximumCallFrequency value." & ex.ToString())
-                    errorOccured = True
-                End Try
-
-                ' Test Cache.Remove Key - empty string
-                Try
-                    Action("Test invalid values - Cache.Remove Key Empty")
-                    cache.Remove("")
-                    LogError(TestName, "InvalidValueException was not thrown when supplying an empty Cache.Remove key string.")
-                    errorOccured = True
-                Catch ex As InvalidValueException
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("InvalidValueException correctly generated when supplying an empty Cache.Remove key string: ""{0}""", ex.Message))
-                Catch ex As Exception
-                    LogError(TestName, "An unexpected exception was thrown when supplying an empty Cache.Remove key string." & ex.ToString())
-                    errorOccured = True
-                End Try
-
-                ' Test Cache.Remove Keys - null value
-                Try
-                    Action("Test invalid values - Cache.Remove Key Null")
-                    cache.Remove(Nothing)
-                    LogError(TestName, "InvalidValueException was not thrown when supplying a null value as Cache.Remove key.")
-                    errorOccured = True
-                Catch ex As InvalidValueException
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("InvalidValueException correctly generated when supplying a null value as Cache.Remove key: ""{0}""", ex.Message))
-                Catch ex As Exception
-                    LogError(TestName, "An unexpected exception was thrown when supplying a null value as Cache.Remove key." & ex.ToString())
-                    errorOccured = True
-                End Try
-
-                Try
-                    cache.SetDouble(doubleKey, testDouble, 1.0)
-                    returnInt = cache.GetInt(doubleKey)
-                    LogError(TestName, String.Format("Getting a double value as an integer worked but it should have thrown an InvalidCastException! Retrieved value: ""{0}""", returnInt))
-                Catch ex As InvalidCastException
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("InvalidCastException correctly generated when getting a double value as an integer. {0} - {1}", ex.GetType.Name, ex.Message))
-                Catch ex As Exception
-                    LogError(TestName, String.Format("An unexpected exception was thrown when setting a double value and retrieving it as an integer. {0} - {1}", ex.GetType.Name, ex.Message))
-                End Try
-
-                Try
-                    cache.SetInt(intKey, testInt, 1.0)
-                    returnDouble = cache.GetDouble(intKey)
-                    LogError(TestName, String.Format("Getting an integer value as a double worked but it should have thrown an InvalidCastException! Retrieved value: ""{0}""", returnInt))
-                Catch ex As InvalidCastException
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("InvalidCastException correctly generated when getting an integer value as a double. {0} - {1}", ex.GetType.Name, ex.Message))
-                Catch ex As Exception
-                    LogError(TestName, String.Format("An unexpected exception was thrown when setting an integer value and retrieving it as a double. {0} - {1}", ex.GetType.Name, ex.Message))
-                End Try
-
-                Try
-                    cache.SetString(stringKey, testString, 1.0)
-                    returnDouble = cache.GetDouble(stringKey)
-                    LogError(TestName, String.Format("Getting a string value as a double worked but it should have thrown an InvalidCastException! Retrieved value: ""{0}""", returnInt))
-                Catch ex As InvalidCastException
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("InvalidCastException correctly generated when getting a string value as a double. {0} - {1}", ex.GetType.Name, ex.Message))
-                Catch ex As Exception
-                    LogError(TestName, String.Format("An unexpected exception was thrown when setting a string value and retrieving it as a double. {0} - {1}", ex.GetType.Name, ex.Message))
-                End Try
-
-                Try
-                    cache.Set(doubleKey, testDouble, 1.0)
-                    returnString = cache.GetString(doubleKey)
-                    LogError(TestName, String.Format("Getting a double object as a string worked but it should have thrown an InvalidCastException! Retrieved value: ""{0}""", returnInt))
-                Catch ex As InvalidCastException
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("InvalidCastException correctly generated when getting a double object as a string. {0} - {1}", ex.GetType.Name, ex.Message))
-                Catch ex As Exception
-                    LogError(TestName, String.Format("An unexpected exception was thrown when setting a string value and retrieving it as a double. {0} - {1}", ex.GetType.Name, ex.Message))
-                End Try
-
-                Try
-                    cache.Set(doubleKey, testDouble, 1.0)
-                    returnInt = cache.GetInt(doubleKey)
-                    LogError(TestName, String.Format("Getting a double object as an integer worked but it should have thrown an InvalidCastException! Retrieved value: ""{0}""", returnInt))
-                Catch ex As InvalidCastException
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("InvalidCastException correctly generated when getting a double object as an integer. {0} - {1}", ex.GetType.Name, ex.Message))
-                Catch ex As Exception
-                    LogError(TestName, String.Format("An unexpected exception was thrown when setting a double object and retrieving it as an integer. {0} - {1}", ex.GetType.Name, ex.Message))
-                End Try
-
-                Try
-                    cache.Set(stringKey, testString, 1.0)
-                    returnBool = cache.Get(stringKey)
-                    LogError(TestName, String.Format("Getting a string object as a boolean worked but it should have thrown an InvalidCastException! Retrieved value: ""{0}""", returnBool))
-                Catch ex As InvalidCastException
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("InvalidCastException correctly generated when getting a string object as a boolean object. {0} - {1}", ex.GetType.Name, ex.Message))
-                Catch ex As Exception
-                    LogError(TestName, String.Format("An unexpected exception was thrown when getting a string object as a boolean object. {0} - {1}", ex.GetType.Name, ex.Message))
-                End Try
-
-                Try
-                    cache.Set(doubleKey, testDouble, 1.0)
-                    returnInt = cache.Get(doubleKey)
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("Successfully retrieved a double object: {0} as an integer object: {1}", testDouble, returnInt))
-                Catch ex As Exception
-                    LogError(TestName, String.Format("An unexpected exception was thrown when setting a double object and retrieving it as an integer object. {0} - {1}", ex.GetType.Name, ex.Message))
-                End Try
-
-                Try
-                    cache.Set(doubleKey, testDouble, 1.0)
-                    returnString = cache.Get(doubleKey)
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("Successfully retrieved a double object: {0} as a string object: {1}", testDouble, returnString))
-                Catch ex As Exception
-                    LogError(TestName, String.Format("An unexpected exception was thrown when setting a double object and retrieving it as a string object. {0} - {1}", ex.GetType.Name, ex.Message))
-                End Try
-
-                Try
-                    cache.Set(doubleKey, testDouble, 1.0)
-                    returnBool = cache.Get(doubleKey)
-                    NMatches += 1
-                    TL.LogMessage(TestName, String.Format("Successfully retrieved a double object: {0} as a boolean object: {1}", testDouble, returnBool))
-                Catch ex As Exception
-                    LogError(TestName, String.Format("An unexpected exception was thrown when setting a double object and retrieving it as a boolean object. {0} - {1}", ex.GetType.Name, ex.Message))
-                End Try
-
-            Catch ex As Exception
-                LogException(TestName, "Error testing Cache invalid values: " & ex.ToString())
-                errorOccured = True
-            End Try
-
-        Catch ex1 As Exception
-            LogException(TestName, "Error creating ASCOM Cache, further cache testing abandoned! " & ex1.ToString())
-            errorOccured = True
-        End Try
-
-        TL.BlankLine()
-
-        Return errorOccured
-    End Function
-
-    Private Sub UtilTests()
+    Sub UtilTests()
         Dim t As Double
         Dim ts As String
         Dim HelperType As Type
@@ -5453,8 +4734,7 @@ Public Class DiagnosticsForm
             Compare("UtilTests", "IsMinimumRequiredVersion 6.1", Utl.IsMinimumRequiredVersion(6, 1).ToString, "True")
             Compare("UtilTests", "IsMinimumRequiredVersion 6.2", Utl.IsMinimumRequiredVersion(6, 2).ToString, "True")
             Compare("UtilTests", "IsMinimumRequiredVersion 6.3", Utl.IsMinimumRequiredVersion(6, 3).ToString, "True")
-            Compare("UtilTests", "IsMinimumRequiredVersion 6.4", Utl.IsMinimumRequiredVersion(6, 4).ToString, "True")
-            Compare("UtilTests", "IsMinimumRequiredVersion 6.5", Utl.IsMinimumRequiredVersion(6, 5).ToString, "False")
+            Compare("UtilTests", "IsMinimumRequiredVersion 6.4", Utl.IsMinimumRequiredVersion(6, 4).ToString, "False")
 
             ' Check that the platform version properties return the correct values
             MyVersion = New Version(Application.ProductVersion) ' Get this assembly's version number against which to compare the Util version numbers
@@ -5919,7 +5199,7 @@ Public Class DiagnosticsForm
         End If
     End Function
 
-    Private Sub TimingTest(ByVal p_NumberOfMilliSeconds As Integer, ByVal Is64Bit As Boolean)
+    Sub TimingTest(ByVal p_NumberOfMilliSeconds As Integer, ByVal Is64Bit As Boolean)
         Action("TimingTest " & p_NumberOfMilliSeconds & "ms")
         s1 = Stopwatch.StartNew 'Test time using new ASCOM component
         AscomUtil.WaitForMilliseconds(p_NumberOfMilliSeconds)
@@ -5938,7 +5218,7 @@ Public Class DiagnosticsForm
         Application.DoEvents()
     End Sub
 
-    Private Sub ScanEventLog()
+    Sub ScanEventLog()
         Dim ELog As EventLog
         Dim Entries As EventLogEntryCollection
         Dim EventLogs() As EventLog
@@ -6038,183 +5318,85 @@ Public Class DiagnosticsForm
         End Try
     End Sub
 
-    Private Sub ScanRegistrySecurity()
-        Dim Key As RegistryKey
+    Sub ScanRegistrySecurity()
         Try
             Status("Scanning Registry Security")
             TL.LogMessage("RegistrySecurity", "Start")
 
-            RegistryRights(Registry.CurrentUser, "", False)
-            RegistryRights(Registry.CurrentUser, "SOFTWARE\ASCOM", False)
-            RegistryRights(Registry.ClassesRoot, "", False)
-            RegistryRights(Registry.ClassesRoot, "DriverHelper.Util", False)
+            'Dim RA As New ASCOM.Utilities.RegistryAccess
+            'ReadRegistryRights(RA.OpenSubKey(Registry.LocalMachine, REGISTRY_ROOT_KEY_NAME, True, ASCOM.Utilities.RegistryAccess.RegWow64Options.KEY_WOW64_32KEY), ASCOM_ROOT_KEY)
 
-            RegistryRights(Registry.LocalMachine, "", False)
-            RegistryRights(Registry.LocalMachine, "SOFTWARE", False)
+            ReadRegistryRights(Registry.CurrentUser, "", False)
+            ReadRegistryRights(Registry.CurrentUser, "SOFTWARE\ASCOM", False)
+            ReadRegistryRights(Registry.ClassesRoot, "", False)
+            ReadRegistryRights(Registry.ClassesRoot, "DriverHelper.Util", False)
 
-            If OSBits() = Bitness.Bits64 Then '64bit OS so look in Wow64node for ASCOM profile store
-                Try
-                    'List the 32bit registry
-                    TL.LogMessage("RegistrySecurity", "Machine Profile Root (64bit OS - 32bit Registry)")
-                    RegistryRights(Registry.LocalMachine, "SOFTWARE\WOW6432Node\ASCOM", False)
-                    RegistryRights(Registry.LocalMachine, "SOFTWARE\WOW6432Node\ASCOM\Telescope Drivers", False)
-                    RegistryRights(Registry.LocalMachine, "SOFTWARE\WOW6432Node\ASCOM\Telescope Drivers\ASCOM.Simulator.Telescope", False)
-                    Key = ASCOMRegistryAccess.OpenSubKey(Registry.LocalMachine, REGISTRY_ROOT_KEY_NAME, False, RegistryAccess.RegWow64Options.KEY_WOW64_32KEY)
-                    RecursionLevel = -1
-                    RecurseRegistrySecurity(Key)
-                Catch ex As Exception
-                    LogException("RegistrySecurity", "Exception: " & ex.ToString)
-                End Try
-                TL.BlankLine()
+            ReadRegistryRights(Registry.LocalMachine, "", False)
+            ReadRegistryRights(Registry.LocalMachine, "SOFTWARE", False)
+
+            If IntPtr.Size = 8 Then '64bit OS so look in Wow64node
+                ReadRegistryRights(Registry.LocalMachine, "SOFTWARE\Wow6432Node\ASCOM", True)
             Else '32 bit OS
-                Try
-                    'List the registry (only one view on a 32bit machine)
-                    TL.LogMessage("RegistrySecurity", "Machine Profile Root (32bit OS)")
-                    RegistryRights(Registry.LocalMachine, "SOFTWARE\ASCOM", False)
-                    RegistryRights(Registry.LocalMachine, "SOFTWARE\ASCOM\Telescope Drivers", False)
-                    RegistryRights(Registry.LocalMachine, "SOFTWARE\ASCOM\Telescope Drivers\ASCOM.Simulator.Telescope", False)
-                    Key = Registry.LocalMachine.OpenSubKey(REGISTRY_ROOT_KEY_NAME)
-                    RecursionLevel = -1
-                    RecurseRegistrySecurity(Key)
-                Catch ex As Exception
-                    LogException("RegistrySecurity", "Exception: " & ex.ToString)
-                End Try
+                ReadRegistryRights(Registry.LocalMachine, "SOFTWARE\ASCOM", True)
             End If
 
             TL.BlankLine()
-
         Catch ex As Exception
             LogException("RegistrySecurity", "Exception: " & ex.ToString)
         End Try
     End Sub
 
-    Private Sub RecurseRegistrySecurity(ByVal Key As RegistryKey)
-        Dim SubKeys() As String
+    Private Sub ReadRegistryRights(ByVal key As RegistryKey, ByVal SubKey As String, ByVal ConfirmFullAccess As Boolean)
         Dim sec As System.Security.AccessControl.RegistrySecurity
+        Dim SKey As RegistryKey
         Dim FoundFullAccess As Boolean = False
-        Dim debugSwitch As Boolean = False
-        Dim builtInUsers As String
 
         Try
-            builtInUsers = GetBuiltInUsers().ToUpper()
-            RecursionLevel += 1
-
-            Try
-                If (debugSwitch) Then TL.LogMessage("RegistrySecurityDbg", "Entered ReadRegistryRights")
-                If (debugSwitch) Then TL.LogMessage("RegistrySecurityRec", "Processing key: " & Key.Name.ToString)
-
-                If (debugSwitch) Then TL.LogMessage("RegistrySecurityDbg", "Getting access control")
-                sec = Key.GetAccessControl()
-                If (debugSwitch) Then TL.LogMessage("RegistrySecurityDbg", "Starting iteration of security rules")
-
-                For Each RegRule As RegistryAccessRule In sec.GetAccessRules(True, True, GetType(NTAccount)) 'Iterate over the rule set and list them
-                    If (debugSwitch) Then
-                        TL.LogMessage("RegistrySecurityDbg", "Before printing rule")
-                        TL.LogMessage("RegistrySecurityRec", RegRule.AccessControlType.ToString() & " " &
-                                                      RegRule.IdentityReference.ToString() & " " &
-                                                      RegRule.RegistryRights.ToString() & " / " &
-                                                      IIf(RegRule.IsInherited.ToString(), "Inherited", "NotInherited") & " / " &
-                                                      RegRule.InheritanceFlags.ToString() & " / " &
-                                                      RegRule.PropagationFlags.ToString())
-                        TL.LogMessage("RegistrySecurityDbg", "After printing rule")
-                    End If
-                    If (RegRule.IdentityReference.ToString.ToUpper = builtInUsers) And (RegRule.RegistryRights = Global.System.Security.AccessControl.RegistryRights.FullControl) Then
-                        FoundFullAccess = True
-                    End If
-                    If (debugSwitch) Then TL.LogMessage("RegistrySecurityDbg", "After testing for FullAccess")
-                Next
-
-                If (debugSwitch) Then TL.LogMessage("RegistrySecurityDbg", "Completed iteration of security rules")
-                If FoundFullAccess Then
-                    NMatches += 1
-                    TL.LogMessage("RegistrySecurityRec", "OK - SubKey " & Key.Name & " does have full registry access rights for BUILTIN\Users")
-                Else
-                    LogError("RegistrySecurityRec", "Subkey " & Key.Name & " does not have full access rights for BUILTIN\Users!")
-                End If
-
-                If (debugSwitch) Then TL.LogMessage("RegistrySecurityDbg", "End of Try-Catch code")
-            Catch ex As NullReferenceException
-                LogException("RegistrySecurityRec", "The subkey: " & Key.Name & " does not exist.")
-            Catch ex As Exception
-                LogException("RegistrySecurityRec", ex.ToString)
-            End Try
-            If (debugSwitch) Then TL.LogMessage("RegistrySecurityDbg", "Exited ReadRegistryRights")
-
-        Catch ex As Exception
-            LogException("RegistrySecurityRec 1", "Exception: " & ex.ToString)
-        End Try
-
-        Try
-            SubKeys = Key.GetSubKeyNames
-            For Each SubKey As String In SubKeys
-                If (debugSwitch) Then TL.LogMessage("RegistrySecurityRec", "Recursing to Profile Key: " & SubKey)
-                RecurseRegistrySecurity(Key.OpenSubKey(SubKey))
-            Next
-        Catch ex As Exception
-            LogException("RegistrySecurityRec 2", "Exception: " & ex.ToString)
-        End Try
-        RecursionLevel -= 1
-
-    End Sub
-
-    Private Sub RegistryRights(ByVal Key As RegistryKey, ByVal SubKey As String, ByVal ConfirmFullAccess As Boolean)
-        Dim sec As System.Security.AccessControl.RegistrySecurity
-        Dim sKey As RegistryKey
-        Dim foundFullAccess As Boolean = False
-        Dim debugSwitch As Boolean = False
-        Dim builtInUsers As String
-
-        Try
-            builtInUsers = GetBuiltInUsers().ToUpper()
-            If (debugSwitch) Then TL.LogMessage("RegistrySecurityDbg", "Entered ReadRegistryRights")
-            TL.LogMessage("RegistryRights", IIf(SubKey = "", Key.Name.ToString, Key.Name.ToString & "\" & SubKey))
+            TL.LogMessage("RegistrySecurityDbg", "Entered ReadRegistryRights")
+            TL.LogMessage("RegistrySecurity", IIf(SubKey = "", key.Name.ToString, key.Name.ToString & "\" & SubKey))
             If (SubKey = "") Or (SubKey = ASCOM_ROOT_KEY) Then
-                sKey = Key
+                SKey = key
             Else
-                sKey = Key.OpenSubKey(SubKey)
+                SKey = key.OpenSubKey(SubKey)
             End If
 
-            If (debugSwitch) Then TL.LogMessage("RegistryRightsDbg", "Getting access control")
-            sec = sKey.GetAccessControl() 'System.Security.AccessControl.AccessControlSections.All)
-            If (debugSwitch) Then TL.LogMessage("RegistryRightsDbg", "Starting iteration of security rules")
+            TL.LogMessage("RegistrySecurityDbg", "Getting access control")
+            sec = SKey.GetAccessControl() 'System.Security.AccessControl.AccessControlSections.All)
+            TL.LogMessage("RegistrySecurityDbg", "Starting iteration of security rules")
 
             For Each RegRule As RegistryAccessRule In sec.GetAccessRules(True, True, GetType(NTAccount)) 'Iterate over the rule set and list them
-                If (debugSwitch) Then TL.LogMessage("RegistryRightsDbg", "Before printing rule")
-                Try
-                    TL.LogMessage("RegistryRights", RegRule.AccessControlType.ToString() & " " &
+                TL.LogMessage("RegistrySecurityDbg", "Before printing rule")
+                TL.LogMessage("RegistrySecurity", RegRule.AccessControlType.ToString() & " " &
                                                   RegRule.IdentityReference.ToString() & " " &
                                                   RegRule.RegistryRights.ToString() & " / " &
                                                   IIf(RegRule.IsInherited.ToString(), "Inherited", "NotInherited") & " / " &
                                                   RegRule.InheritanceFlags.ToString() & " / " &
                                                   RegRule.PropagationFlags.ToString())
-                    If (debugSwitch) Then TL.LogMessage("RegistryRightsDbg", "After printing rule")
-                Catch ex1 As Exception
-                    LogException("RegistryRights", "Issue formatting registry rights: " & ex1.ToString)
-                End Try
+                TL.LogMessage("RegistrySecurityDbg", "After printing rule")
 
-                If (RegRule.IdentityReference.ToString.ToUpper = builtInUsers) And (RegRule.RegistryRights = Global.System.Security.AccessControl.RegistryRights.FullControl) Then
-                    foundFullAccess = True
+                If (RegRule.IdentityReference.ToString.ToUpper = GetBuiltInUsers().ToUpper) And (RegRule.RegistryRights = RegistryRights.FullControl) Then
+                    FoundFullAccess = True
                 End If
-                If (debugSwitch) Then TL.LogMessage("RegistryRightsDbg", "After testing for FullAccess")
+                TL.LogMessage("RegistrySecurityDbg", "After testing for FullAccess")
             Next
 
-            If (debugSwitch) Then TL.LogMessage("RegistryRightsDbg", "Completed iteration of security rules")
+            TL.LogMessage("RegistrySecurityDbg", "Completed iteration of security rules")
             If ConfirmFullAccess Then 'Check whether full access is availble if required
-                If foundFullAccess Then
+                If FoundFullAccess Then
                     NMatches += 1
                     TL.BlankLine()
-                    TL.LogMessage("RegistryRights", "OK - SubKey " & SubKey & " does have full registry access rights for BUILTIN\Users")
+                    TL.LogMessage("RegistrySecurity", "OK - SubKey " & SubKey & " does have full registry access rights for BUILTIN\Users")
                 Else
-                    LogError("RegistryRights", "Subkey " & SubKey & " does not have full access rights for BUILTIN\Users!")
+                    LogError("RegistrySecurity", "Subkey " & SubKey & " does not have full access rights for BUILTIN\Users!")
                 End If
             End If
-            If (debugSwitch) Then TL.LogMessage("RegistryRightsDbg", "End of Try-Catch code")
+            TL.LogMessage("RegistrySecurityDbg", "End of Try-Catch code")
         Catch ex As NullReferenceException
-            LogException("RegistryRights", "The subkey: " & Key.Name & "\" & SubKey & " does not exist.")
+            LogException("ReadRegistryRights", "The subkey: " & key.Name & "\" & SubKey & " does not exist.")
         Catch ex As Exception
-            LogException("RegistryRights", "Issue reading registry rights: " & ex.ToString)
+            LogException("ReadRegistryRights", ex.ToString)
         End Try
-        If (debugSwitch) Then TL.LogMessage("RegistryRightsDbg", "Exited ReadRegistryRights")
+        TL.LogMessage("RegistrySecurityDbg", "Exited ReadRegistryRights")
         TL.BlankLine()
     End Sub
 
@@ -6266,7 +5448,7 @@ Public Class DiagnosticsForm
         Return Group & "\" & Name
     End Function
 
-    Private Sub ScanRegistry()
+    Sub ScanRegistry()
         Dim Key As RegistryKey
         Status("Scanning Registry")
         'TL.LogMessage("ScanRegistry", "Start")
@@ -6324,7 +5506,7 @@ Public Class DiagnosticsForm
         TL.BlankLine()
     End Sub
 
-    Private Sub RecurseRegistry(ByVal Key As RegistryKey)
+    Sub RecurseRegistry(ByVal Key As RegistryKey)
         Dim ValueNames(), SubKeys(), DisplayName As String
         Try
             RecursionLevel += 1
@@ -6353,7 +5535,7 @@ Public Class DiagnosticsForm
         RecursionLevel -= 1
     End Sub
 
-    Private Sub ScanDrives()
+    Sub ScanDrives()
         Dim Drives() As String, Drive As DriveInfo
         Try
             Status("Scanning drives")
@@ -6372,7 +5554,7 @@ Public Class DiagnosticsForm
         End Try
     End Sub
 
-    Private Sub ScanProgramFiles()
+    Sub ScanProgramFiles()
         Dim BaseDir As String
         Dim PathShell As New System.Text.StringBuilder(260)
         Try
@@ -6403,7 +5585,7 @@ Public Class DiagnosticsForm
         End Try
     End Sub
 
-    Private Sub RecurseProgramFiles(ByVal Folder As String)
+    Sub RecurseProgramFiles(ByVal Folder As String)
         Dim DirInfo As DirectoryInfo
         Dim FileInfos() As FileInfo
         Dim DirInfos() As DirectoryInfo
@@ -6452,7 +5634,7 @@ Public Class DiagnosticsForm
         End Try
     End Sub
 
-    Private Sub ScanProfile55Files()
+    Sub ScanProfile55Files()
         Dim ProfileStore As AllUsersFileSystemProvider, Files() As String
         Try
             Status("Scanning Profile 5.5 Files")
@@ -6472,7 +5654,7 @@ Public Class DiagnosticsForm
         End Try
     End Sub
 
-    Private Sub RecurseProfile55Files(ByVal Folder As String)
+    Sub RecurseProfile55Files(ByVal Folder As String)
         Dim Files(), Directories() As String
 
         Try
@@ -6508,7 +5690,7 @@ Public Class DiagnosticsForm
 
     End Sub
 
-    Private Sub ScanFrameworks()
+    Sub ScanFrameworks()
         Dim FrameworkPath, FrameworkFile, FrameworkDirectories() As String
         Dim PathShell As New System.Text.StringBuilder(260)
 
@@ -6539,64 +5721,36 @@ Public Class DiagnosticsForm
         End Try
     End Sub
 
-    Private Sub ScanPlatform6Logs()
+    Sub ScanPlatform6Logs()
 
-        Dim fileList() As String
-        Dim setupFiles As SortedList(Of DateTime, String) = New SortedList(Of DateTime, String)
-        Dim streamReader As StreamReader = Nothing
-        Dim fileInfo As FileInfo
+        Dim SetupFiles() As String
+        Dim SR As StreamReader = Nothing
 
         Try
             Status("Scanning Platform 6 install logs")
             TL.LogMessage("ScanPlatform6Logs", "Starting scan")
+            'Get an array of setup and uninstall filenames from the Temp directory
+            SetupFiles = Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) & "\ASCOM", "ASCOMPlatform6Install*.txt", SearchOption.TopDirectoryOnly)
 
-            'Get a list of setup files in the ASCOM directory and sub directories in creation date order
-            fileList = Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) & "\ASCOM", "ASCOMPlatform6Install*.txt", SearchOption.TopDirectoryOnly)
-            For Each foundFile In fileList
-                fileInfo = New FileInfo(foundFile)
-                setupFiles.Add(fileInfo.CreationTime, foundFile)
-            Next
-
-            fileList = Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) & "\ASCOM", "ASCOM.UninstallASCOM.*.txt", SearchOption.AllDirectories)
-            For Each foundFile In fileList
-                fileInfo = New FileInfo(foundFile)
-                setupFiles.Add(fileInfo.CreationTime, foundFile)
-            Next
-
-            fileList = Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) & "\ASCOM", "ASCOM.FinaliseInstall.*.txt", SearchOption.AllDirectories)
-            For Each foundFile In fileList
-                fileInfo = New FileInfo(foundFile)
-                setupFiles.Add(fileInfo.CreationTime, foundFile)
-            Next
-
-            TL.LogMessage("ScanPlatform6Logs", "Found the following installation logs:")
-            For Each foundFile In setupFiles
-                TL.LogMessage("ScanPlatform6Logs", String.Format("  Date: {0} Log: {1}", foundFile.Key.ToString("dd MMM yyyy HH:mm:ss"), foundFile.Value))
-            Next
-
-            TL.BlankLine()
-
-            For Each foundFile In setupFiles 'Iterate over results
+            For Each TempFile As String In SetupFiles 'Iterate over results
                 Try
-                    fileInfo = New FileInfo(foundFile.Value)
-                    TL.LogMessage("InstallLog Found", String.Format("{0}, Created: {1}, Last updated: {2}", foundFile.Value, fileInfo.CreationTime.ToString("dd MMM yyyy HH:mm:ss"), fileInfo.LastWriteTime.ToString("dd MMM yyyy HH:mm:ss")))
+                    TL.LogMessage("InstallLog Found", TempFile)
+                    SR = File.OpenText(TempFile)
 
-                    streamReader = File.OpenText(foundFile.Value)
-
-                    Do Until streamReader.EndOfStream 'include the file
-                        TL.LogMessage("InstallLog", streamReader.ReadLine())
+                    Do Until SR.EndOfStream 'include the file
+                        TL.LogMessage("InstallLog", SR.ReadLine())
                     Loop
 
                     TL.LogMessage("", "")
-                    streamReader.Close()
-                    streamReader.Dispose()
-                    streamReader = Nothing
+                    SR.Close()
+                    SR.Dispose()
+                    SR = Nothing
                 Catch ex1 As Exception
                     LogException("ScanPlatform6Logs", "Exception 1: " & ex1.ToString)
-                    If Not (streamReader Is Nothing) Then 'Clean up streamreader
-                        streamReader.Close()
-                        streamReader.Dispose()
-                        streamReader = Nothing
+                    If Not (SR Is Nothing) Then 'Clean up streamreader
+                        SR.Close()
+                        SR.Dispose()
+                        SR = Nothing
                     End If
                 End Try
             Next
@@ -6605,30 +5759,27 @@ Public Class DiagnosticsForm
             Status("Scanning Migration logs")
             TL.LogMessage("ScanMigrationLogs", "Starting scan")
             'Get an array of setup and uninstall filenames from the Temp directory
-            fileList = Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) & "\ASCOM", "ASCOM.ProfileMigrationLog*.txt", SearchOption.TopDirectoryOnly)
+            SetupFiles = Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) & "\ASCOM", "ASCOM.ProfileMigrationLog*.txt", SearchOption.TopDirectoryOnly)
 
-            For Each tempFile As String In fileList 'Iterate over results
+            For Each TempFile As String In SetupFiles 'Iterate over results
                 Try
-                    TL.LogMessage("MigrationLog Found", tempFile)
-                    fileInfo = New FileInfo(tempFile)
-                    TL.LogMessage("InstallLog", "File created: " & fileInfo.CreationTime.ToString("dd MMM yyyy hh:mm:ss"))
-                    TL.LogMessage("InstallLog", "File last updated: " & fileInfo.LastWriteTime.ToString("dd MMM yyyy hh:mm:ss"))
-                    streamReader = File.OpenText(tempFile)
+                    TL.LogMessage("MigrationLog Found", TempFile)
+                    SR = File.OpenText(TempFile)
 
-                    Do Until streamReader.EndOfStream 'include the file
-                        TL.LogMessage("MigrationLog", streamReader.ReadLine())
+                    Do Until SR.EndOfStream 'include the file
+                        TL.LogMessage("MigrationLog", SR.ReadLine())
                     Loop
 
                     TL.LogMessage("", "")
-                    streamReader.Close()
-                    streamReader.Dispose()
-                    streamReader = Nothing
+                    SR.Close()
+                    SR.Dispose()
+                    SR = Nothing
                 Catch ex2 As Exception
                     LogException("ScanPlatform6Logs", "Exception 2: " & ex2.ToString)
-                    If Not (streamReader Is Nothing) Then 'Clean up streamreader
-                        streamReader.Close()
-                        streamReader.Dispose()
-                        streamReader = Nothing
+                    If Not (SR Is Nothing) Then 'Clean up streamreader
+                        SR.Close()
+                        SR.Dispose()
+                        SR = Nothing
                     End If
                 End Try
             Next
@@ -6641,7 +5792,7 @@ Public Class DiagnosticsForm
         End Try
     End Sub
 
-    Private Sub ScanLogs()
+    Sub ScanLogs()
         Const NumLine As Integer = 30 'Number of lines to read from file to see if it is an ASCOM log
 
         Dim TempFiles() As String
@@ -6708,7 +5859,7 @@ Public Class DiagnosticsForm
         End Try
     End Sub
 
-    Private Sub ScanCOMRegistration()
+    Sub ScanCOMRegistration()
         Try
             Status("Scanning Registry")
             TL.LogMessage("COMRegistration", "") 'Report COM registation
@@ -6854,15 +6005,13 @@ Public Class DiagnosticsForm
                                         SHGetSpecialFolderPath(IntPtr.Zero, PathShell, CSIDL_SYSTEM, False) ' Get the system directory
                                     End If
                                     RegSvr32Path = PathShell.ToString & "\RegSvr32.exe" 'Construct the full path to RegSvr32.exe
-                                    Info = New ProcessStartInfo With {
-                                        .FileName = RegSvr32Path, 'Populate the ProcessStartInfo with the full path to RegSvr32.exe 
-                                        .Arguments = "/s """ & ASCOMPath & """" ' And the start parameter specifying the file to COM register
-                                        }
+                                    Info = New ProcessStartInfo
+                                    Info.FileName = RegSvr32Path 'Populate the ProcessStartInfo with the full path to RegSvr32.exe 
+                                    Info.Arguments = "/s """ & ASCOMPath & """" ' And the start parameter specifying the file to COM register
                                     TL.LogMessage("HelperHijacking", "  RegSvr32 Path: """ & RegSvr32Path & """, COM Path: """ & ASCOMPath & """")
 
-                                    P = New Process With {
-                                        .StartInfo = Info ' Set the start info
-                                        } ' Create the process
+                                    P = New Process ' Create the process
+                                    P.StartInfo = Info ' Set the start info
                                     P.Start() 'Start the process and wait for it to finish
                                     TL.LogMessage("HelperHijacking", "  Started registration")
                                     P.WaitForExit()
@@ -6910,23 +6059,13 @@ Public Class DiagnosticsForm
         TL.LogMessage(Section, Message)
     End Sub
 
-    Private Sub ScanGac()
+    Sub ScanGac()
         Dim ae As IAssemblyEnum
         Dim an As IAssemblyName = Nothing
         Dim ass As Assembly
         Dim AssemblyNames As Generic.SortedList(Of String, String)
         Dim assname As AssemblyName
         Dim AscomGACPaths As Generic.List(Of String)
-        Dim FVInfo As FileVersionInfo = Nothing
-        Dim MyName, FVer As String
-        Dim FileLocation As String
-        Dim FileVer As FileVersionInfo
-        Dim DiagnosticsVersion As New Version("0.0.0.0")
-        Dim FileVersion As New Version("0.0.0.0")
-        Dim VersionComparison As Integer
-        Dim assemblyURI As Uri = Nothing
-        Dim localPath As String
-
         Try
             Status("Scanning Assemblies")
             AssemblyNames = New Generic.SortedList(Of String, String)
@@ -6938,9 +6077,11 @@ Public Class DiagnosticsForm
                 Try
                     assname = GetAssemblyName(an)
                     AssemblyNames.Add(assname.FullName, assname.Name) 'Convert the fusion representation to a standard AssemblyName and get its full name
+
                 Catch ex As Exception
                     'Ignore an exceptions here due to duplicate names, these are all MS assemblies
                 End Try
+
             Loop
 
             AscomGACPaths = New Generic.List(Of String)
@@ -6953,15 +6094,16 @@ Public Class DiagnosticsForm
                         AssemblyInfo(TL, AssemblyName.Value, ass) ' Get file version and other information
 
                         Try
-                            assemblyURI = New Uri(ass.GetName.CodeBase)
-                            localPath = assemblyURI.LocalPath
-                            If (localPath.ToUpper.Contains("\ASCOM.DRIVERACCESS\6") Or
-                                localPath.ToUpper.Contains("\ASCOM.UTILITIES\6") Or
-                                localPath.ToUpper.Contains("\ASCOM.ASTROMETRY\6") Or
-                                localPath.ToUpper.Contains("\ASCOM.DEVICEINTERFACES\6")) Then
-                                AscomGACPaths.Add(localPath)
+                            Dim U As New Uri(ass.GetName.CodeBase)
+                            Dim LocalPath As String = U.LocalPath
+                            If (LocalPath.ToUpper.Contains("\ASCOM.DRIVERACCESS\6") Or
+                                LocalPath.ToUpper.Contains("\ASCOM.UTILITIES\6") Or
+                                LocalPath.ToUpper.Contains("\ASCOM.ASTROMETRY\6") Or
+                                LocalPath.ToUpper.Contains("\ASCOM.DEVICEINTERFACES\6")) Then
+                                AscomGACPaths.Add(LocalPath)
+                            Else
+                                FileDetails(Path.GetDirectoryName(LocalPath) & "\", Path.GetFileName(LocalPath))
                             End If
-                            FileDetails(Path.GetDirectoryName(localPath) & "\", Path.GetFileName(localPath))
                         Catch ex As Exception
 
                         End Try
@@ -6973,6 +6115,13 @@ Public Class DiagnosticsForm
                     LogException("Assemblies", "Exception 2: " & ex.ToString)
                 End Try
             Next
+            Dim FVInfo As FileVersionInfo = Nothing
+            Dim MyName, FVer As String
+            Dim FileLocation As String
+            Dim FileVer As FileVersionInfo
+            Dim DiagnosticsVersion As New Version("0.0.0.0")
+            Dim FileVersion As New Version("0.0.0.0")
+            Dim VersionComparison As Integer
 
             Try
                 ass = Assembly.GetExecutingAssembly
@@ -7042,7 +6191,7 @@ Public Class DiagnosticsForm
         Return AssName
     End Function
 
-    Private Sub ScanDeveloperFiles()
+    Sub ScanDeveloperFiles()
         Dim ASCOMPath As String = "C:\Program Files\ASCOM\Platform 6 Developer Components\" ' Default location
         Dim PathShell As New System.Text.StringBuilder(260)
         Dim ASCOMPathComponents5, ASCOMPathComponents55, ASCOMPathComponents6, ASCOMPathDocs, ASCOMPathInstallerGenerator, ASCOMPathResources As String
@@ -7121,7 +6270,7 @@ Public Class DiagnosticsForm
 
     End Sub
 
-    Private Sub ScanPlatformFiles(ByVal ASCOMPath As String)
+    Sub ScanPlatformFiles(ByVal ASCOMPath As String)
         Try
             Status("Scanning Platform Files")
 
@@ -7156,7 +6305,7 @@ Public Class DiagnosticsForm
         TL.BlankLine()
     End Sub
 
-    Private Sub FileDetails(ByVal FPath As String, ByVal FName As String)
+    Sub FileDetails(ByVal FPath As String, ByVal FName As String)
         Dim FullPath As String
         Dim Att As FileAttributes, FVInfo As FileVersionInfo, FInfo As FileInfo
         Dim Ass As Assembly, AssVer As String = "", CompareName As String
@@ -7236,7 +6385,7 @@ Public Class DiagnosticsForm
         TL.LogMessage("", "")
     End Sub
 
-    Private Sub GetCOMRegistration(ByVal ProgID As String)
+    Sub GetCOMRegistration(ByVal ProgID As String)
         Dim RKey As RegistryKey
         Try
             TL.LogMessage("ProgID", ProgID)
@@ -7257,7 +6406,7 @@ Public Class DiagnosticsForm
         TL.LogMessage("", "")
     End Sub
 
-    Private Sub ProcessSubKey(ByVal p_Key As RegistryKey, ByVal p_Depth As Integer, ByVal p_Container As String)
+    Sub ProcessSubKey(ByVal p_Key As RegistryKey, ByVal p_Depth As Integer, ByVal p_Container As String)
         Dim ValueNames(), SubKeys() As String
         Dim RKey As RegistryKey, ValueKind As RegistryValueKind
         Dim Container As String
@@ -7370,7 +6519,7 @@ Public Class DiagnosticsForm
 
     End Sub
 
-    Private Sub ScanSerial()
+    Sub ScanSerial()
         Dim SerialRegKey As RegistryKey = Nothing, SerialDevices() As String
         Try
             'First list out the ports we can see through .NET
@@ -7410,7 +6559,7 @@ Public Class DiagnosticsForm
 
     End Sub
 
-    Private Sub SerialPortDetails(ByVal PortNumber As Integer)
+    Sub SerialPortDetails(ByVal PortNumber As Integer)
         'List specific details of a particular serial port
         Dim PortName As String, SerPort As New System.IO.Ports.SerialPort
 
@@ -7429,7 +6578,7 @@ Public Class DiagnosticsForm
         SerPort = Nothing
     End Sub
 
-    Private Sub ScanProfile()
+    Sub ScanProfile()
         Dim ASCOMProfile As Utilities.Profile, DeviceTypes As ArrayList, Devices As ArrayList
         Dim CompatibiityMessage32Bit, CompatibiityMessage64Bit As String
         Try
@@ -7473,7 +6622,7 @@ Public Class DiagnosticsForm
         TL.BlankLine()
     End Sub
 
-    Private Sub RecurseProfile(ByVal ASCOMKey As String)
+    Sub RecurseProfile(ByVal ASCOMKey As String)
         Dim SubKeys, Values As New Generic.SortedList(Of String, String)
         Dim NextKey, DisplayName, DisplayValue As String
 
@@ -7693,7 +6842,7 @@ Public Class DiagnosticsForm
         Return RetVal
     End Function
 
-    Private Sub ScanASCOMDrivers()
+    Sub ScanASCOMDrivers()
         Dim BaseDir As String
         Dim PathShell As New System.Text.StringBuilder(260)
         Try
@@ -7747,7 +6896,7 @@ Public Class DiagnosticsForm
         End Try
     End Sub
 
-    Private Sub RecurseASCOMDrivers(ByVal Folder As String)
+    Sub RecurseASCOMDrivers(ByVal Folder As String)
         Dim Files(), Directories() As String
 
         Try
@@ -7811,7 +6960,7 @@ Public Class DiagnosticsForm
             CompareDouble("AstroUtilTests", "Range 0:359.999 360.0", AstroUtil2.Range(360.0, 0.0, True, 360.0, False), 0.0, TOLERANCE_E6)
             CompareDouble("AstroUtilTests", "Range 0:360.0 360.0", AstroUtil2.Range(360.0, 0.0, True, 360.0, True), 360.0, TOLERANCE_E6)
 
-            CompareWithin("AstroUtilTests", "DeltaT", AstroUtil2.DeltaT(), 67.0, 71.0) ' Upper bound increased because DeltaT has reached the original upper bound value! PWGS 9/10/2017
+            CompareWithin("AstroUtilTests", "DeltaT", AstroUtil2.DeltaT(), 67.0, 69.0)
             CompareWithin("AstroUtilTests", "DeltaUT", AstroUtil2.DeltaUT(AstroUtil2.JulianDateTT(0.0)), -1.0, 1.0)
             Events = GetEvents(ASCOM.Astrometry.EventType.SunRiseSunset, 5, 8, 2012, 51.0, -60.0, -5.0)
 
@@ -7917,7 +7066,7 @@ Public Class DiagnosticsForm
     End Function
 
 #Region "XML  test String"
-    Private Const XMLTestString As String = "<?xml version=""1.0""?>" & vbCrLf &
+    Const XMLTestString As String = "<?xml version=""1.0""?>" & vbCrLf &
                                     "<ASCOMProfile>" & vbCrLf &
                                     "  <SubKey>" & vbCrLf &
                                     "    <SubKeyName />" & vbCrLf &
@@ -8025,11 +7174,12 @@ Public Class DiagnosticsForm
 
 #Region "Button event handlers"
 
-    Private Sub BtnLastLog_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnViewLastLog.Click
+    Private Sub btnLastLog_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnLastLog.Click
+        'Shell("notepad " & LastLogFile, AppWinStyle.NormalFocus)
         Process.Start(LastLogFile) ' Open in the system's default text editor
     End Sub
 
-    Private Sub BtnExit_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnExit.Click
+    Private Sub btnExit_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnExit.Click
         End 'Close the program
     End Sub
 
@@ -8131,7 +7281,7 @@ Public Class DiagnosticsForm
     ''' <param name="sender"></param>
     ''' <param name="e"></param>
     ''' <remarks></remarks>
-    Private Sub MnuTrace_DropDownOpening(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles mnuTrace.DropDownOpening
+    Private Sub mnuTrace_DropDownOpening(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles mnuTrace.DropDownOpening
         RefreshTraceItems()
     End Sub
 
@@ -8181,7 +7331,6 @@ Public Class DiagnosticsForm
         MenuThrowAbandonedMutexExceptions.Checked = GetBool(ABANDONED_MUTEXT_TRACE, ABANDONED_MUTEX_TRACE_DEFAULT)
         MenuAstroUtilsTraceEnabled.Checked = GetBool(ASTROUTILS_TRACE, ASTROUTILS_TRACE_DEFAULT)
         MenuNovasTraceEnabled.Checked = GetBool(NOVAS_TRACE, NOVAS_TRACE_DEFAULT)
-        MenuCacheTraceEnabled.Checked = GetBool(TRACE_CACHE, TRACE_CACHE_DEFAULT)
 
         TypeOfWait = GetWaitType(SERIAL_WAIT_TYPE, SERIAL_WAIT_TYPE_DEFAULT)
 
@@ -8218,9 +7367,8 @@ Public Class DiagnosticsForm
     Private Sub ChooserNETToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ChooserNETToolStripMenuItem.Click
         Dim Chooser As ASCOM.Utilities.Chooser, Chosen As String
 
-        Chooser = New ASCOM.Utilities.Chooser With {
-            .DeviceType = "Telescope"
-        }
+        Chooser = New ASCOM.Utilities.Chooser
+        Chooser.DeviceType = "Telescope"
         Chosen = Chooser.Choose("ScopeSim.Telescope")
         Chooser.Dispose()
 
@@ -8235,9 +7383,8 @@ Public Class DiagnosticsForm
         Dim proc As Process, procStartInfo As ProcessStartInfo
         Try
             procStartInfo = New ProcessStartInfo(Application.StartupPath & DRIVER_CONNECT_APPLICATION_64BIT)
-            proc = New Process With {
-                .StartInfo = procStartInfo
-            }
+            proc = New Process
+            proc.StartInfo = procStartInfo
             proc.Start()
         Catch ex As Exception
             MessageBox.Show(ex.Message.ToString() & " - " & Application.StartupPath & DRIVER_CONNECT_APPLICATION_64BIT, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -8250,9 +7397,8 @@ Public Class DiagnosticsForm
 
         Try
             procStartInfo = New ProcessStartInfo(Application.StartupPath & DRIVER_CONNECT_APPLICATION_32BIT)
-            proc = New Process With {
-                .StartInfo = procStartInfo
-            }
+            proc = New Process
+            proc.StartInfo = procStartInfo
             proc.Start()
         Catch ex As Exception
             MessageBox.Show(ex.Message.ToString() & " - " & Application.StartupPath & DRIVER_CONNECT_APPLICATION_32BIT, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -8284,11 +7430,6 @@ Public Class DiagnosticsForm
     Private Sub MenuDriverAccessTraceEnabled_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MenuDriverAccessTraceEnabled.Click
         MenuDriverAccessTraceEnabled.Checked = Not MenuDriverAccessTraceEnabled.Checked 'Invert the selection
         SetName(DRIVERACCESS_TRACE, MenuDriverAccessTraceEnabled.Checked.ToString)
-    End Sub
-
-    Private Sub MenuCacheTraceEnabled_Click(sender As Object, e As EventArgs) Handles MenuCacheTraceEnabled.Click
-        MenuCacheTraceEnabled.Checked = Not MenuCacheTraceEnabled.Checked 'Invert the selection
-        SetName(TRACE_CACHE, MenuCacheTraceEnabled.Checked.ToString)
     End Sub
 
     Private Sub MenuAstroUtilsTraceEnabled_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MenuAstroUtilsTraceEnabled.Click
@@ -8331,26 +7472,13 @@ Public Class DiagnosticsForm
         SetName(SERIAL_WAIT_TYPE, Serial.WaitType.WaitForSingleObject.ToString)
     End Sub
 
-    Private Sub MenuAutoViewLog_Click(sender As Object, e As EventArgs) Handles MenuAutoViewLog.Click
-        MenuAutoViewLog.Checked = Not MenuAutoViewLog.Checked ' Auto view log option clicked so invert its checked status
-        SetName(OPTIONS_AUTOVIEW_REGISTRYKEY, MenuAutoViewLog.Checked.ToString()) ' Set the new value in the registry
-    End Sub
-
-    Private Sub DiagnosticsForm_KeyDown(sender As Object, e As System.Windows.Forms.KeyEventArgs) Handles Me.KeyDown
-        ' Handle the Form KeyDown event to determine which key was pressed
-        ' Test whether the F5 key was pressed to start the test
-        If e.KeyCode = Keys.F5 Then ' F5 was pressed so start the Diagnostics test
-            RunDiagnostics(New Object, New EventArgs)
-        End If
-    End Sub
-
 #End Region
 
 #Region "Utility Code"
 
     'DLL to provide the path to Program Files(x86)\Common Files folder location that is not avialable through the .NET framework
     <DllImport("shell32.dll")>
-    Private Shared Function SHGetSpecialFolderPath(ByVal hwndOwner As IntPtr,
+    Shared Function SHGetSpecialFolderPath(ByVal hwndOwner As IntPtr,
         <Out()> ByVal lpszPath As System.Text.StringBuilder,
         ByVal nFolder As Integer,
         ByVal fCreate As Boolean) As Boolean
@@ -8367,23 +7495,6 @@ Public Class DiagnosticsForm
         lblAction.Text = Msg
         Application.DoEvents()
     End Sub
-
-    Private Function RunningInVM(WriteToLog As Boolean) As Boolean
-        Dim cpuId1 As CpuID.CpuIdResult, ecxBytes As Byte()
-
-        ' The static CpuId class is located in the ASCOM.Cache component because it is written in C#
-        ' Bit 31 of the ECX register is set when running in a VM, so we retrieve the ECX register and return a test of bit 31
-
-        cpuId1 = CpuID.Invoke(1) ' Get leaf 1 of the CPUID information, where the virtualisation bit is stored in the ECX register
-        ecxBytes = BitConverter.GetBytes(cpuId1.Ecx) ' Extract the ECX register as a 4 byte array
-        If WriteToLog Then TL.LogMessage("RunningInVM", String.Format("Found ECX byte {0} = {1}", 3, Hex(ecxBytes(3))))
-
-        RunningInVM = (ecxBytes(3) And &H80) > 0 ' Set to true if top bit of ECX is set, otherwise false
-        If WriteToLog Then TL.LogMessage("RunningInVM", String.Format("Returning value: {0}", RunningInVM))
-
-        Return RunningInVM
-
-    End Function
 
 #End Region
 
