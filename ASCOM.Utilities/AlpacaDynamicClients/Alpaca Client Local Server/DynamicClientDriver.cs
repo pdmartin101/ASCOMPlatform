@@ -71,6 +71,7 @@ namespace ASCOM.DynamicRemoteClients
 
                 connectStates = new ConcurrentDictionary<long, bool>();
 
+                AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
                 TLLocalServer.LogMessage("DynamicClientDriver", "Initialisation complete.");
             }
             catch (Exception ex)
@@ -78,6 +79,21 @@ namespace ASCOM.DynamicRemoteClients
                 TLLocalServer.LogMessageCrLf("DynamicClientDriver", ex.ToString());
                 MessageBox.Show(ex.ToString(), "Error initialising the DynamicClientDriver base class", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            try
+            {
+                Console.WriteLine($"DynamicClientDriver - Sender is null: {sender is null}, Args is null: {args is null}");
+                Console.WriteLine( $"DynamicClientDriver - Can't find: assembly {args.Name}, {args.RequestingAssembly.FullName}");
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine( $"DynamicClientDriver  ASsembly Resolve- {ex}");
+            }
+            return null;
         }
 
         #endregion
@@ -1522,7 +1538,7 @@ namespace ASCOM.DynamicRemoteClients
         /// </summary>
         /// <param name="response">The driver's response </param>
         /// <returns>True if the call was successful otherwise returns false.</returns>
-        private static bool CallWasSuccessful(TraceLogger TL, RestResponseBase response)
+        private static bool CallWasSuccessful(TraceLoggerPlus TL, RestResponseBase response)
         {
             TL.LogMessage("CallWasSuccessful", string.Format("DriverException == null: {0}, ErrorMessage: {1}, ErrorNumber: 0x{2}", response.DriverException == null, response.ErrorMessage, response.ErrorNumber.ToString("X8")));
             if (response.DriverException != null) TL.LogMessage("CallWasSuccessfulEx", response.DriverException.ToString());

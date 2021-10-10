@@ -1141,6 +1141,21 @@ Install Files
 Install Files
 Install Files
 Install Files
+Install Files
+Install Files
+Install Files
+Install Files
+Install Files
+Comment
+Install Files
+Install Files
+Install Files
+Install Files
+Install Files
+Install Files
+Install Files
+Install Files
+Install Files
 Code Folding Region
 Comment
 Code Folding Region
@@ -3078,7 +3093,21 @@ $
 {3583042B-2D97-4F7C-BD27-3F0A6B7FD411}
 {9F5F901E-69E1-45A7-AA19-2D5FCB51D653}
 {364763FD-78C9-4988-A0A5-D194EE0C970B}
-{DA668ED1-C328-4E28-B02C-A35680941BBD}
+{4A20C249-8990-4F28-A5AA-03E06C0D9687}
+{55FBF852-2167-4BFB-8F0A-329720DDF1E4}
+{BA7A24E1-6F20-4583-AF70-222F54BBF840}
+{8FB3D53D-D814-43CF-8700-8F9679FB9772}
+{B7F96FFE-2A5A-4757-8571-080B159006CB}
+{FDEE0A32-C3AE-4314-B69E-678DC98DBFA6}
+{8379CAFB-CF68-4A1C-B208-9D600458BA35}
+{A6DB0E18-FCA2-4296-B17A-C9FF57872C82}
+{664A92DA-E20A-435E-84D0-DA924A81AC9F}
+{D7237AEF-F58E-4A80-B2E6-9306F310E86D}
+{83C0F6D6-938E-462E-9D53-730A6479B217}
+{CA48D36E-E968-4394-9623-B0CE9B63A242}
+{246D4100-DBE5-400E-B622-B4B209303178}
+{21DE32EA-237D-4A93-ABB2-910115DBC927}
+{876DC098-E980-456C-87B6-22B7E8E3E978}
 {4CC1714A-F4E4-48E8-BCBD-5F4704A11BF1}
 {23D1AEE3-7817-47F4-BA58-5D0EE99EA6A3}
 {2AD14A0C-AFC6-43C0-9691-1BC843C62755}
@@ -3086,6 +3115,7 @@ $
 {59A83F04-5E26-4C0C-A93C-D6492E414D23}
 {47FDF76A-3E97-4146-B993-933189260DEB}
 {07ECF99B-D559-4E60-B8E8-8788A272B628}
+{22D3363D-C46B-4759-BCB8-085FDB6AE435}
 {59302FA6-658F-4182-A81D-AD77A3EECBC7}
 {FBA925DD-C424-4348-9DF4-10CC11E8BC2D}
 {237B0382-D0F5-4DD4-851F-A728A2614F47}
@@ -4558,6 +4588,8 @@ The MessageBox returns its result in the CFA variable...
 
 {721BB493-37FF-49AD-B24B-BA7F9A921CD0}
 
+{55FBF852-2167-4BFB-8F0A-329720DDF1E4}
+Add the .NET Standard Alpaca Client Support libraries
 {C974C952-7C50-4503-BFEF-AF3B492C0AEE}
 MYPROGRESS
 100
@@ -8930,19 +8962,6 @@ FALSE
 FALSE
 FALSE
 FALSE
-{DA668ED1-C328-4E28-B02C-A35680941BBD}
-..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\ASCOM.AlpacaDynamicClientManager\bin\Release\RestSharp.dll
-FALSE|
-$COMMONFILES$\ASCOM\AlpacaDynamicClients
-FALSE
-FALSE
-FALSE
-FALSE
-FALSE
-FALSE
-FALSE
-FALSE
-FALSE
 {93F921A4-C61C-41AF-856A-EB87C02CCD28}
 ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Local Server\bin\Release\ASCOM.AlpacaClientLocalServer.exe
 FALSE|
@@ -9207,6 +9226,201 @@ FALSE
 ..\..\..\..\Releases\ASCOM 6\Platform\Files\Astro32.dll
 FALSE|
 $COMMONFILES$\ASCOM\Telescope
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+{4A20C249-8990-4F28-A5AA-03E06C0D9687}
+..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\RestSharp.dll
+FALSE|
+$COMMONFILES$\ASCOM\AlpacaDynamicClients
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+{BA7A24E1-6F20-4583-AF70-222F54BBF840}
+..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\ASCOM.Alpaca.dll
+FALSE|
+$COMMONFILES$\ASCOM\AlpacaDynamicClients
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+{8FB3D53D-D814-43CF-8700-8F9679FB9772}
+..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\ASCOM.Tools.dll
+FALSE|
+$COMMONFILES$\ASCOM\AlpacaDynamicClients
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+{B7F96FFE-2A5A-4757-8571-080B159006CB}
+..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\ASCOM.Common.dll
+FALSE|
+$COMMONFILES$\ASCOM\AlpacaDynamicClients
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+{FDEE0A32-C3AE-4314-B69E-678DC98DBFA6}
+..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\System.Text.Json.dll
+FALSE|
+$COMMONFILES$\ASCOM\AlpacaDynamicClients
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+{8379CAFB-CF68-4A1C-B208-9D600458BA35}
+..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\System.Text.Encodings.Web.dll
+FALSE|
+$COMMONFILES$\ASCOM\AlpacaDynamicClients
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+{A6DB0E18-FCA2-4296-B17A-C9FF57872C82}
+..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\System.Runtime.CompilerServices.Unsafe.dll
+FALSE|
+$COMMONFILES$\ASCOM\AlpacaDynamicClients
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+{664A92DA-E20A-435E-84D0-DA924A81AC9F}
+..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\System.Buffers.dll
+FALSE|
+$COMMONFILES$\ASCOM\AlpacaDynamicClients
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+{D7237AEF-F58E-4A80-B2E6-9306F310E86D}
+..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\System.Memory.dll
+FALSE|
+$COMMONFILES$\ASCOM\AlpacaDynamicClients
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+{83C0F6D6-938E-462E-9D53-730A6479B217}
+..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\System.Threading.Tasks.Extensions.dll
+FALSE|
+$COMMONFILES$\ASCOM\AlpacaDynamicClients
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+{CA48D36E-E968-4394-9623-B0CE9B63A242}
+..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\Microsoft.Bcl.AsyncInterfaces.dll
+FALSE|
+$COMMONFILES$\ASCOM\AlpacaDynamicClients
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+{246D4100-DBE5-400E-B622-B4B209303178}
+..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\System.ValueTuple.dll
+FALSE|
+$COMMONFILES$\ASCOM\AlpacaDynamicClients
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+{21DE32EA-237D-4A93-ABB2-910115DBC927}
+..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\System.Numerics.Vectors.dll
+FALSE|
+$COMMONFILES$\ASCOM\AlpacaDynamicClients
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+{876DC098-E980-456C-87B6-22B7E8E3E978}
+..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\Newtonsoft.Json.dll
+FALSE|
+$COMMONFILES$\ASCOM\AlpacaDynamicClients
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+FALSE
+{22D3363D-C46B-4759-BCB8-085FDB6AE435}
+..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\ASCOM.Alpaca.dll
+FALSE|
+$TARGETDIR$\Tools\AlpacaDynamicClientManager
 FALSE
 FALSE
 FALSE
@@ -14257,6 +14471,21 @@ C
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 C
 C
 C
@@ -15023,6 +15252,21 @@ C
 
 
 $
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

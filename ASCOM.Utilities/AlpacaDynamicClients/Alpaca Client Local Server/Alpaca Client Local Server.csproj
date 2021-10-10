@@ -85,38 +85,17 @@
     <Compile Include="..\Alpaca Shared Resources\Response Classes\AxisRatesResponse.cs">
       <Link>Response Classes\AxisRatesResponse.cs</Link>
     </Compile>
-    <Compile Include="..\Alpaca Shared Resources\Response Classes\Base64ArrayHandOffResponse.cs">
-      <Link>Response Classes\Base64ArrayHandOffResponse.cs</Link>
-    </Compile>
-    <Compile Include="..\Alpaca Shared Resources\Response Classes\Base64ArrayJsonResponse.cs">
-      <Link>Response Classes\Base64ArrayJsonResponse.cs</Link>
-    </Compile>
     <Compile Include="..\Alpaca Shared Resources\Response Classes\BoolResponse.cs">
       <Link>Response Classes\BoolResponse.cs</Link>
     </Compile>
     <Compile Include="..\Alpaca Shared Resources\Response Classes\DateAndTimeResponse.cs">
       <Link>Response Classes\DateAndTimeResponse.cs</Link>
     </Compile>
-    <Compile Include="..\Alpaca Shared Resources\Response Classes\DoubleArray2DResponse.cs">
-      <Link>Response Classes\DoubleArray2DResponse.cs</Link>
-    </Compile>
-    <Compile Include="..\Alpaca Shared Resources\Response Classes\DoubleArray3DResponse.cs">
-      <Link>Response Classes\DoubleArray3DResponse.cs</Link>
-    </Compile>
     <Compile Include="..\Alpaca Shared Resources\Response Classes\DoubleResponse.cs">
       <Link>Response Classes\DoubleResponse.cs</Link>
     </Compile>
-    <Compile Include="..\Alpaca Shared Resources\Response Classes\ImageArrayResponseBase.cs">
-      <Link>Response Classes\ImageArrayResponseBase.cs</Link>
-    </Compile>
     <Compile Include="..\Alpaca Shared Resources\Response Classes\IntArray1DResponse.cs">
       <Link>Response Classes\IntArray1DResponse.cs</Link>
-    </Compile>
-    <Compile Include="..\Alpaca Shared Resources\Response Classes\IntArray2DResponse.cs">
-      <Link>Response Classes\IntArray2DResponse.cs</Link>
-    </Compile>
-    <Compile Include="..\Alpaca Shared Resources\Response Classes\IntArray3DResponse.cs">
-      <Link>Response Classes\IntArray3DResponse.cs</Link>
     </Compile>
     <Compile Include="..\Alpaca Shared Resources\Response Classes\IntResponse.cs">
       <Link>Response Classes\IntResponse.cs</Link>
@@ -129,12 +108,6 @@
     </Compile>
     <Compile Include="..\Alpaca Shared Resources\Response Classes\RestResponseBase.cs">
       <Link>Response Classes\RestResponseBase.cs</Link>
-    </Compile>
-    <Compile Include="..\Alpaca Shared Resources\Response Classes\ShortArray2DResponse.cs">
-      <Link>Response Classes\ShortArray2DResponse.cs</Link>
-    </Compile>
-    <Compile Include="..\Alpaca Shared Resources\Response Classes\ShortArray3DResponse.cs">
-      <Link>Response Classes\ShortArray3DResponse.cs</Link>
     </Compile>
     <Compile Include="..\Alpaca Shared Resources\Response Classes\ShortResponse.cs">
       <Link>Response Classes\ShortResponse.cs</Link>
@@ -158,9 +131,16 @@
       <Link>TraceLoggerPlus.cs</Link>
     </Compile>
     <Compile Include="AxisRates.cs" />
+    <Compile Include="Base64ArrayHandOffResponse.cs" />
+    <Compile Include="Base64ArrayJsonResponse.cs" />
     <Compile Include="ClassFactory.cs" />
     <Compile Include="DataProtectionExtensions.cs" />
+    <Compile Include="DoubleArray2DResponse.cs" />
+    <Compile Include="DoubleArray3DResponse.cs" />
     <Compile Include="HostPc.cs" />
+    <Compile Include="ImageArrayResponseBase.cs" />
+    <Compile Include="IntArray2DResponse.cs" />
+    <Compile Include="IntArray3DResponse.cs" />
     <Compile Include="LocalServerForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -179,6 +159,8 @@
     <Compile Include="SetupDialogForm.Designer.cs">
       <DependentUpon>SetupDialogForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ShortArray2DResponse.cs" />
+    <Compile Include="ShortArray3DResponse.cs" />
     <Compile Include="TrackingRates.cs" />
     <Compile Include="DynamicClientDriver.cs" />
     <EmbeddedResource Include="LocalServerForm.resx">
@@ -214,6 +196,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="ASCOM.Tools">
+      <Version>1.0.0-alpha23i</Version>
+    </PackageReference>
     <PackageReference Include="RestSharp">
       <Version>106.12.0</Version>
     </PackageReference>

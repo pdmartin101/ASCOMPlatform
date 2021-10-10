@@ -18,7 +18,7 @@ namespace ASCOM.DynamicRemoteClients
         // Encryption uses the Microsoft Data Protection API (DPAPI) for simplicity and avoidance of the need to manage keys. 
         const DataProtectionScope dataProtectionScope = DataProtectionScope.LocalMachine;
 
-        public static string Encrypt(this string clearText, TraceLogger TL)
+        public static string Encrypt(this string clearText, TraceLoggerPlus TL)
         {
             try
             {
@@ -36,7 +36,7 @@ namespace ASCOM.DynamicRemoteClients
             }
         }
 
-        public static string Unencrypt(this string encryptedText, TraceLogger TL)
+        public static string Unencrypt(this string encryptedText, TraceLoggerPlus TL)
         {
             try
             {

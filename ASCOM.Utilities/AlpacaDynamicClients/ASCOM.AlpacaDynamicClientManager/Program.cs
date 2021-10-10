@@ -305,12 +305,15 @@ namespace ASCOM.DynamicRemoteClients
                 };
                 TL.LogMessage("CreateAlpacaClient", "Created compiler parameters");
 
-                // Add required assembly references to make sure the compilation succeeds
+                // Add required assembly references to make sure the compilation succeeds - CURRENT DIRECTORY = CODE GENERATOR MANAGER DIRECTORY
                 cp.ReferencedAssemblies.Add(@"ASCOM.Attributes.dll");                    // Must be present in the current directory because the compiler doesn't use the GAC
                 cp.ReferencedAssemblies.Add(@"ASCOM.DeviceInterfaces.dll");              // Must be present in the current directory because the compiler doesn't use the GAC
                 cp.ReferencedAssemblies.Add(@"ASCOM.Newtonsoft.Json.dll");               // Must be present in the current directory because the compiler doesn't use the GAC
                 cp.ReferencedAssemblies.Add(@"RestSharp.dll");                           // Must be present in the current directory
                 cp.ReferencedAssemblies.Add(@"ASCOM.AlpacaClientDeviceBaseClasses.dll"); // Must be present in the current directory
+                cp.ReferencedAssemblies.Add(@"ASCOM.Alpaca.dll"); // Must be present in the current directory
+                cp.ReferencedAssemblies.Add(@"ASCOM.Common.dll"); // Must be present in the current directory
+                cp.ReferencedAssemblies.Add(@"Netstandard.dll"); // Must be present in the current directory
                 cp.ReferencedAssemblies.Add(SharedConstants.ALPACA_CLIENT_LOCAL_SERVER); // Must be present in the current directory
 
                 Assembly executingAssembly = Assembly.GetExecutingAssembly();
@@ -319,9 +322,16 @@ namespace ASCOM.DynamicRemoteClients
                 foreach (AssemblyName assemblyName in executingAssembly.GetReferencedAssemblies())
                 {
                     cp.ReferencedAssemblies.Add(Assembly.Load(assemblyName).Location);
+                    TL.LogMessage("CreateAlpacaClient", $"Added assembly reference from current executable: {assemblyName}");
                 }
+                TL.BlankLine();
 
-                TL.LogMessage("CreateAlpacaClient", "Added assembly references");
+                TL.LogMessage("CreateAlpacaClient", "Added assembly references. Complete assembly list:");
+                foreach (var assemblyName in cp.ReferencedAssemblies)
+                {
+                    TL.LogMessage("CreateAlpacaClient", $"Assembly reference: {assemblyName}");
+                }
+                TL.BlankLine();
 
                 // Create formatting options for the generated code that will be logged into the trace logger
                 CodeGeneratorOptions codeGeneratorOptions = new CodeGeneratorOptions()

@@ -1131,7 +1131,21 @@ Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Loc
 Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Local Server\bin\Release\ASCOM.AlpacaClientLocalServer.exe.config to $COMMONFILES$\ASCOM\AlpacaDynamicClients
 Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\ASCOM.AlpacaClientDeviceBaseClasses.dll to $COMMONFILES$\ASCOM\AlpacaDynamicClients
 Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\ASCOM.AlpacaClientDeviceBaseClasses.pdb to $COMMONFILES$\ASCOM\AlpacaDynamicClients
-Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\ASCOM.AlpacaDynamicClientManager\bin\Release\RestSharp.dll to $COMMONFILES$\ASCOM\AlpacaDynamicClients
+Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\RestSharp.dll to $COMMONFILES$\ASCOM\AlpacaDynamicClients
+Comment: Add the .NET Standard Alpaca Client Support libraries
+Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\ASCOM.Alpaca.dll to $COMMONFILES$\ASCOM\AlpacaDynamicClients
+Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\ASCOM.Tools.dll to $COMMONFILES$\ASCOM\AlpacaDynamicClients
+Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\ASCOM.Common.dll to $COMMONFILES$\ASCOM\AlpacaDynamicClients
+Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\System.Text.Json.dll to $COMMONFILES$\ASCOM\AlpacaDynamicClients
+Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\System.Text.Encodings.Web.dll to $COMMONFILES$\ASCOM\AlpacaDynamicClients
+Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\System.Runtime.CompilerServices.Unsafe.dll to $COMMONFILES$\ASCOM\AlpacaDynamicClients
+Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\System.Buffers.dll to $COMMONFILES$\ASCOM\AlpacaDynamicClients
+Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\System.Memory.dll to $COMMONFILES$\ASCOM\AlpacaDynamicClients
+Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\System.Threading.Tasks.Extensions.dll to $COMMONFILES$\ASCOM\AlpacaDynamicClients
+Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\Microsoft.Bcl.AsyncInterfaces.dll to $COMMONFILES$\ASCOM\AlpacaDynamicClients
+Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\System.ValueTuple.dll to $COMMONFILES$\ASCOM\AlpacaDynamicClients
+Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\System.Numerics.Vectors.dll to $COMMONFILES$\ASCOM\AlpacaDynamicClients
+Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\Newtonsoft.Json.dll to $COMMONFILES$\ASCOM\AlpacaDynamicClients
 Comment: Add the client creator executable and the dependencies that must be present in order to allow the dynamic compilation to succeed
 Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\ASCOM.AlpacaDynamicClientManager\bin\Release\ASCOM.AlpacaDynamicClientManager.exe to $TARGETDIR$\Tools\AlpacaDynamicClientManager
 Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\ASCOM.AlpacaDynamicClientManager\bin\Release\ASCOM.AlpacaDynamicClientManager.pdb to $TARGETDIR$\Tools\AlpacaDynamicClientManager
@@ -1139,6 +1153,7 @@ Install Files ..\..\..\..\ASCOM.Attributes\bin\Release\ASCOM.Attributes.dll to $
 Install Files ..\..\..\..\ASCOM.DeviceInterface\bin\Release\ASCOM.DeviceInterfaces.dll to $TARGETDIR$\Tools\AlpacaDynamicClientManager
 Install Files ..\..\..\..\ASCOM.Utilities\ASCOM.Newtonsoft.Json\bin\Release\net35\ASCOM.Newtonsoft.Json.dll to $TARGETDIR$\Tools\AlpacaDynamicClientManager
 Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\ASCOM.AlpacaDynamicClientManager\bin\Release\RestSharp.dll to $TARGETDIR$\Tools\AlpacaDynamicClientManager
+Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\ASCOM.Alpaca.dll to $TARGETDIR$\Tools\AlpacaDynamicClientManager
 Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Device Base Classes\bin\Release\ASCOM.AlpacaClientDeviceBaseClasses.dll to $TARGETDIR$\Tools\AlpacaDynamicClientManager
 Install Files ..\..\..\..\ASCOM.Utilities\AlpacaDynamicClients\Alpaca Client Local Server\bin\Release\ASCOM.AlpacaClientLocalServer.exe to $TARGETDIR$\Tools\AlpacaDynamicClientManager
 [END REGION]
