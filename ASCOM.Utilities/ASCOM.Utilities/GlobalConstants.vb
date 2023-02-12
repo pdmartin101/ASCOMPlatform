@@ -11,6 +11,10 @@ Module GlobalConstants
     Friend Const SERIAL_FORCED_COMPORTS_VARNAME As String = SERIALPORT_COM_PORT_SETTINGS & "\ForceCOMPorts" 'Constant listing COM ports that will be forced to be present
     Friend Const SERIAL_IGNORE_COMPORTS_VARNAME As String = SERIALPORT_COM_PORT_SETTINGS & "\IgnoreCOMPorts" 'Constant listing COM ports that will be ignored if present
 
+    ' Experimental features constants
+    Friend Const THROW_INITIATOR As String = "Throw Initiator", THROW_INITIATOR_DEFAULT As Boolean = False
+    Friend Const THROW_COMPLETION As String = "Throw Completion", THROW_COMPLETION_DEFAULT As Boolean = False
+
     'Utilities configuration constants
     Friend Const TRACE_XMLACCESS As String = "Trace XMLAccess", TRACE_XMLACCESS_DEFAULT As Boolean = False
     Friend Const TRACE_PROFILE As String = "Trace Profile", TRACE_PROFILE_DEFAULT As Boolean = False
