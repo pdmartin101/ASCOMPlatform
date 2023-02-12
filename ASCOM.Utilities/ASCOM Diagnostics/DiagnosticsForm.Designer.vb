@@ -66,6 +66,8 @@ Partial Class DiagnosticsForm
         Me.lblAction = New System.Windows.Forms.Label()
         Me.btnViewLastLog = New System.Windows.Forms.Button()
         Me.SerialTraceFileName = New System.Windows.Forms.SaveFileDialog()
+        Me.MenuThrowInitiator = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuThrowCompletion = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -324,7 +326,7 @@ Partial Class DiagnosticsForm
         '
         'OptionsToolStripMenuItem
         '
-        Me.OptionsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuAutoViewLog})
+        Me.OptionsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuAutoViewLog, Me.MenuThrowCompletion, Me.MenuThrowInitiator})
         Me.OptionsToolStripMenuItem.Name = "OptionsToolStripMenuItem"
         Me.OptionsToolStripMenuItem.Size = New System.Drawing.Size(61, 20)
         Me.OptionsToolStripMenuItem.Text = "Options"
@@ -363,6 +365,18 @@ Partial Class DiagnosticsForm
         Me.btnViewLastLog.TabIndex = 7
         Me.btnViewLastLog.Text = "View Last Log"
         Me.btnViewLastLog.UseVisualStyleBackColor = True
+        '
+        'MenuThrowInitiator
+        '
+        Me.MenuThrowInitiator.Name = "MenuThrowInitiator"
+        Me.MenuThrowInitiator.Size = New System.Drawing.Size(243, 22)
+        Me.MenuThrowInitiator.Text = "Throw initiator"
+        '
+        'MenuThrowCompletion
+        '
+        Me.MenuThrowCompletion.Name = "MenuThrowCompletion"
+        Me.MenuThrowCompletion.Size = New System.Drawing.Size(243, 22)
+        Me.MenuThrowCompletion.Text = "Throw completion"
         '
         'DiagnosticsForm
         '
@@ -432,4 +446,6 @@ Partial Class DiagnosticsForm
     Friend WithEvents EarthRotationDataUpdateToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents MenuEarthRotationDataFormTraceEnabled As ToolStripMenuItem
     Friend WithEvents MenuRegistryTraceEnabled As ToolStripMenuItem
+    Friend WithEvents MenuThrowCompletion As ToolStripMenuItem
+    Friend WithEvents MenuThrowInitiator As ToolStripMenuItem
 End Class

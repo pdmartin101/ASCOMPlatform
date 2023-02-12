@@ -8826,6 +8826,10 @@ Public Class DiagnosticsForm
         MenuCacheTraceEnabled.Checked = GetBool(TRACE_CACHE, TRACE_CACHE_DEFAULT)
         MenuEarthRotationDataFormTraceEnabled.Checked = GetBool(TRACE_EARTHROTATION_DATA_FORM, TRACE_EARTHROTATION_DATA_FORM_DEFAULT)
 
+        ' Set experimental features values
+        MenuThrowInitiator.Checked = GetBool(THROW_INITIATOR, THROW_INITIATOR_DEFAULT)
+        MenuThrowCompletion.Checked = GetBool(THROW_COMPLETION, THROW_COMPLETION_DEFAULT)
+
         TypeOfWait = GetWaitType(SERIAL_WAIT_TYPE, SERIAL_WAIT_TYPE_DEFAULT)
 
         MenuWaitTypeManualResetEvent.Checked = False
@@ -9002,6 +9006,29 @@ Public Class DiagnosticsForm
         ' Test whether the F5 key was pressed to start the test
         If e.KeyCode = Keys.F5 Then ' F5 was pressed so start the Diagnostics test
             RunDiagnostics(New Object, New EventArgs)
+        End If
+    End Sub
+
+    ' Experimental features
+    Private Sub MenuThrowInitiator_Click(sender As Object, e As EventArgs) Handles MenuThrowInitiator.Click
+        MenuThrowInitiator.Checked = Not MenuThrowInitiator.Checked 'Invert the selection
+        SetName(THROW_INITIATOR, MenuThrowInitiator.Checked.ToString)
+
+        ' Make this option mutually exclusive with throw completion
+        If MenuThrowInitiator.Checked Then
+            MenuThrowCompletion.Checked = False
+            SetName(THROW_COMPLETION, False.ToString())
+        End If
+    End Sub
+
+    Private Sub MenuThrowCompletion_Click(sender As Object, e As EventArgs) Handles MenuThrowCompletion.Click
+        MenuThrowCompletion.Checked = Not MenuThrowCompletion.Checked 'Invert the selection
+        SetName(THROW_COMPLETION, MenuThrowCompletion.Checked.ToString)
+
+        ' Make this option mutually exclusive with throw initiator
+        If MenuThrowCompletion.Checked Then
+            MenuThrowInitiator.Checked = False
+            SetName(THROW_INITIATOR, False.ToString())
         End If
     End Sub
 
