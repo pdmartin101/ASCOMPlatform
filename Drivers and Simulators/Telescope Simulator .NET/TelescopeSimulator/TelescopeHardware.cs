@@ -73,6 +73,37 @@ namespace ASCOM.Simulator
 
         #endregion
 
+        #region Experimental area
+
+        // Working variable to hold current simulator state of whether or not to throw slewing completion exceptions
+        public static bool ThrowSlewingCompletionExceptions;
+
+        /// <summary>
+        /// Get the Platform configuration value for whether or not completion variables throw exceptions
+        /// </summary>
+        private static bool ThrowCompletionExceptions
+        {
+            get
+            {
+                // Read experimental throw completion feature option
+                return RegistryCommonCode.GetBool(GlobalConstants.THROW_COMPLETION, GlobalConstants.THROW_COMPLETION_DEFAULT);
+            }
+        }
+
+        /// <summary>
+        /// Get the Platform configuration value for whether or not initiation methods throw exceptions
+        /// </summary>
+        private static bool ThrowInitiatorExceptions
+        {
+            get
+            {
+                // Read experimental throw initiator feature option
+                return RegistryCommonCode.GetBool(GlobalConstants.THROW_INITIATOR, GlobalConstants.THROW_INITIATOR_DEFAULT);
+            }
+        }
+
+        #endregion
+
         #region Private variables
         // change to using a Windows timer to avoid threading problems
         private static System.Windows.Forms.Timer updateStateTimer;
@@ -1551,10 +1582,44 @@ namespace ASCOM.Simulator
 
         public static void StartSlewRaDec(double rightAscension, double declination, bool doSideOfPier)
         {
-            Vector raDec = new Vector(rightAscension, declination);
+            Vector raDec;
+
+            // Clear the slewing exceptions flag if we are not slewing so that this slew will succeed
+            if (!slewing) ThrowSlewingCompletionExceptions = false;
+
+            if (ThrowInitiatorExceptions)
+            {
+                if (slewing)
+                {
+                    // Reject a re-target
+                    LogMessage("StartSlewRaDec", $"ThrowInitiator - REJECTED TARGET - RA: {rightAscension.ToHMS()}, Declination: {declination.ToDMS()}, DoSOP {doSideOfPier}");
+                    throw new InvalidOperationException("Cannot start a new slew because a slew is already underway!");
+                }
+
+                // Accept a new target
+                LogMessage("StartSlewRaDec", $"ThrowInitiator RA: {rightAscension.ToHMS()}, Declination: {declination.ToDMS()}, DoSOP {doSideOfPier}");
+            }
+            else if (ThrowCompletionExceptions)
+            {
+                if (slewing)
+                {
+                    // Make slewing throw exceptions but accept a changed target
+                    ThrowSlewingCompletionExceptions = true;
+                }
+
+                // Accept a new target or re-target
+                LogMessage("StartSlewRaDec", $"ThrowCompletion RA: {rightAscension.ToHMS()}, Declination: {declination.ToDMS()}, DoSOP {doSideOfPier}");
+            }
+            else
+            {
+                // Classic behaviour to always accept a new target or re-target
+                LogMessage("StartSlewRaDec", $"Classic RA: {rightAscension.ToHMS()}, Declination: {declination.ToDMS()}, DoSOP {doSideOfPier}");
+            }
+
+            // Start the slew
+            raDec = new Vector(rightAscension, declination);
             targetAxesDegrees = MountFunctions.ConvertRaDecToAxes(raDec);
 
-            LogMessage("StartSlewRaDec", $"RA: {rightAscension.ToHMS()}, Declination: {declination.ToDMS()}, DoSOP {doSideOfPier}");
             StartSlewAxes(targetAxesDegrees, SlewType.SlewRaDec);
         }
 
@@ -1566,9 +1631,41 @@ namespace ASCOM.Simulator
 
         public static void StartSlewAltAz(Vector targetAltAzm)
         {
-            LogMessage("StartSlewAltAz", $"Azimuth: {targetAltAzm.X.ToDMS()}, Altitude: {targetAltAzm.Y.ToDMS()}");
+            Vector target;
 
-            Vector target = MountFunctions.ConvertAltAzmToAxes(targetAltAzm);
+            // Clear the slewing exceptions flag if we are not slewing so that this slew will succeed
+            if (!slewing) ThrowSlewingCompletionExceptions = false;
+
+            if (ThrowInitiatorExceptions)
+            {
+                if (slewing)
+                {
+                    // Reject the re-target
+                    LogMessage("StartSlewAltAz", $"ThrowInitiator - REJECTED TARGET - Azimuth: {targetAltAzm.X.ToDMS()}, Altitude: {targetAltAzm.Y.ToDMS()}");
+                    throw new InvalidOperationException("Cannot start a new slew because a slew is already underway!");
+                }
+
+                // Accept a new target
+                LogMessage("StartSlewAltAz", $"ThrowInitiator - Azimuth: {targetAltAzm.X.ToDMS()}, Altitude: {targetAltAzm.Y.ToDMS()}");
+            }
+            else if (ThrowCompletionExceptions)
+            {
+                if (slewing)
+                {
+                    // Make slewing throw exceptions but accept the changed target
+                    ThrowSlewingCompletionExceptions = true;
+                }
+
+                // Accept a new target or re-target
+                LogMessage("StartSlewAltAz", $"ThrowCompletion - Azimuth: {targetAltAzm.X.ToDMS()}, Altitude: {targetAltAzm.Y.ToDMS()}");
+            }
+            else
+            {
+                // Classic behaviour to always accept a new target or re-target
+                LogMessage("StartSlewAltAz", $"Classic - Azimuth: {targetAltAzm.X.ToDMS()}, Altitude: {targetAltAzm.Y.ToDMS()}");
+            }
+
+            target = MountFunctions.ConvertAltAzmToAxes(targetAltAzm);
             if (target.LengthSquared > 0)
             {
                 StartSlewAxes(target, SlewType.SlewAltAz);

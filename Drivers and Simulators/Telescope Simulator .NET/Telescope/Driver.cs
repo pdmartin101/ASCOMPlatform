@@ -1154,6 +1154,9 @@ namespace ASCOM.Simulator
             get
             {
                 SharedResources.TrafficLine(SharedResources.MessageType.Polls, string.Format(CultureInfo.CurrentCulture, "Slewing: {0}", TelescopeHardware.SlewState != SlewType.SlewNone));
+                if (TelescopeHardware.ThrowSlewingCompletionExceptions)
+                    throw new OperationCanceledException("The current slew or park or home operation did not complete and was overridden by a new operation!");
+
                 return TelescopeHardware.IsSlewing;
             }
         }

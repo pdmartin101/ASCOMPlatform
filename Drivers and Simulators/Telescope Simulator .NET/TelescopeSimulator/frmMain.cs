@@ -121,7 +121,6 @@ namespace ASCOM.Simulator
                     TelescopeHardware.Longitude = setupForm.Longitude;
                     TelescopeHardware.MaximumSlewRate = setupForm.MaximumSlewRate;
                     TelescopeHardware.NoSyncPastMeridian = setupForm.NoSyncPastMeridian;
-
                     this.TopMost = setupForm.OnTop;
                 }
             }
