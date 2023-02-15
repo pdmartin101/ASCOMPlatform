@@ -19,6 +19,18 @@ using System.Text;
 
 namespace ASCOM.Simulator
 {
+    public enum MountOperation
+    {
+        None,
+        Slew,
+        Move,
+        Park,
+        Home,
+        PulseGuide,
+        HandPaddle
+    }
+
+
     public enum SlewType
     {
         SlewNone,
@@ -267,8 +279,5 @@ namespace ASCOM.Simulator
         {
             return util.DegreesToDMS(value, ":", ":", "", 3);
         }
-
-
-
     }
 }

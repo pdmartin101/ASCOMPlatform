@@ -62,12 +62,14 @@ Partial Class DiagnosticsForm
         Me.MenuWaitTypeWaitForSingleObject = New System.Windows.Forms.ToolStripMenuItem()
         Me.OptionsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuAutoViewLog = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuThrowInitiator = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuThrowCompletion = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuUseSlewingAsHomeParkCompletionVariable = New System.Windows.Forms.ToolStripMenuItem()
         Me.AboutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.lblAction = New System.Windows.Forms.Label()
         Me.btnViewLastLog = New System.Windows.Forms.Button()
         Me.SerialTraceFileName = New System.Windows.Forms.SaveFileDialog()
-        Me.MenuThrowInitiator = New System.Windows.Forms.ToolStripMenuItem()
-        Me.MenuThrowCompletion = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuTransactionalBehaviour = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -326,7 +328,7 @@ Partial Class DiagnosticsForm
         '
         'OptionsToolStripMenuItem
         '
-        Me.OptionsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuAutoViewLog, Me.MenuThrowCompletion, Me.MenuThrowInitiator})
+        Me.OptionsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuAutoViewLog, Me.MenuTransactionalBehaviour, Me.MenuThrowInitiator, Me.MenuThrowCompletion, Me.MenuUseSlewingAsHomeParkCompletionVariable})
         Me.OptionsToolStripMenuItem.Name = "OptionsToolStripMenuItem"
         Me.OptionsToolStripMenuItem.Size = New System.Drawing.Size(61, 20)
         Me.OptionsToolStripMenuItem.Text = "Options"
@@ -334,8 +336,32 @@ Partial Class DiagnosticsForm
         'MenuAutoViewLog
         '
         Me.MenuAutoViewLog.Name = "MenuAutoViewLog"
-        Me.MenuAutoViewLog.Size = New System.Drawing.Size(243, 22)
+        Me.MenuAutoViewLog.Size = New System.Drawing.Size(323, 22)
         Me.MenuAutoViewLog.Text = "Automatically view log after run"
+        '
+        'MenuThrowInitiator
+        '
+        Me.MenuThrowInitiator.Enabled = False
+        Me.MenuThrowInitiator.Name = "MenuThrowInitiator"
+        Me.MenuThrowInitiator.Size = New System.Drawing.Size(323, 22)
+        Me.MenuThrowInitiator.Text = "Initiator methods throw exceptions"
+        Me.MenuThrowInitiator.Visible = False
+        '
+        'MenuThrowCompletion
+        '
+        Me.MenuThrowCompletion.Enabled = False
+        Me.MenuThrowCompletion.Name = "MenuThrowCompletion"
+        Me.MenuThrowCompletion.Size = New System.Drawing.Size(323, 22)
+        Me.MenuThrowCompletion.Text = "Completion methods throw exceptions"
+        Me.MenuThrowCompletion.Visible = False
+        '
+        'MenuUseSlewingAsHomeParkCompletionVariable
+        '
+        Me.MenuUseSlewingAsHomeParkCompletionVariable.Enabled = False
+        Me.MenuUseSlewingAsHomeParkCompletionVariable.Name = "MenuUseSlewingAsHomeParkCompletionVariable"
+        Me.MenuUseSlewingAsHomeParkCompletionVariable.Size = New System.Drawing.Size(323, 22)
+        Me.MenuUseSlewingAsHomeParkCompletionVariable.Text = "Use Slewing as Home/Park completion variable"
+        Me.MenuUseSlewingAsHomeParkCompletionVariable.Visible = False
         '
         'AboutToolStripMenuItem
         '
@@ -366,17 +392,11 @@ Partial Class DiagnosticsForm
         Me.btnViewLastLog.Text = "View Last Log"
         Me.btnViewLastLog.UseVisualStyleBackColor = True
         '
-        'MenuThrowInitiator
+        'MenuTransactionalBehaviour
         '
-        Me.MenuThrowInitiator.Name = "MenuThrowInitiator"
-        Me.MenuThrowInitiator.Size = New System.Drawing.Size(243, 22)
-        Me.MenuThrowInitiator.Text = "Throw initiator"
-        '
-        'MenuThrowCompletion
-        '
-        Me.MenuThrowCompletion.Name = "MenuThrowCompletion"
-        Me.MenuThrowCompletion.Size = New System.Drawing.Size(243, 22)
-        Me.MenuThrowCompletion.Text = "Throw completion"
+        Me.MenuTransactionalBehaviour.Name = "MenuTransactionalBehaviour"
+        Me.MenuTransactionalBehaviour.Size = New System.Drawing.Size(323, 22)
+        Me.MenuTransactionalBehaviour.Text = "Enable simulator transactional behaviour"
         '
         'DiagnosticsForm
         '
@@ -448,4 +468,6 @@ Partial Class DiagnosticsForm
     Friend WithEvents MenuRegistryTraceEnabled As ToolStripMenuItem
     Friend WithEvents MenuThrowCompletion As ToolStripMenuItem
     Friend WithEvents MenuThrowInitiator As ToolStripMenuItem
+    Friend WithEvents MenuUseSlewingAsHomeParkCompletionVariable As ToolStripMenuItem
+    Friend WithEvents MenuTransactionalBehaviour As ToolStripMenuItem
 End Class

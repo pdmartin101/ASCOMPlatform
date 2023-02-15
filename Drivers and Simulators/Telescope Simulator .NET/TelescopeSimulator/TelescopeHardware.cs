@@ -31,6 +31,8 @@ using System.Windows;
 using ASCOM.DeviceInterface;
 using ASCOM.Utilities;
 using System.Collections.Generic;
+using ASCOM.Astrometry;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace ASCOM.Simulator
 {
@@ -75,30 +77,27 @@ namespace ASCOM.Simulator
 
         #region Experimental area
 
+        // Working variable to hold the type of the last requested operation
+        private static MountOperation lastOperation = CurrentOperation.None;
+
         // Working variable to hold current simulator state of whether or not to throw slewing completion exceptions
         public static bool ThrowSlewingCompletionExceptions;
+
+        // Working variable to hold current simulator state of whether or not to throw AtPark completion exceptions
+        public static bool ThrowAtParkCompletionExceptions;
+
+        // Working variable to hold current simulator state of whether or not to throw AtHome completion exceptions
+        public static bool ThrowAtHomeCompletionExceptions;
 
         /// <summary>
         /// Get the Platform configuration value for whether or not completion variables throw exceptions
         /// </summary>
-        private static bool ThrowCompletionExceptions
+        private static bool TransactionalBehviour
         {
             get
             {
-                // Read experimental throw completion feature option
-                return RegistryCommonCode.GetBool(GlobalConstants.THROW_COMPLETION, GlobalConstants.THROW_COMPLETION_DEFAULT);
-            }
-        }
-
-        /// <summary>
-        /// Get the Platform configuration value for whether or not initiation methods throw exceptions
-        /// </summary>
-        private static bool ThrowInitiatorExceptions
-        {
-            get
-            {
-                // Read experimental throw initiator feature option
-                return RegistryCommonCode.GetBool(GlobalConstants.THROW_INITIATOR, GlobalConstants.THROW_INITIATOR_DEFAULT);
+                // Read experimental transactional operation feature option
+                return RegistryCommonCode.GetBool(GlobalConstants.SIMULATOR_TRANSACTIONAL_BEHAVIOUR, GlobalConstants.SIMULATOR_TRANSACTIONAL_BEHAVIOUR_DEFAULT);
             }
         }
 
@@ -629,6 +628,7 @@ namespace ASCOM.Simulator
                 // invalid target position
                 targetRaDec = new Vector(double.NaN, double.NaN);
                 SlewState = SlewType.SlewNone;
+                lastOperation = CurrentOperation.None;
 
                 mountAxesDegrees = MountFunctions.ConvertAltAzmToAxes(currentAltAzm); // Convert the start position AltAz coordinates into the current axes representation and set this as the simulator start position
                 TL.LogMessage("TelescopeHardware New", string.Format("Start-up mode: {0}, Azimuth: {1}, Altitude: {2}", startupMode, currentAltAzm.X.ToString(CultureInfo.InvariantCulture), currentAltAzm.Y.ToString(CultureInfo.InvariantCulture)));
@@ -1587,9 +1587,9 @@ namespace ASCOM.Simulator
             // Clear the slewing exceptions flag if we are not slewing so that this slew will succeed
             if (!slewing) ThrowSlewingCompletionExceptions = false;
 
-            if (ThrowInitiatorExceptions)
+            if (TransactionalBehviour) // Reject any new operation if one is already in progress
             {
-                if (slewing)
+                if (slewing | isPulseGuidingDec | isPulseGuidingRa) // An operation is in progress
                 {
                     // Reject a re-target
                     LogMessage("StartSlewRaDec", $"ThrowInitiator - REJECTED TARGET - RA: {rightAscension.ToHMS()}, Declination: {declination.ToDMS()}, DoSOP {doSideOfPier}");
@@ -1598,13 +1598,47 @@ namespace ASCOM.Simulator
 
                 // Accept a new target
                 LogMessage("StartSlewRaDec", $"ThrowInitiator RA: {rightAscension.ToHMS()}, Declination: {declination.ToDMS()}, DoSOP {doSideOfPier}");
-            }
-            else if (ThrowCompletionExceptions)
-            {
                 if (slewing)
                 {
-                    // Make slewing throw exceptions but accept a changed target
-                    ThrowSlewingCompletionExceptions = true;
+                    switch (lastOperation)
+                    {
+                        case CurrentOperation.None:
+                            throw new InvalidOperationException($"StartSlewRaDec - Slewing is true but lastOperation is set to 'None', this should be impossible!");
+
+                        case CurrentOperation.Slew: // Currently in the middle of a slew operation
+                            // Make slewing throw exceptions but accept a changed target
+                            ThrowSlewingCompletionExceptions = true;
+                            break;
+
+                        case CurrentOperation.Park: // Currently in the middle of a Park() operation
+                            if (UseSlewingAsHomeParkCompletionVariable) // We are using Slewing as the Park() completion variable
+                            {
+                                // Make slewing throw exceptions but accept the new slew
+                                ThrowSlewingCompletionExceptions = true;
+                            }
+                            else // We are using AtPark as the Park() completion variable
+                            {
+                                // Make AtPark throw exceptions but accept the new value
+                                ThrowAtParkCompletionExceptions = true;
+                            }
+                            break;
+
+                        case CurrentOperation.Home: // Currently in the middle of a Home() operation
+                            if (UseSlewingAsHomeParkCompletionVariable) // We are using Slewing as the Home() completion variable
+                            {
+                                // Make slewing throw exceptions but accept the new slew
+                                ThrowSlewingCompletionExceptions = true;
+                            }
+                            else // We are using AtHome as the Home() completion variable
+                            {
+                                // Make AtHome throw exceptions but accept the new value
+                                ThrowAtHomeCompletionExceptions = true;
+                            }
+                            break;
+
+                        default:
+                            throw new InvalidValueException($"StartSlewRaDec - Unexpected last operation value: {lastOperation}");
+                    }
                 }
 
                 // Accept a new target or re-target
@@ -1619,6 +1653,7 @@ namespace ASCOM.Simulator
             // Start the slew
             raDec = new Vector(rightAscension, declination);
             targetAxesDegrees = MountFunctions.ConvertRaDecToAxes(raDec);
+            lastOperation = CurrentOperation.Slew;
 
             StartSlewAxes(targetAxesDegrees, SlewType.SlewRaDec);
         }
@@ -1669,6 +1704,7 @@ namespace ASCOM.Simulator
             if (target.LengthSquared > 0)
             {
                 StartSlewAxes(target, SlewType.SlewAltAz);
+                lastOperation = CurrentOperation.Slew;
             }
         }
 
@@ -1693,8 +1729,50 @@ namespace ASCOM.Simulator
         {
             Vector parkCoordinates;
 
+            // Clear the Slewing and AtPark exception flags if we are parked so that this Park will succeed
+            if (!slewing) ThrowSlewingCompletionExceptions = false;
+            if (AtPark) ThrowAtParkCompletionExceptions = false;
+
+            if (ThrowInitiatorExceptions)
+            {
+                if (slewing)
+                {
+                    // Reject the Park because an operation is already in progress
+                    LogMessage("Park", $"ThrowInitiator - REJECTED PARK");
+                    throw new InvalidOperationException($"Cannot Park because another operation ({lastOperation}) is already underway!");
+                }
+
+                // Accept a new target
+                LogMessage("Park", $"ThrowInitiator - Parking mount.");
+            }
+            else if (ThrowCompletionExceptions)
+            {
+                if (slewing)
+                {
+                    // Make Slewing or AtPark throw exceptions but accept the changed target
+                    if (UseSlewingAsHomeParkCompletionVariable) // We are using Slewing
+                    {
+                        ThrowSlewingCompletionExceptions = true;
+                    }
+                    else // We are using AtPark
+                    {
+                        ThrowAtParkCompletionExceptions = true;
+                    }
+                }
+
+                // Accept the Park command
+                LogMessage("Park", $"ThrowCompletion - Parking mount.");
+            }
+            else
+            {
+                // Classic behaviour to always obey the last command issued
+                LogMessage("Park", $"Classic - Parking mount.");
+            }
+
+            // Park the mount
             parkCoordinates = MountFunctions.ConvertAltAzmToAxes(parkPosition); // Convert the park position AltAz coordinates into the current axes representation
             Tracking = false;
+            lastOperation = CurrentOperation.Park;
 
             StartSlewAxes(parkCoordinates, SlewType.SlewPark);
         }
@@ -1706,7 +1784,50 @@ namespace ASCOM.Simulator
                 throw new ParkedException("Cannot find Home when Parked");
             }
 
+
+            // Clear the Slewing and AtHome exception flags if we are homed so that this Home will succeed
+            if (!slewing) ThrowSlewingCompletionExceptions = false;
+            if (AtHome) ThrowAtHomeCompletionExceptions = false;
+
+            if (ThrowInitiatorExceptions)
+            {
+                if (slewing)
+                {
+                    // Reject the FindHome because an operation is already in progress
+                    LogMessage("FindHome", $"ThrowInitiator - REJECTED FINDHOME");
+                    throw new InvalidOperationException($"Cannot FindHome because another operation ({lastOperation}) is already underway!");
+                }
+
+                // Accept the FindHome command
+                LogMessage("FindHome", $"ThrowInitiator - Homing mount.");
+            }
+            else if (ThrowCompletionExceptions)
+            {
+                if (slewing)
+                {
+                    // Make Slewing or AtHome throw exceptions but accept the changed target
+                    if (UseSlewingAsHomeParkCompletionVariable) // We are using Slewing
+                    {
+                        ThrowSlewingCompletionExceptions = true;
+                    }
+                    else // We are using AtPark
+                    {
+                        ThrowAtParkCompletionExceptions = true;
+                    }
+                }
+
+                // Accept the FindHome command
+                LogMessage("FindHome", $"ThrowCompletion - Homing mount.");
+            }
+            else
+            {
+                // Classic behaviour to always obey the last command issued
+                LogMessage("FindHome", $"Classic - Homing mount.");
+            }
+            // Home the mount
             Tracking = false;
+            lastOperation = CurrentOperation.Home;
+
             TL.LogMessage("FindHome", $"HomePosition.X: {HomePosition.X.ToDMS()}, HomePosition.Y: {HomePosition.Y.ToDMS()}");
             StartSlewAxes(MountFunctions.ConvertAltAzmToAxes(HomePosition), SlewType.SlewHome);
         }
@@ -2224,6 +2345,51 @@ namespace ASCOM.Simulator
             TelescopeSimulator.m_MainForm.LabelState(TelescopeSimulator.m_MainForm.lblPARK, AtPark);
             TelescopeSimulator.m_MainForm.LabelState(TelescopeSimulator.m_MainForm.lblHOME, AtHome);
             TelescopeSimulator.m_MainForm.LabelState(TelescopeSimulator.m_MainForm.labelSlew, IsSlewing);
+        }
+
+        /// <summary>
+        /// Report which operation, if any, is currently underway. Only one of these can be active at one time
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidValueException"></exception>
+        private static MountOperation CurrentOperation()
+        {
+            switch (SlewState)
+            {
+                case SlewType.SlewNone:
+
+                    // No mount movement so check whether a pulse guide operation is running
+                    if (IsPulseGuiding)
+                        return MountOperation.PulseGuide;
+
+                    // No operations are underway so indicate this.
+                    return MountOperation.None;
+
+                case SlewType.SlewSettle:
+                    return MountOperation.Slew;
+
+                case SlewType.SlewMoveAxis:
+                    return MountOperation.Move;
+
+                case SlewType.SlewRaDec:
+                    return MountOperation.Slew;
+
+                case SlewType.SlewAltAz:
+                    return MountOperation.Slew;
+
+                case SlewType.SlewPark:
+                    return MountOperation.Park;
+
+                case SlewType.SlewHome:
+                    return MountOperation.Home;
+
+                case SlewType.SlewHandpad:
+                    return MountOperation.HandPaddle;
+
+                default:
+                    throw new InvalidValueException($"CurrentOperation - Unknown SlewState value: {SlewState}");
+
+            }
         }
 
         #endregion

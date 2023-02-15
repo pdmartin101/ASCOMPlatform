@@ -14,6 +14,8 @@ Module GlobalConstants
     ' Experimental features constants
     Friend Const THROW_INITIATOR As String = "Throw Initiator", THROW_INITIATOR_DEFAULT As Boolean = False
     Friend Const THROW_COMPLETION As String = "Throw Completion", THROW_COMPLETION_DEFAULT As Boolean = False
+    Friend Const USE_SLEWING_AS_HOME_PARK_COMPLETION_VARIABLE As String = "Use Slewing As Home-Park Completion Variable", USE_SLEWING_AS_HOME_PARK_COMPLETION_VARIABLE_DEFAULT As Boolean = False
+    Friend Const SIMULATOR_TRANSACTIONAL_BEHAVIOUR As String = "Simulator Transactional Behaviour", SIMULATOR_TRANSACTIONAL_BEHAVIOUR_DEFAULT As Boolean = False
 
     'Utilities configuration constants
     Friend Const TRACE_XMLACCESS As String = "Trace XMLAccess", TRACE_XMLACCESS_DEFAULT As Boolean = False

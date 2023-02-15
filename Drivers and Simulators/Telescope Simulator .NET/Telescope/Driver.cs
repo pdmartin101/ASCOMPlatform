@@ -218,6 +218,10 @@ namespace ASCOM.Simulator
             {
                 CheckVersionOne("AtHome", false);
                 SharedResources.TrafficLine(SharedResources.MessageType.Polls, "AtHome: " + TelescopeHardware.AtHome);
+
+                if (TelescopeHardware.ThrowAtHomeCompletionExceptions)
+                    throw new OperationCanceledException("The current Home operation did not complete and was overridden by a new operation!");
+
                 return TelescopeHardware.AtHome;
             }
         }
@@ -228,6 +232,10 @@ namespace ASCOM.Simulator
             {
                 CheckVersionOne("AtPark", false);
                 SharedResources.TrafficLine(SharedResources.MessageType.Polls, "AtPark: " + TelescopeHardware.AtPark);
+
+                if (TelescopeHardware.ThrowAtParkCompletionExceptions)
+                    throw new OperationCanceledException("The current Park operation did not complete and was overridden by a new operation!");
+
                 return TelescopeHardware.AtPark;
             }
         }

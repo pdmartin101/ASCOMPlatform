@@ -8829,6 +8829,8 @@ Public Class DiagnosticsForm
         ' Set experimental features values
         MenuThrowInitiator.Checked = GetBool(THROW_INITIATOR, THROW_INITIATOR_DEFAULT)
         MenuThrowCompletion.Checked = GetBool(THROW_COMPLETION, THROW_COMPLETION_DEFAULT)
+        MenuUseSlewingAsHomeParkCompletionVariable.Checked = GetBool(USE_SLEWING_AS_HOME_PARK_COMPLETION_VARIABLE, USE_SLEWING_AS_HOME_PARK_COMPLETION_VARIABLE_DEFAULT)
+        MenuTransactionalBehaviour.Checked = GetBool(SIMULATOR_TRANSACTIONAL_BEHAVIOUR, SIMULATOR_TRANSACTIONAL_BEHAVIOUR_DEFAULT)
 
         TypeOfWait = GetWaitType(SERIAL_WAIT_TYPE, SERIAL_WAIT_TYPE_DEFAULT)
 
@@ -9032,6 +9034,15 @@ Public Class DiagnosticsForm
         End If
     End Sub
 
+    Private Sub UseSlewingAsHomeParkCompletionVariable_Click(sender As Object, e As EventArgs) Handles MenuUseSlewingAsHomeParkCompletionVariable.Click
+        MenuUseSlewingAsHomeParkCompletionVariable.Checked = Not MenuUseSlewingAsHomeParkCompletionVariable.Checked 'Invert the selection
+        SetName(USE_SLEWING_AS_HOME_PARK_COMPLETION_VARIABLE, MenuUseSlewingAsHomeParkCompletionVariable.Checked.ToString)
+    End Sub
+
+    Private Sub MenuTransactionalBehaviour_Click(sender As Object, e As EventArgs) Handles MenuTransactionalBehaviour.Click
+        MenuTransactionalBehaviour.Checked = Not MenuTransactionalBehaviour.Checked 'Invert the selection
+        SetName(SIMULATOR_TRANSACTIONAL_BEHAVIOUR, MenuTransactionalBehaviour.Checked.ToString)
+    End Sub
 #End Region
 
 #Region "Utility Code"
