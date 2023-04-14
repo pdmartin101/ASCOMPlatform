@@ -11,7 +11,7 @@
     <RootNamespace>ASCOM.Simulator</RootNamespace>
     <AssemblyName>ASCOM.Simulator.Camera</AssemblyName>
     <OldToolsVersion>3.5</OldToolsVersion>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>

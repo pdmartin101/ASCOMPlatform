@@ -19,7 +19,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <ApplicationIcon>Resources\ASCOM.ico</ApplicationIcon>
     <StartupObject>ASCOM.Simulator.FilterWheelSim</StartupObject>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
