@@ -30,6 +30,7 @@ using System.Text;
 using System.Security.Policy;
 using System.Web;
 using ASCOM.Common.Com;
+using ASCOM.Common.Alpaca2;
 
 namespace ASCOM.DynamicRemoteClients
 {
@@ -688,7 +689,7 @@ namespace ASCOM.DynamicRemoteClients
         /// <returns></returns>
         public static T GetValue<T>(uint clientNumber, RestClient client, string URIBase, TraceLoggerPlus TL, string method, MemberTypes memberType)
         {
-            return GetValue<T>(clientNumber, client, URIBase, TL, method, AlpacaConstants.IMAGE_ARRAY_TRANSFER_TYPE_DEFAULT, AlpacaConstants.IMAGE_ARRAY_COMPRESSION_DEFAULT, memberType); // Set an arbitrary value for ImageArrayTransferType
+            return GetValue<T>(clientNumber, client, URIBase, TL, method, AlpacaConstants2.IMAGE_ARRAY_TRANSFER_TYPE_DEFAULT, AlpacaConstants2.IMAGE_ARRAY_COMPRESSION_DEFAULT, memberType); // Set an arbitrary value for ImageArrayTransferType
         }
 
         /// <summary>
@@ -835,7 +836,7 @@ namespace ASCOM.DynamicRemoteClients
         /// <returns></returns>
         public static T SendToRemoteDevice<T>(uint clientNumber, RestClient client, string URIBase, TraceLoggerPlus TL, string method, Dictionary<string, string> Parameters, Method HttpMethod, MemberTypes memberType)
         {
-            return SendToRemoteDevice<T>(clientNumber, client, URIBase, TL, method, Parameters, HttpMethod, AlpacaConstants.IMAGE_ARRAY_TRANSFER_TYPE_DEFAULT, AlpacaConstants.IMAGE_ARRAY_COMPRESSION_DEFAULT, memberType);
+            return SendToRemoteDevice<T>(clientNumber, client, URIBase, TL, method, Parameters, HttpMethod, AlpacaConstants2.IMAGE_ARRAY_TRANSFER_TYPE_DEFAULT, AlpacaConstants2.IMAGE_ARRAY_COMPRESSION_DEFAULT, memberType);
         }
 
         /// <summary>
@@ -907,12 +908,12 @@ namespace ASCOM.DynamicRemoteClients
                                 break;
 
                             case ImageArrayTransferType.ImageBytes:
-                                request.AddHeader(AlpacaConstants.ACCEPT_HEADER_NAME, AlpacaConstants.IMAGE_BYTES_ACCEPT_HEADER);
+                                request.AddHeader(AlpacaConstants2.ACCEPT_HEADER_NAME, AlpacaConstants2.IMAGE_BYTES_ACCEPT_HEADER);
                                 break;
 
                             case ImageArrayTransferType.BestAvailable:
                                 request.AddHeader(AlpacaConstants.BASE64_HANDOFF_HEADER, AlpacaConstants.BASE64_HANDOFF_SUPPORTED);
-                                request.AddHeader(AlpacaConstants.ACCEPT_HEADER_NAME, AlpacaConstants.IMAGE_BYTES_ACCEPT_HEADER);
+                                request.AddHeader(AlpacaConstants2.ACCEPT_HEADER_NAME, AlpacaConstants2.IMAGE_BYTES_ACCEPT_HEADER);
                                 break;
 
                             default:
@@ -941,7 +942,7 @@ namespace ASCOM.DynamicRemoteClients
                     // Use the more efficient .NET HttpClient to get the large image array as a byte[] for the ImageBytes mechanic
                     if ((typeof(T) == typeof(Array)) & ((imageArrayTransferType == ImageArrayTransferType.ImageBytes) | ((imageArrayTransferType == ImageArrayTransferType.BestAvailable))))
                     {
-                        deviceJsonResponse = GetResponse($"{client.BaseUrl}{uriBase}{method}".ToLowerInvariant(), AlpacaConstants.IMAGE_BYTES_ACCEPT_HEADER, clientNumber, transaction, TL); ;
+                        deviceJsonResponse = GetResponse($"{client.BaseUrl}{uriBase}{method}".ToLowerInvariant(), AlpacaConstants2.IMAGE_BYTES_ACCEPT_HEADER, clientNumber, transaction, TL); ;
                     }
                     else // Use the RestSharp client for everything else
                     {
@@ -1596,14 +1597,14 @@ namespace ASCOM.DynamicRemoteClients
                             if (ex.InnerException is System.Net.Sockets.SocketException) // There is an inner exception and it is a SocketException so apply the retry logic
                             {
                                 retryCounter += 1; // Increment the retry counter
-                                if (retryCounter <= AlpacaConstants.SOCKET_ERROR_MAXIMUM_RETRIES) // The retry count is less than or equal to the maximum allowed so retry the command
+                                if (retryCounter <= AlpacaConstants2.SOCKET_ERROR_MAXIMUM_RETRIES) // The retry count is less than or equal to the maximum allowed so retry the command
                                 {
                                     TL.LogMessageCrLf(clientNumber, method, typeof(T).Name + " " + ex.Message);
                                     if (TL.DebugTraceState) TL.LogMessageCrLf(clientNumber, method, "SocketException: " + ex.ToString());
 
                                     // Log that we are retrying the command and wait a short time in the hope that the transient condition clears
-                                    TL.LogMessage(clientNumber, method, string.Format("Socket exception, retrying command - retry-count {0}/{1}", retryCounter, AlpacaConstants.SOCKET_ERROR_MAXIMUM_RETRIES));
-                                    Thread.Sleep(AlpacaConstants.SOCKET_ERROR_RETRY_DELAY_TIME);
+                                    TL.LogMessage(clientNumber, method, string.Format("Socket exception, retrying command - retry-count {0}/{1}", retryCounter, AlpacaConstants2.SOCKET_ERROR_MAXIMUM_RETRIES));
+                                    Thread.Sleep(AlpacaConstants2.SOCKET_ERROR_RETRY_DELAY_TIME);
                                 }
                                 else // The retry count exceeds the maximum allowed so throw the exception to the client
                                 {
@@ -2222,7 +2223,7 @@ namespace ASCOM.DynamicRemoteClients
                 if (headers is null) throw new InvalidValueException("The device did not return any headers. Expected a Content-Type header with a value of 'application/json' or 'text/json' or 'application/imagebytes'.");
 
                 // Extract the content type from tyhe headers
-                if (headers.TryGetValues(AlpacaConstants.CONTENT_TYPE_HEADER_NAME, out contentTypeValues))
+                if (headers.TryGetValues(AlpacaConstants2.CONTENT_TYPE_HEADER_NAME, out contentTypeValues))
                 {
                     contentType = contentTypeValues.First().ToLowerInvariant();
                 }

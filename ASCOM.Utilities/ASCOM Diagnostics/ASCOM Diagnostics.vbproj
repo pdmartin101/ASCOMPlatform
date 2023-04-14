@@ -175,9 +175,7 @@
     <Compile Include="ConnectForm.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DiagnosticsForm.vb">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="DiagnosticsForm.vb" />
     <Compile Include="DiagnosticsForm.Designer.vb">
       <DependentUpon>DiagnosticsForm.vb</DependentUpon>
       <SubType>Form</SubType>

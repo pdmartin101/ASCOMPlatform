@@ -1,4 +1,5 @@
 ﻿using ASCOM.Common.Alpaca;
+using ASCOM.Common.Alpaca2;
 
 namespace ASCOM.DynamicRemoteClients
 {
@@ -7,7 +8,7 @@ namespace ASCOM.DynamicRemoteClients
         // Client driver profile persistence constants
         public const string TRACE_LEVEL_PROFILENAME = "Trace Level"; public const bool CLIENT_TRACE_LEVEL_DEFAULT = true;
         public const string DEBUG_TRACE_PROFILENAME = "Include Debug Trace"; public const bool DEBUG_TRACE_DEFAULT = false;
-        public const string IPADDRESS_PROFILENAME = "IP Address"; public const string IPADDRESS_DEFAULT = AlpacaConstants.LOCALHOST_ADDRESS_IPV4;
+        public const string IPADDRESS_PROFILENAME = "IP Address"; public const string IPADDRESS_DEFAULT = AlpacaConstants2.LOCALHOST_ADDRESS_IPV4;
         public const string PORTNUMBER_PROFILENAME = "Port Number"; public const decimal PORTNUMBER_DEFAULT = 11111;
         public const string REMOTE_DEVICE_NUMBER_PROFILENAME = "Remote Device Number"; public const decimal REMOTE_DEVICE_NUMBER_DEFAULT = 0;
         public const string SERVICE_TYPE_PROFILENAME = "Service Type"; public const string SERVICE_TYPE_DEFAULT = "http";
