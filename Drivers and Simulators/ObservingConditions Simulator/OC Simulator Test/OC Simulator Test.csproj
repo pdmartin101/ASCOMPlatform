@@ -11,7 +11,7 @@
     <RootNamespace>ASCOM.Simulator</RootNamespace>
     <AssemblyName>ASCOM.OCSimulator.Test</AssemblyName>
     <AssemblyOriginatorKeyFile>..\..\..\ASCOM.snk</AssemblyOriginatorKeyFile>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
