@@ -15,7 +15,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ASCOMVsixTemplateInstaller</RootNamespace>
     <AssemblyName>ASCOMVsixTemplateInstaller</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <GeneratePkgDefFile>false</GeneratePkgDefFile>
     <IncludeAssemblyInVSIXContainer>false</IncludeAssemblyInVSIXContainer>
     <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
@@ -34,6 +34,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CreateVsixContainer>False</CreateVsixContainer>
+    <DeployExtension>False</DeployExtension>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -154,10 +156,9 @@
   </Target>
   <PropertyGroup>
     <VsixSignTool>$(NuGetPackageRoot)Microsoft.VSSDK.Vsixsigntool\16.2.29116.78\tools\vssdk\vsixsigntool.exe</VsixSignTool>
-    <VsixSignCommand>$(VsixSignTool) sign /f $(SIGN_CERTIFICATE) /p $(SIGN_PASSWORD) /sha1 $(SIGN_CERT_HASH) /fd sha256</VsixSignCommand>
+    <VsixSignCommand>$(VsixSignTool) sign /f $(SIGN_CERTIFICATE) /p $(SIGN_PASSWORD) /fd sha256</VsixSignCommand>
   </PropertyGroup>
   <Target Name="AfterBuild" DependsOnTargets="CoreCompile">
     <Message Text="Signing $(TargetVsixContainer)" />
-    <Exec Command="$(VsixSignCommand) &quot;$(MSBuildProjectDirectory)\$(TargetVsixContainer)&quot;" />
   </Target>
 </Project>

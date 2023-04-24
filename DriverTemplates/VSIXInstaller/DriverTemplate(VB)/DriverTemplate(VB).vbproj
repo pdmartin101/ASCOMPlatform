@@ -14,7 +14,7 @@
     <RootNamespace>DriverTemplate_VB_</RootNamespace>
     <AssemblyName>DriverTemplate%28VB%29</AssemblyName>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <OptionExplicit>On</OptionExplicit>
     <OptionCompare>Binary</OptionCompare>
     <OptionStrict>Off</OptionStrict>

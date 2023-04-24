@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-		<TargetFrameworks>net35;net40</TargetFrameworks>
+		<TargetFrameworks>net35;net48</TargetFrameworks>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>../ASCOM.snk</AssemblyOriginatorKeyFile>
 		<DelaySign>false</DelaySign>
