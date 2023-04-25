@@ -2191,7 +2191,7 @@ AscomPlatform662
 TRUE
 TRUE
 |
-|C:\CodeSigningCertificate\petercodesign.pfx
+|D:\Development\ProjectsWork\cert\pdmcert.pfx
 http://timestamp.digicert.com|
 https://ascom-standards.org
 UAC=requireAdministrator,CACHESOURCES=TRUE,MSI_ALL=FALSE,VM_TARGETFOLDER=%TEMP%,VM_INSTALL_COMMANDLINE=/s,"VM_UNINSTALL_COMMANDLINE=/s MODIFY=FALSE REMOVE=TRUE","VM_UNITTEST=C:\Program Files (x86)\InstallAware X6 Creators Update\unit.exe",LOADOLDDATA=TRUE,SIGN_ALL=DEFAULT,SHA256ONLY=TRUE
@@ -2216,7 +2216,7 @@ checknet4.8_x86 .mia
 CleanRegistry.mia
 $
 FALSE
-P8tris9000cdK
+s@&s@g3x56
 FALSE
 FALSE
 TRUE
