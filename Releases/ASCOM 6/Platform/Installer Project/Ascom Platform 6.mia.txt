@@ -108,8 +108,9 @@ Set Variable VC64_REBOOT_REQUIRED to
 Comment: Component installed state variables
 Set Variable INSTALL_PLATFORM to 
 Set Variable INSTALL_DIAGNOSTICS_SHORTCUT_ON_DESKTOP to 
-Set Variable INSTALL_PROFILE_EXPLORER_SHORTCUT_ON_DESKTOP to 
 Set Variable DISPLAY_USER_GUIDE to 
+Set Variable INSTALL_PROFILE_EXPLORER_SHORTCUT_ON_DESKTOP to 
+Set Variable INSTALL_DEVICEHUB_SHORTCUT_ON_DESKTOP to 
 Set Variable INSTALL_POTH to 
 Set Variable INSTALL_DOMECONTROLHUB to 
 Set Variable INSTALL_PIPE to 
@@ -167,6 +168,7 @@ Comment: Define components
 Define Component: ASCOM Platform Options
 Define Component: ASCOM Platform Options\Install Diagnostics shortcut on desktop
 Define Component: ASCOM Platform Options\Install Profile Explorer shortcut on desktop
+Define Component: ASCOM Platform Options\Install DeviceHub shortcut on desktop
 Define Component: ASCOM Platform Options\Display user guide when installation is complete
 Define Component: Out of date hubs replaced by Device Hub
 Define Component: Out of date hubs replaced by Device Hub\POTH
@@ -510,6 +512,7 @@ Comment: Get the state of the installable components
 Get Component ASCOM Platform Options Selection State into Variable INSTALL_PLATFORM
 Get Component ASCOM Platform Options\Install Diagnostics shortcut on desktop Selection State into Variable INSTALL_DIAGNOSTICS_SHORTCUT_ON_DESKTOP
 Get Component ASCOM Platform Options\Install Profile Explorer shortcut on desktop Selection State into Variable INSTALL_PROFILE_EXPLORER_SHORTCUT_ON_DESKTOP
+Get Component ASCOM Platform Options\Install DeviceHub shortcut on desktop Selection State into Variable INSTALL_DEVICEHUB_SHORTCUT_ON_DESKTOP
 Get Component ASCOM Platform Options\Display user guide when installation is complete Selection State into Variable DISPLAY_USER_GUIDE
 Get Component Out of date hubs replaced by Device Hub\POTH Selection State into Variable INSTALL_POTH
 Get Component Out of date hubs replaced by Device Hub\Dome Control Hub Selection State into Variable INSTALL_DOMECONTROLHUB
@@ -1381,6 +1384,9 @@ if Variable INSTALL_DIAGNOSTICS_SHORTCUT_ON_DESKTOP Equals TRUE
 end
 if Variable INSTALL_PROFILE_EXPLORER_SHORTCUT_ON_DESKTOP Equals TRUE
   Create Shortcut $DESKTOPFOLDER$\ProfileExplorer to $TARGETDIR$\Tools\ProfileExplorer.exe
+end
+if Variable INSTALL_DEVICEHUB_SHORTCUT_ON_DESKTOP Equals TRUE
+  Create Shortcut $DESKTOPFOLDER$\ASCOM Device Hub to $COMMONFILES$\ASCOM\DeviceHub\ASCOM.DeviceHub.exe
 end
  
 Comment: Shortcuts have to be created in native mode in order to get the ASCOM shortcut icon to appear

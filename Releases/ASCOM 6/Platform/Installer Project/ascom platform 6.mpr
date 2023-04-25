@@ -1540,6 +1540,12 @@ $
 
 
 
+
+
+
+
+
+
 B
 
 
@@ -2180,7 +2186,7 @@ ASCOM Platform 6.6 SP2-  Early Access
 ASCOM Platform 6.6 SP2 - Installation
 ASCOM Initiative
 All rights reserved. http://www.ascom-standards.org
-{E7F3DD4E-5BAC-4938-86EA-A226A82CC73A}
+{6999A6BB-235C-43AE-85E3-1061E107AEBC}
 ASCOM Initiative
 ASCOM Initiative
 https://ascomtalk.groups.io/g/Help
@@ -2220,4 +2226,4 @@ s@&s@g3x56
 FALSE
 FALSE
 TRUE
-FALSE
+false
