@@ -25,7 +25,7 @@
 		<When Condition=" '$(BuildType)'=='ReleaseCandidate' ">
 			<PropertyGroup>
 				<!-- GIT Branch to Check Out -->
-				<GitCheckoutBranch>develop</GitCheckoutBranch>
+				<GitCheckoutBranch>PdmDevelop</GitCheckoutBranch>
 
 				<!--  Specify Release or Debug builds (Debug not working at 25/10/21) -->
 				<Configuration>Release</Configuration>
@@ -47,7 +47,7 @@
 		<BuildNumberFile>$(CheckoutDirectory)\$(BuildNumberFileName)</BuildNumberFile>
 
 		<!-- GitHub URL from which to make the clone -->
-		<GitRepositoryPath>https://github.com/ASCOMInitiative/ASCOMPlatform.git</GitRepositoryPath>
+		<GitRepositoryPath>https://github.com/pdmartin101/ASCOMPlatform.git</GitRepositoryPath>
 
 		<!-- Base date from which the number of days is calculated to give the build version number (should stay at Jan 1 2011 - it's good till at least 2019) -->
 		<BuildBaseDate>January 1,2011</BuildBaseDate>
@@ -89,7 +89,7 @@
 		<NuGetCommand>..\nuget restore</NuGetCommand>
 
 		<!-- Code signing tool command line bases for SHA1 and SHA256 signing -->
-		<SignToolBase1>signtool sign /as /as /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256</SignToolBase1>
+		<SignToolBase1>signtool sign /as /as /fd SHA1 /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256</SignToolBase1>
 		<SignToolBase256>signtool sign /a /fd SHA256 /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256</SignToolBase256>
 
 	</PropertyGroup>
