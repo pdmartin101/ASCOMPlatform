@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ASCOM.PowerShell.Cmdlets</RootNamespace>
     <AssemblyName>ASCOMPowerShellCmdlets</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ApplicationIcon>ASCOM.ico</ApplicationIcon>
     <FileUpgradeFlags>

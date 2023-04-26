@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-		<TargetFrameworks>net35;net48</TargetFrameworks>
+		<TargetFrameworks>net48</TargetFrameworks>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>../ASCOM.snk</AssemblyOriginatorKeyFile>
 		<DelaySign>false</DelaySign>
@@ -64,12 +64,12 @@
 		<Version>1.0.0-rc1</Version>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net35|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net48|AnyCPU'">
 	  <NoWarn>1701;1702;3274;3258;3268</NoWarn>
 	  <WarningLevel>0</WarningLevel>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net35|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net48|AnyCPU'">
 	  <NoWarn>1701;1702;3274;3258;3268</NoWarn>
 	  <WarningLevel>0</WarningLevel>
 	</PropertyGroup>

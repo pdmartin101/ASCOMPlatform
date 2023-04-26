@@ -18,8 +18,8 @@
     <HtmlHelpName>Documentation</HtmlHelpName>
     <Language>en-US</Language>
     <DocumentationSources>
-      <DocumentationSource sourceFile="..\Interfaces\ASCOMExceptions\bin\Release\net35\ASCOM.Exceptions.xml" />
-<DocumentationSource sourceFile="..\Interfaces\ASCOMExceptions\bin\Release\net35\ASCOM.Exceptions.dll" />
+      <DocumentationSource sourceFile="..\Interfaces\ASCOMExceptions\bin\Release\net48\ASCOM.Exceptions.xml" />
+<DocumentationSource sourceFile="..\Interfaces\ASCOMExceptions\bin\Release\net48\ASCOM.Exceptions.dll" />
 <DocumentationSource sourceFile="..\ASCOM.Utilities\ASCOM.Utilities\bin\Release\ASCOM.Exceptions.xml" />
 <DocumentationSource sourceFile="..\ASCOM.Utilities\ASCOM.Utilities\bin\Release\ASCOM.Exceptions.dll" /></DocumentationSources>
     <HelpFileFormat>HtmlHelp1</HelpFileFormat>

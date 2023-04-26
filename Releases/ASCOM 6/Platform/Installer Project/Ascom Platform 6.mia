@@ -7563,7 +7563,7 @@ FALSE
 FALSE
 FALSE
 {AFFAC2E3-131B-42AB-A0DB-6055EB18D1FC}
-..\..\..\..\Interfaces\ASCOMExceptions\bin\Release\net35\ASCOM.Exceptions.pdb
+..\..\..\..\Interfaces\ASCOMExceptions\bin\Release\net48\ASCOM.Exceptions.pdb
 FALSE|
 $WINDIR$\Symbols\dll
 FALSE
@@ -7576,7 +7576,7 @@ FALSE
 FALSE
 FALSE
 {0808F9DA-4556-4B78-8A2F-902825998095}
-..\..\..\..\Interfaces\ASCOMExceptions\bin\Release\net35\ASCOM.Exceptions.dll
+..\..\..\..\Interfaces\ASCOMExceptions\bin\Release\net48\ASCOM.Exceptions.dll
 FALSE|
 $COMMONFILES$\ASCOM\Platform\v6
 FALSE
@@ -9045,7 +9045,7 @@ FALSE
 FALSE
 FALSE
 {70023001-1CC7-424B-A9D1-94D0FB6E89EA}
-..\..\..\..\ASCOM.Utilities\ASCOM.Newtonsoft.Json\bin\Release\net35\ASCOM.Newtonsoft.Json.pdb
+..\..\..\..\ASCOM.Utilities\ASCOM.Newtonsoft.Json\bin\Release\net48\ASCOM.Newtonsoft.Json.pdb
 FALSE|
 $WINDIR$\Symbols\dll
 FALSE
@@ -9136,7 +9136,7 @@ FALSE
 FALSE
 FALSE
 {47FDF76A-3E97-4146-B993-933189260DEB}
-..\..\..\..\ASCOM.Utilities\ASCOM.Newtonsoft.Json\bin\Release\net35\ASCOM.Newtonsoft.Json.dll
+..\..\..\..\ASCOM.Utilities\ASCOM.Newtonsoft.Json\bin\Release\net48\ASCOM.Newtonsoft.Json.dll
 FALSE|
 $TARGETDIR$\Tools\AlpacaDynamicClientManager
 FALSE
@@ -12981,7 +12981,7 @@ TRUE
 TRUE
 
 {9D6171F5-D1AF-4295-936D-1D9FF8E5AB1F}
-..\..\..\..\Interfaces\ASCOMExceptions\bin\Release\net35\ASCOM.Exceptions.dll
+..\..\..\..\Interfaces\ASCOMExceptions\bin\Release\net48\ASCOM.Exceptions.dll
 TRUE
 
 {1F7F0B19-8C68-4676-8D62-2733FBD50DD8}
@@ -13041,7 +13041,7 @@ TRUE
 TRUE
 
 {F809AAF9-23F4-4367-A19E-A0060E8819C1}
-..\..\..\..\ASCOM.Utilities\ASCOM.Newtonsoft.Json\bin\Release\net35\ASCOM.Newtonsoft.Json.dll
+..\..\..\..\ASCOM.Utilities\ASCOM.Newtonsoft.Json\bin\Release\net48\ASCOM.Newtonsoft.Json.dll
 TRUE
 
 {02D98C71-D54E-414E-89F8-B7764BB8096E}
